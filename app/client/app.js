@@ -4,6 +4,8 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import request from 'superagent-bluebird-promise';
 
+import FileSaver from 'file-saver';
+
 class GetUrlComponent extends React.Component {
   constructor(props) {
     super(props);
@@ -74,6 +76,8 @@ class Results extends React.Component {
       </ResultSection>
       <ResultSection title="Facebook OG Tags" result={this.props.results.og} />
       <ResultSection title="SEO Rules" result={this.props.results.seo} />
+
+      <button className="results-download" onClick={() => this.props.onDownload()}>Download As JSON</button>
     </div>;
   }
 }
@@ -82,7 +86,7 @@ class HomeComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      results: null,
+      response: null,
       loading: false,
       error: null
     };
@@ -90,7 +94,7 @@ class HomeComponent extends React.Component {
 
   loadRules(url) {
     request.post("/api/validate.json", {url: url})
-           .then(response => this.setState({results: response.body, loading: false}))
+           .then(response => this.setState({response: response.body, loading: false}))
            .catch(e => this.setState({loading: false, error: e.message}));
   }
 
@@ -104,12 +108,19 @@ class HomeComponent extends React.Component {
     }, () => this.loadRules(url));
   }
 
+  downloadResponse() {
+    const blob = new Blob([JSON.stringify(this.state.response)], {type: "application/json;charset=utf-8"});
+    FileSaver.saveAs(blob, "validator.json");
+  }
+
   render() {
     return <div>
       <GetUrlComponent onSubmit={(url) => this.processUrl(url)}/>
       {this.state.error && <div className="error-message">{this.state.error}</div>}
       {this.state.loading && <div className="loading">Crunching Numbers</div>}
-      {!this.state.loading && this.state.results && <Results results={this.state.results} />}
+      {!this.state.loading && this.state.response && <Results results={this.state.response.results}
+                                                              url={this.state.response.url}
+                                                              onDownload={() => this.downloadResponse()} />}
     </div>;
   }
 }

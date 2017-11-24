@@ -182,7 +182,10 @@ app.post("/api/validate.json", (req, res) => {
     .then(([amp, structured, seo, og, headers]) => {
       res.status(201);
       res.setHeader("Content-Type", "application/json");
-      res.json({seo, amp, og, headers, structured});
+      res.json({
+        url: url,
+        results: {seo, amp, og, headers, structured}
+      });
     })
     .catch(error => {
       res.status(500);

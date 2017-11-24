@@ -8,21 +8,14 @@ import FileSaver from 'file-saver';
 import _ from 'lodash';
 
 class GetUrlComponent extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      url: ""
-    }
-  }
-
   submit(e) {
     e.preventDefault();
-    this.props.onSubmit(this.state.url);
+    this.props.onSubmit(this.props.url);
   }
 
   render() {
     return <form className="url-container" onSubmit={(e) => this.submit(e)}>
-      <input className="url-input" value={this.state.value} placeholder="Enter Url" onChange={(e) => this.setState({url: e.target.value})} />
+      <input className="url-input" value={this.props.url} placeholder="Enter Url" onChange={(e) => this.props.onChange(e.target.value)} />
       <input type="submit" className="url-go" value="Go!"/>
     </form>;
   }
@@ -83,16 +76,15 @@ class DebugSection extends React.Component {
   }
 
   render() {
-    global.results = this.props.results;
-    global._ = _;
     return <section className={`result ${this.state.active && 'active'}`}>
       <header className={`result-header expandable`} onClick={() => this.setState({active: !this.state.active})}>
         <div className="clearfix">
-          <h2 className="result-title">Debug Information</h2>
+          <h2 className="result-title">Debugging</h2>
         </div>
       </header>
       <div className="result-body">
         <div>
+          <h4>Debugging Information:</h4>
           <table>
             <thead>
               <tr>
@@ -105,6 +97,14 @@ class DebugSection extends React.Component {
               {_(this.props.results).entries().flatMap(([category, result]) => _(result.debug).entries().map(([key, value]) => toRow(category, key, value)).value()).value()}
             </tbody>
           </table>
+        </div>
+        {this.props.links.length > 0 && <div>
+          <h4>Links:</h4>
+          <ul>{this.props.links.map((link, index) => <li key={index}><button onClick={() => this.props.onValidate(link)}>validate</button> - {link}</li>)}</ul>
+        </div>}
+        <div>
+          <h4>Links</h4>
+          <ul></ul>
         </div>
       </div>
     </section>
@@ -123,7 +123,7 @@ class Results extends React.Component {
       <ResultSection title="Facebook OG Tags" result={this.props.results.og} />
       <ResultSection title="SEO Rules" result={this.props.results.seo} />
 
-      <DebugSection results={this.props.results}/>
+      <DebugSection results={this.props.results} links={this.props.links} onValidate={this.props.onValidate}/>
 
       <button className="results-download" onClick={() => this.props.onDownload()}>Download As JSON</button>
     </div>;
@@ -134,6 +134,7 @@ class HomeComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      url: "",
       response: null,
       loading: false,
       error: null
@@ -151,6 +152,7 @@ class HomeComponent extends React.Component {
       return;
 
     this.setState({
+      url: url,
       loading: true,
       error: null
     }, () => this.loadRules(url));
@@ -163,10 +165,12 @@ class HomeComponent extends React.Component {
 
   render() {
     return <div>
-      <GetUrlComponent onSubmit={(url) => this.processUrl(url)}/>
+      <GetUrlComponent onSubmit={(url) => this.processUrl(url)} url={this.state.url} onChange={(url) => this.setState({url: url})}/>
       {this.state.error && <div className="error-message">{this.state.error}</div>}
       {this.state.loading && <div className="loading">Crunching Numbers</div>}
       {!this.state.loading && this.state.response && <Results results={this.state.response.results}
+                                                              links={this.state.response.links}
+                                                              onValidate={(url) => this.processUrl(url)}
                                                               url={this.state.response.url}
                                                               onDownload={() => this.downloadResponse()} />}
     </div>;

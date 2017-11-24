@@ -172,7 +172,13 @@ function runStructuredDataValidator(dom, url) {
   });
 }
 
-const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator];
+function fetchLinks($, url) {
+  const links = $('a[href]').map((index, element) => URL.resolve(url, $(element).attr("href"))).get();
+  return _(links).filter(link => link.startsWith("http")).uniq().value();
+
+}
+
+const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, fetchLinks];
 
 app.post("/api/validate.json", (req, res) => {
   const url = req.body.url;
@@ -183,12 +189,13 @@ app.post("/api/validate.json", (req, res) => {
   })
     .then(response => ({response: response, dom: cheerio.load(response.body)}))
     .then(({response, dom}) => Promise.all(RUNNERS.map(runner => runner(dom, url, response))))
-    .then(([amp, structured, seo, og, headers]) => {
+    .then(([amp, structured, seo, og, headers, links]) => {
       res.status(201);
       res.setHeader("Content-Type", "application/json");
       res.json({
         url: url,
-        results: {seo, amp, og, headers, structured}
+        results: {seo, amp, og, headers, structured},
+        links: links
       });
     })
     .catch(error => {

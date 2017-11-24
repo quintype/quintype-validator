@@ -49,7 +49,8 @@ function runAmpValidator(dom, url) {
         status: result.status,
         ampUrl: ampUrl,
         errors: result.errors.filter(({severity}) => severity == "ERROR").map(ampErrorToMessage),
-        warnings: result.errors.filter(({severity}) => severity != "ERROR").map(ampErrorToMessage)
+        warnings: result.errors.filter(({severity}) => severity != "ERROR").map(ampErrorToMessage),
+        debug: {"Amp Url": ampUrl}
       }
     });
 }
@@ -117,7 +118,7 @@ function validateHeader(headers, header, regex, errors) {
     return errors.push(`Could not find header ${header}`);
 
   if(!value.match(regex))
-    return errors.push(`Expected header to match ${regex} (got ${value})`);
+    return errors.push(`Expected header ${header} to match ${regex} (got ${value})`);
 }
 
 function runHeaderValidator(dom, url, response) {
@@ -140,7 +141,8 @@ function runHeaderValidator(dom, url, response) {
   return {
     status: errors.length == 0 ? "PASS" : "FAIL",
     errors: errors,
-    warnings: warnings
+    warnings: warnings,
+    debug: _.pick(headers,['cache-control', 'vary', 'surrogate-key', 'surrogate-control', 'set-cookie', 'content-encoding'])
   };
 }
 

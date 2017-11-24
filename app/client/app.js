@@ -5,6 +5,7 @@ import ReactDom from 'react-dom';
 import request from 'superagent-bluebird-promise';
 
 import FileSaver from 'file-saver';
+import _ from 'lodash';
 
 class GetUrlComponent extends React.Component {
   constructor(props) {
@@ -53,13 +54,58 @@ class ResultSection extends React.Component {
 
         {errors.length > 0 && <div>
           <h4>Errors:</h4>
-          <ul className="result-errors">{errors.map((error, index) => <li key={index}>{error}</li>)}</ul>
+          <ul>{errors.map((error, index) => <li key={index}>{error}</li>)}</ul>
         </div>}
 
         {warnings.length > 0 && <div>
           <h4>Warnings:</h4>
-          <ul className="result-warnings">{warnings.map((error, index) => <li key={index}>{error}</li>)}</ul>
+          <ul>{warnings.map((error, index) => <li key={index}>{error}</li>)}</ul>
         </div>}
+      </div>
+    </section>
+  }
+}
+
+function toRow(category, key, value) {
+  return <tr key={`${category}/${key}`}>
+    <td>{category}</td>
+    <td className="debug-key">{key}</td>
+    <td>{value}</td>
+  </tr>;
+}
+
+class DebugSection extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      active: false
+    }
+  }
+
+  render() {
+    global.results = this.props.results;
+    global._ = _;
+    return <section className={`result ${this.state.active && 'active'}`}>
+      <header className={`result-header expandable`} onClick={() => this.setState({active: !this.state.active})}>
+        <div className="clearfix">
+          <h2 className="result-title">Debug Information</h2>
+        </div>
+      </header>
+      <div className="result-body">
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Key</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {_(this.props.results).entries().flatMap(([category, result]) => _(result.debug).entries().map(([key, value]) => toRow(category, key, value)).value()).value()}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   }
@@ -76,6 +122,8 @@ class Results extends React.Component {
       </ResultSection>
       <ResultSection title="Facebook OG Tags" result={this.props.results.og} />
       <ResultSection title="SEO Rules" result={this.props.results.seo} />
+
+      <DebugSection results={this.props.results}/>
 
       <button className="results-download" onClick={() => this.props.onDownload()}>Download As JSON</button>
     </div>;

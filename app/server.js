@@ -27,7 +27,7 @@ function getAmpUrlFromPage(url, dom) {
   return ampUrl;
 }
 
-function runAmpValidator(url, dom) {
+function runAmpValidator(dom, url) {
   const ampUrl = getAmpUrlFromPage(url, dom);
 
   if(!ampUrl) {
@@ -68,7 +68,7 @@ function validate($, selector, contentAttr, errors, rules = {}) {
   });
 }
 
-function runSeoValidator(url, dom) {
+function runSeoValidator(dom) {
   var errors = [];
   var warnings = [];
 
@@ -80,14 +80,14 @@ function runSeoValidator(url, dom) {
   validate(dom, "meta[name=description]", 'content', errors, {count: 1, presence: true})
   validate(dom, "meta[name=description]", 'content', warnings, {length_le: 160})
 
-  return Promise.resolve({
+  return {
     status: errors.length == 0 ? "PASS" : "FAIL",
     errors: errors,
     warnings: warnings
-  });
+  };
 }
 
-function runOgTagValidator(url, dom) {
+function runOgTagValidator(dom) {
   var errors = [];
   var warnings = [];
 
@@ -99,22 +99,63 @@ function runOgTagValidator(url, dom) {
   validate(dom, "meta[property=og\\:image\\:height]", 'content', warnings, {count: 1, presence: true});
   validate(dom, "meta[property=og\\:image\\:width]", 'content', warnings, {count: 1, presence: true});
 
-  return Promise.resolve({
+  return {
     status: errors.length == 0 ? "PASS" : "FAIL",
     errors: errors,
     warnings: warnings
-  });
+  };
+}
+
+function validateHeader(headers, header, regex, errors) {
+  const value = headers[header.toLowerCase()];
+
+  if(!value || value == '')
+    return errors.push(`Could not find header ${header}`);
+
+  if(!value.match(regex))
+    return errors.push(`Expected header to match ${regex}`);
+}
+
+function runHeaderValidator(dom, url, response) {
+  const headers = response.headers;
+
+  var errors = [];
+  var warnings = [];
+
+  validateHeader(headers, 'Cache-Control', /public/, errors);
+  validateHeader(headers, 'Vary', /Accept-Encoding/, errors);
+  validateHeader(headers, 'Surrogate-Control', /public/, errors);
+  validateHeader(headers, 'Surrogate-Control', /stale-while-revalidate/, errors);
+  validateHeader(headers, 'Surrogate-Control', /stale-if-error/, errors);
+  validateHeader(headers, 'Surrogate-Key', /./, warnings);
+
+  validateHeader(headers, 'Content-Encoding', /gzip/, errors);
+
+  return {
+    status: errors.length == 0 ? "PASS" : "FAIL",
+    errors: errors,
+    warnings: warnings
+  };
 }
 
 app.post("/validate.json", (req, res) => {
   const url = req.body.url;
-  rp(url)
-    .then(htmlString => cheerio.load(htmlString))
-    .then(dom => Promise.all([runAmpValidator(url, dom), runSeoValidator(url, dom), runOgTagValidator(url, dom)]))
-    .then(([amp, seo, og]) => {
+  rp(url, {
+    headers: {"Fastly-Debug": "1"},
+    resolveWithFullResponse: true,
+    gzip: true
+  })
+    .then(response => ({response: response, dom: cheerio.load(response.body)}))
+    .then(({response, dom}) => Promise.all([
+      runAmpValidator(dom, url, response),
+      runSeoValidator(dom, url, response),
+      runOgTagValidator(dom, url, response),
+      runHeaderValidator(dom, url, response)
+    ]))
+    .then(([amp, seo, og, headers]) => {
       res.status(201);
       res.setHeader("Content-Type", "application/json");
-      res.json({seo, amp, og});
+      res.json({seo, amp, og, headers});
     })
     .catch(error => {
       res.status(500);

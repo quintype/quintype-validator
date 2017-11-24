@@ -13,9 +13,9 @@ class GetUrlComponent extends React.Component {
   }
 
   render() {
-    return <div>
-      <input value={this.state.value} placeholder="Enter Url" onChange={(e) => this.setState({url: e.target.value})} />
-      <button onClick={() => this.props.onSubmit(this.state.url)}>Go!</button>
+    return <div className="url-container">
+      <input className="url-input" value={this.state.value} placeholder="Enter Url" onChange={(e) => this.setState({url: e.target.value})} />
+      <button className="url-go" onClick={() => this.props.onSubmit(this.state.url)}>Go!</button>
       {this.props.loading && <span className="loading">Loading....</span>}
     </div>;
   }
@@ -61,7 +61,7 @@ class ResultSection extends React.Component {
 
 class Results extends React.Component {
   render() {
-    return <div className="results">
+    return <div>
       <ResultSection title="AMP" result={this.props.results.amp} />
       <ResultSection title="Headers" result={this.props.results.headers} />
       <ResultSection title="Structured Data" result={this.props.results.structured}>

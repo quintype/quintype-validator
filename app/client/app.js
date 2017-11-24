@@ -12,11 +12,16 @@ class GetUrlComponent extends React.Component {
     }
   }
 
+  submit(e) {
+    e.preventDefault();
+    this.props.onSubmit(this.state.url);
+  }
+
   render() {
-    return <div className="url-container">
+    return <form className="url-container" onSubmit={(e) => this.submit(e)}>
       <input className="url-input" value={this.state.value} placeholder="Enter Url" onChange={(e) => this.setState({url: e.target.value})} />
-      <button className="url-go" onClick={() => this.props.onSubmit(this.state.url)}>Go!</button>
-    </div>;
+      <input type="submit" className="url-go" value="Go!"/>
+    </form>;
   }
 }
 

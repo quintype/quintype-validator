@@ -11,13 +11,16 @@ if(cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  var startApp = require("./app/server.js");
-  startApp().catch(function(e) {
+  const app = require("./app/server.js");
+  try {
+    app.listen(3000, function () {
+      console.log('Example app listening on port 3000!');
+    });
+  } catch (e) {
     var sleep = require("sleep-promise");
     console.error("Worker died - Aborting");
     console.error(e.stack);
-    return new Promise((resolve) => resolve(cluster.worker.disconnect()))
-      .then(() => sleep(250))
-      .then(() => process.exit());
-  });
+    cluster.worker.disconnect();
+    sleep(250).then(() => process.exit());
+  }
 }

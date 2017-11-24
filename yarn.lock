@@ -50,6 +50,12 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
+aws-serverless-express@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/aws-serverless-express/-/aws-serverless-express-3.0.2.tgz#38ceb2a5786aa5cfb51033d9c3692fd7972605db"
+  dependencies:
+    binary-case "^1.0.0"
+
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -67,6 +73,10 @@ bcrypt-pbkdf@^1.0.0:
   resolved "https://registry.yarnpkg.com/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.1.tgz#63bc5dcb61331b92bc05fd528953c33462a06f8d"
   dependencies:
     tweetnacl "^0.14.3"
+
+binary-case@^1.0.0:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/binary-case/-/binary-case-1.1.3.tgz#f91d0e3008f1fb0f4043d6594522d66d6d1c8409"
 
 bluebird@^3.5.0, bluebird@^3.5.1:
   version "3.5.1"

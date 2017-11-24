@@ -31,7 +31,7 @@ const config = process.env.NODE_ENV == 'production' ? {
     compressJSPlugins: [
       new webpack.NamedModulesPlugin()
     ],
-    outputPublicPath: "http://localhost:8080" + PUBLIC_PATH,
+    outputPublicPath: PUBLIC_PATH,
   };
 
 module.exports = {

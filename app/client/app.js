@@ -16,7 +16,6 @@ class GetUrlComponent extends React.Component {
     return <div className="url-container">
       <input className="url-input" value={this.state.value} placeholder="Enter Url" onChange={(e) => this.setState({url: e.target.value})} />
       <button className="url-go" onClick={() => this.props.onSubmit(this.state.url)}>Go!</button>
-      {this.props.loading && <span className="loading">Loading....</span>}
     </div>;
   }
 }
@@ -98,7 +97,11 @@ class HomeComponent extends React.Component {
   }
 
   render() {
-    return this.state.results ? <Results results={this.state.results} /> : <GetUrlComponent onSubmit={(url) => this.processUrl(url)} loading={this.state.loading}/> ;
+    return <div>
+      <GetUrlComponent onSubmit={(url) => this.processUrl(url)}/>
+      {this.state.loading && <div className="loading">Crunching Numbers</div>}
+      {!this.state.loading && this.state.results && <Results results={this.state.results} />}
+    </div>;
   }
 }
 

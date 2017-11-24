@@ -54,8 +54,16 @@ section.result {
 .result-status {
   line-height: 20px;
   float: right;
-  color: red;
+  color: green;
   width: 75px;
+}
+
+.result-status-WARN {
+  color: orange;
+}
+
+.result-status-FAIL, .result-status-NA {
+  color: red;
 }
 
 .result-body {
@@ -73,12 +81,4 @@ section.result {
   .active & {
     max-height: fit-content;
   }
-}
-
-.result-status-PASS {
-  color: green;
-}
-
-.result-status-WARN {
-  color: orange;
 }

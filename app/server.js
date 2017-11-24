@@ -7,6 +7,7 @@ const Promise = require("bluebird");
 const rp = require('request-promise');
 const cheerio = require("cheerio");
 const URL = require("url");
+const _ = require("lodash");
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -141,20 +142,29 @@ function runHeaderValidator(dom, url, response) {
   };
 }
 
+const structuredErrorToMessage = ({ownerSet, errorType, args, begin, end}) => `[${_.keys(ownerSet).join(" ")}] ${errorType} ${args.join(" ")} (${begin} - ${end})`;
+
 function runStructuredDataValidator(dom, url) {
   return rp.post("https://search.google.com/structured-data/testing-tool/validate", {
     form: {url: url}
   })
   .then(body => JSON.parse(body.substring(body.indexOf("{"))))
-  .then(({errors, numObjects, warnings, contentId, url}) => {
+  .then(({errors, numObjects, contentId, url}) => {
+    const actualErrors = errors.filter(error => error.isSevere).map(structuredErrorToMessage);
+    const warnings = errors.filter(error => !error.isSevere).map(structuredErrorToMessage);
+
+    if(!contentId) {
+      warnings.push("No ContentId was found");
+    }
+
     var status;
-    if(errors.length > 0)
+    if(actualErrors.length > 0)
       status = "FAIL";
     else if (numObjects == 0)
       status = "NA";
     else
       status = "PASS";
-    return {errors, warnings, numObjects, contentId, url, status};
+    return {errors: actualErrors, warnings, numObjects, contentId, url, status};
   });
 }
 

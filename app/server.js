@@ -117,7 +117,7 @@ function validateHeader(headers, header, regex, errors) {
     return errors.push(`Could not find header ${header}`);
 
   if(!value.match(regex))
-    return errors.push(`Expected header to match ${regex}`);
+    return errors.push(`Expected header to match ${regex} (got ${value})`);
 }
 
 function runHeaderValidator(dom, url, response) {
@@ -126,12 +126,14 @@ function runHeaderValidator(dom, url, response) {
   var errors = [];
   var warnings = [];
 
-  validateHeader(headers, 'Cache-Control', /public/, errors);
+  validateHeader(headers, 'Cache-Control', /public, ?max-age=\d+/, errors);
   validateHeader(headers, 'Vary', /Accept-Encoding/, errors);
-  validateHeader(headers, 'Surrogate-Control', /public/, errors);
-  validateHeader(headers, 'Surrogate-Control', /stale-while-revalidate/, errors);
-  validateHeader(headers, 'Surrogate-Control', /stale-if-error/, errors);
+  validateHeader(headers, 'Surrogate-Control', /public, ?max-age=\d+, ?stale-while-revalidate=\d+, ?stale-if-error=\d+/, errors);
   validateHeader(headers, 'Surrogate-Key', /./, warnings);
+
+  if(headers["set-cookie"]) {
+    errors.push("Illegal Header Set-Cookie found");
+  }
 
   validateHeader(headers, 'Content-Encoding', /gzip/, errors);
 

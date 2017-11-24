@@ -138,6 +138,25 @@ function runHeaderValidator(dom, url, response) {
   };
 }
 
+function runStructuredDataValidator(dom, url) {
+  return rp.post("https://search.google.com/structured-data/testing-tool/validate", {
+    form: {url: url}
+  })
+  .then(body => JSON.parse(body.substring(body.indexOf("{"))))
+  .then(({errors, numObjects, warnings, contentId, url}) => {
+    var status;
+    if(errors.length > 0)
+      status = "FAIL";
+    else if (numObjects == 0)
+      status = "NA";
+    else
+      status = "PASS";
+    return {errors, warnings, numObjects, contentId, url, status};
+  });
+}
+
+const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator];
+
 app.post("/validate.json", (req, res) => {
   const url = req.body.url;
   rp(url, {
@@ -146,16 +165,11 @@ app.post("/validate.json", (req, res) => {
     gzip: true
   })
     .then(response => ({response: response, dom: cheerio.load(response.body)}))
-    .then(({response, dom}) => Promise.all([
-      runAmpValidator(dom, url, response),
-      runSeoValidator(dom, url, response),
-      runOgTagValidator(dom, url, response),
-      runHeaderValidator(dom, url, response)
-    ]))
-    .then(([amp, seo, og, headers]) => {
+    .then(({response, dom}) => Promise.all(RUNNERS.map(runner => runner(dom, url, response))))
+    .then(([amp, structured, seo, og, headers]) => {
       res.status(201);
       res.setHeader("Content-Type", "application/json");
-      res.json({seo, amp, og, headers});
+      res.json({seo, amp, og, headers, structured});
     })
     .catch(error => {
       res.status(500);

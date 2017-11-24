@@ -3,6 +3,7 @@
     "amphtml-validator": "^1.0.21",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
+    "cheerio": "^1.0.0-rc.2",
     "compression": "^1.7.1",
     "express": "^4.16.2",
     "request": "^2.83.0",

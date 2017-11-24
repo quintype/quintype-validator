@@ -11,6 +11,9 @@ const URL = require("url");
 app.use(compression());
 app.use(bodyParser.json());
 
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+
 const ampErrorToMessage = ({line, col, message, specUrl}) => `line ${line}, col ${col}: ${message} ${specUrl ? `(see ${specUrl})` : ""}`
 
 function getAmpUrlFromPage(url, dom) {
@@ -157,7 +160,7 @@ function runStructuredDataValidator(dom, url) {
 
 const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator];
 
-app.post("/validate.json", (req, res) => {
+app.post("/api/validate.json", (req, res) => {
   const url = req.body.url;
   rp(url, {
     headers: {"Fastly-Debug": "1"},
@@ -178,5 +181,18 @@ app.post("/validate.json", (req, res) => {
     })
     .finally(() => res.end());
 });
+
+const fs = require("fs");
+const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));
+
+function assetPath(asset) {
+  return assets[asset];
+}
+
+app.get("/", (req, res) => {
+  res.render("index", {
+    assetPath: assetPath
+  })
+})
 
 module.exports = app;

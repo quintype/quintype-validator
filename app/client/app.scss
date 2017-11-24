@@ -1,3 +1,16 @@
+.clearfix {
+  &::after {
+    display: block;
+    content: "";
+    clear: both;
+  }
+}
+
+.results {
+  max-width: 750px;
+  margin: auto;
+}
+
 section.result {
   h2 { margin: 0; display: inline-block; }
   h3 { margin: 0; display: inline-block; }
@@ -6,18 +19,62 @@ section.result {
     margin: 0;
     margin-top: 10px;
   }
-  padding: 20px 10px;
-  border: 1px solid black;
 }
 
-.result-PASS {
-  background-color: rgba(0,255,0,0.1);
+.result-header {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  position: relative;
+
+  &:hover { background-color: #ccc; }
+
+  &.expandable:after {
+    content: '\02795'; /* Unicode character for "plus" sign (+) */
+    font-size: 13px;
+    color: #777;
+    top: 12px;
+    right: 20px;
+    position: absolute;
+  }
+
+  .active &.expandable:after {
+    content: "\2796"; /* Unicode character for "minus" sign (-) */
+  }
 }
 
-.result-FAIL {
-  background-color: rgba(255,0,0,0.1);
+.result-title {
+  line-height: 20px;
+  float: left;
 }
 
-.result-NA {
-  background-color: rgba(255,0,0,0.1);
+.result-status {
+  line-height: 20px;
+  float: right;
+  color: red;
+  width: 75px;
+}
+
+.result-body {
+  max-height: 0px;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+  padding: 0 18px;
+  box-sizing: border-box;
+
+  .active & {
+    max-height: fit-content;
+    padding: 18px;
+  }
+}
+
+.result-status-PASS {
+  color: green;
+}
+
+.result-status-WARN {
+  color: orange;
 }

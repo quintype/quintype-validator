@@ -78,13 +78,15 @@ class HomeComponent extends React.Component {
     super(props);
     this.state = {
       results: null,
-      loading: false
+      loading: false,
+      error: null
     };
   }
 
   loadRules(url) {
     request.post("/api/validate.json", {url: url})
-           .then(response => this.setState({results: response.body}));
+           .then(response => this.setState({results: response.body, loading: false}))
+           .catch(e => this.setState({loading: false, error: e.message}));
   }
 
   processUrl(url) {
@@ -92,13 +94,15 @@ class HomeComponent extends React.Component {
       return;
 
     this.setState({
-      loading: true
+      loading: true,
+      error: null
     }, () => this.loadRules(url));
   }
 
   render() {
     return <div>
       <GetUrlComponent onSubmit={(url) => this.processUrl(url)}/>
+      {this.state.error && <div className="error-message">{this.state.error}</div>}
       {this.state.loading && <div className="loading">Crunching Numbers</div>}
       {!this.state.loading && this.state.results && <Results results={this.state.results} />}
     </div>;

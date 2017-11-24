@@ -12,7 +12,7 @@ app.use(compression());
 app.use(bodyParser.json());
 
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.use(express.static("public", {maxage: 86400000}));
 
 const ampErrorToMessage = ({line, col, message, specUrl}) => `line ${line}, col ${col}: ${message} ${specUrl ? `(see ${specUrl})` : ""}`
 

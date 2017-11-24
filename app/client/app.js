@@ -43,7 +43,8 @@ class ResultSection extends React.Component {
         </div>
       </header>
       <div className="result-body">
-        {this.props.children}
+        {this.props.children && <div>{this.props.children}</div>}
+
         {errors.length > 0 && <div>
           <h4>Errors:</h4>
           <ul className="result-errors">{errors.map((error, index) => <li key={index}>{error}</li>)}</ul>
@@ -80,8 +81,8 @@ class HomeComponent extends React.Component {
   }
 
   loadRules(url) {
-     request.post("/api/validate.json", {url: url})
-            .then(results => this.setState({results: results}));
+    request.post("/api/validate.json", {url: url})
+           .then(response => this.setState({results: response.body}));
   }
 
   processUrl(url) {

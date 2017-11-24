@@ -61,13 +61,17 @@ section.result {
 .result-body {
   max-height: 0px;
   overflow: hidden;
-  transition: all 0.2s ease-out;
+  transition: max-height 0.2s ease-out;
   padding: 0 18px;
   box-sizing: border-box;
 
+  & > div {
+    padding: 18px 18px 0;
+    &:last-child { padding-bottom: 18px; }
+  }
+
   .active & {
     max-height: fit-content;
-    padding: 18px;
   }
 }
 

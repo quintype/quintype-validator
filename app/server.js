@@ -30,6 +30,14 @@ function getAmpUrlFromPage(url, dom) {
 function runAmpValidator(url, dom) {
   const ampUrl = getAmpUrlFromPage(url, dom);
 
+  if(!ampUrl) {
+    return Promise.resolve({
+      status: "NA",
+      ampUrl: null,
+      errors: ["No AMP Page Found"]
+    })
+  };
+
   return Promise.all([rp(ampUrl), amphtmlValidator.getInstance()])
     .then(([htmlString, validator]) => {
       const result = validator.validateString(htmlString);

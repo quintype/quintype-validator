@@ -58,4 +58,4 @@ typings/
 .env
 
 /asset-manifest.json
-/public
+/public/toddy

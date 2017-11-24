@@ -169,13 +169,15 @@ function runStructuredDataValidator(dom, url) {
     else
       status = "PASS";
     return {errors: actualErrors, warnings, numObjects, contentId, url, status};
-  });
+  }).catch(e => ({
+    status: "ERROR",
+    debug: {error: e.message}
+  }));
 }
 
 function fetchLinks($, url) {
   const links = $('a[href]').map((index, element) => URL.resolve(url, $(element).attr("href"))).get();
   return _(links).filter(link => link.startsWith("http")).uniq().value();
-
 }
 
 const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, fetchLinks];

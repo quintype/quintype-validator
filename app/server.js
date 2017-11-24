@@ -193,6 +193,8 @@ app.get("/", (req, res) => {
   res.render("index", {
     assetPath: assetPath
   })
-})
+});
+
+app.get("/ping", (req, res) => res.send("pong"));
 
 module.exports = app;

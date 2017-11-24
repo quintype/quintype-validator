@@ -190,6 +190,8 @@ function assetPath(asset) {
 }
 
 app.get("/", (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+  res.setHeader("Cache-Control", "public,max-age=60");
   res.render("index", {
     assetPath: assetPath
   })

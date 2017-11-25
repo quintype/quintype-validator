@@ -202,7 +202,8 @@ app.post("/api/validate.json", (req, res) => {
     })
     .catch(error => {
       res.status(500);
-      res.send(error.message);
+      res.setHeader("Content-Type", "application/json");
+      res.json({error: {message: error.message}});
       console.error(error.stack);
     })
     .finally(() => res.end());

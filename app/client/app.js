@@ -3,6 +3,7 @@ import css from './app.scss';
 import React from 'react';
 import ReactDom from 'react-dom';
 import request from 'superagent-bluebird-promise';
+import Dropzone from 'react-dropzone';
 
 import FileSaver from 'file-saver';
 import _ from 'lodash';
@@ -13,11 +14,27 @@ class GetUrlComponent extends React.Component {
     this.props.onSubmit(this.props.url);
   }
 
+  importResult(accepted) {
+    if(accepted.length != 1)
+      return;
+
+    const reader = new FileReader();
+    reader.onload = (x) => this.props.onImport(JSON.parse(x.target.result));
+    reader.readAsText(accepted[0]);
+  }
+
   render() {
-    return <form className="url-container" onSubmit={(e) => this.submit(e)}>
-      <input className="url-input" value={this.props.url} placeholder="Enter Url" onChange={(e) => this.props.onChange(e.target.value)} />
-      <input type="submit" className="url-go" value="Go!"/>
-    </form>;
+    return <Dropzone accept="application/json"
+                     onDrop={(accepted) => this.importResult(accepted)}
+                     className="url-dropzone"
+                     acceptClassName="url-dropzone-accept"
+                     rejectClassName="url-dropzone-reject"
+                     disableClick={true}>
+      <form className="url-container" onSubmit={(e) => this.submit(e)}>
+        <input className="url-input" value={this.props.url} placeholder="Enter Url" onChange={(e) => this.props.onChange(e.target.value)} />
+        <input type="submit" className="url-go" value="Go!"/>
+      </form>
+    </Dropzone>;
   }
 }
 
@@ -143,7 +160,7 @@ class HomeComponent extends React.Component {
 
   loadRules(url) {
     request.post("/api/validate.json", {url: url})
-           .then(response => this.setState({response: response.body, loading: false}))
+           .then(response => this.setState({response: response.body, loading: false, url: response.body.url}))
            .catch(e => this.setState({loading: false, error: e.message}));
   }
 
@@ -163,9 +180,18 @@ class HomeComponent extends React.Component {
     FileSaver.saveAs(blob, "validator.json");
   }
 
+  import(response) {
+    this.setState({
+      response: response,
+      error: null,
+      loading: false,
+      url: response.url
+    })
+  }
+
   render() {
     return <div>
-      <GetUrlComponent onSubmit={(url) => this.processUrl(url)} url={this.state.url} onChange={(url) => this.setState({url: url})}/>
+      <GetUrlComponent onSubmit={(url) => this.processUrl(url)} url={this.state.url} onChange={(url) => this.setState({url: url})} onImport={(result) => this.import(result)}/>
       {this.state.error && <div className="error-message">{this.state.error}</div>}
       {this.state.loading && <div className="loading">Crunching Numbers</div>}
       {!this.state.loading && this.state.response && <Results results={this.state.response.results}

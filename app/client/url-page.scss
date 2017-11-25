@@ -30,4 +30,12 @@
   background-color: #4267b2;
   color: white;
   padding: 0;
+
+  .url-dropzone-accept & {
+    background-color: green;
+  }
+
+  .url-dropzone-reject & {
+    background-color: red;
+  }
 }

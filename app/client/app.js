@@ -100,6 +100,7 @@ class DebugSection extends React.Component {
         </div>
       </header>
       <div className="result-body">
+        <div>For a full list of rules, please see <a href="https://github.com/quintype/quintype-validator">Readme.md</a></div>
         <div>
           <table>
             <thead>
@@ -118,10 +119,6 @@ class DebugSection extends React.Component {
           <h4>Links:</h4>
           <ul>{this.props.links.map((link, index) => <li key={index}><button onClick={() => this.props.onValidate(link)}>validate</button> - {link}</li>)}</ul>
         </div>}
-        <div>
-          <h4>Links</h4>
-          <ul></ul>
-        </div>
       </div>
     </section>
   }

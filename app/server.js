@@ -98,7 +98,7 @@ function runOgTagValidator(dom) {
 
   validate(dom, "meta[property=og\\:type]", 'content', errors, {count: 1, presence: true, length_le: 12});
   validate(dom, "meta[property=og\\:title]", 'content', warnings, {count: 1, presence: true, length_le: 66});
-  validate(dom, "meta[property=og\\:site_name]", 'content', errors, {count: 1, presence: true, length_le: 30});
+  validate(dom, "meta[property=og\\:site_name]", 'content', warnings, {count: 1, presence: true, length_le: 30});
 
   validate(dom, "meta[property=og\\:image]", 'content', errors, {count: 1, presence: true});
   validate(dom, "meta[property=og\\:image\\:height]", 'content', warnings, {count: 1, presence: true});

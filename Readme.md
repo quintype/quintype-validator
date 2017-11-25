@@ -23,7 +23,7 @@ The following SEO validations are run:
 
 The following OG Tag validations are run:
 * The page should have exactly one og:title (length < 66)
-* The page should have exactly one og:site_name (length < 12)
+* (The page should have exactly one og:site_name, length < 12)
 * The page should have exactly one og:image (and og:image:height / og:image:width)
 
 ### Headers

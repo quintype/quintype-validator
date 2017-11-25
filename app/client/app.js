@@ -100,7 +100,7 @@ class DebugSection extends React.Component {
         </div>
       </header>
       <div className="result-body">
-        <div>For a full list of rules, please see <a href="https://github.com/quintype/quintype-validator">Readme.md</a></div>
+        <div>For a full list of rules, please see <a href="https://github.com/quintype/quintype-validator" target="_blank">Readme.md</a></div>
         <div>
           <table>
             <thead>

@@ -18,6 +18,8 @@ h1 {
   text-align: center;
 }
 
+input:focus { outline: 0 }
+
 .loading {
   text-align: center;
   padding-top: 150px;

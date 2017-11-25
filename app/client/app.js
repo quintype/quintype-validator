@@ -101,7 +101,6 @@ class DebugSection extends React.Component {
       </header>
       <div className="result-body">
         <div>
-          <h4>Debugging Information:</h4>
           <table>
             <thead>
               <tr>

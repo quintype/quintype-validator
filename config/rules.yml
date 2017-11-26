@@ -35,12 +35,20 @@ headers:
 
 seo:
   rules:
+    # There should be exactly one title in head, and none in body
     - type: dom
       selector: head title
       contentAttr: body
       errors:
         presence: true
         count: 1
+    - type: dom
+      selector: body title
+      contentAttr: body
+      errors:
+        count: 0
+
+    # Should be exactly one h1
     - type: dom
       selector: body h1
       contentAttr: body
@@ -49,6 +57,7 @@ seo:
         count: 1
       warnings:
         length_le: 66
+
     - type: dom
       selector: meta[name=description]
       contentAttr: content

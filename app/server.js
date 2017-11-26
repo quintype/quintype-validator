@@ -89,7 +89,7 @@ function validateDom($, {selector, contentAttr, errors, warnings}, outputLists) 
     if(rules.presence && elements.length == 0)
       return outputList.push(`Could not find an element with selector ${selector}`);
 
-    if(rules.count && elements.length != rules.count)
+    if(rules.count != null && elements.length != rules.count)
       return outputList.push(`Expected to find ${rules.count} elements with selector ${selector}, got ${elements.length}`);
 
     elements.each((i, element) => {

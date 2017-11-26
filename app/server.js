@@ -74,8 +74,8 @@ function validateHeader(headers, {header, errors, warnings}, outputLists) {
     if(rules.absence && value)
       return outputList.push(`Found header that should be absent ${header}`)
 
-    if(rules.regex && !value.match())
-      return outputList.push(`Expected header ${header} to match ${regex} (got ${value})`)
+    if(rules.regex && !value.match(rules.regex))
+      return outputList.push(`Expected header ${header} to match ${rules.regex} (got ${value})`)
   })
 }
 

@@ -1,0 +1,42 @@
+matchers: [amp, structured, headers, seo, og]
+
+headers:
+  rules:
+    # This set of rules is related to caching
+    - type: header
+      header: Cache-Control
+      errors:
+        presence: true
+        regex: !!js/regexp /public, ?max-age=\d+/
+    - type: header
+      header: Vary
+      errors:
+        presence: true
+        regex: !!js/regexp /Accept-Encoding/
+    - type: header
+      header: Surrogate-Control
+      errors:
+        presence: true
+        regex: !!js/regexp /public, ?max-age=\d+, ?stale-while-revalidate=\d+, ?stale-if-error=\d+/
+    - type: header
+      header: Surrogate-Key
+      warnings:
+        presence: true
+        regex: !!js/regexp /./
+    - type: header
+      header: Set-Cookie
+      errors:
+        absent: true
+
+    # These rules are related to compression
+    - type: header
+      header: Content-Encoding
+      errors:
+        presence: true
+        regex: !!js/regexp /gzip/
+
+amp:
+  ignored: true
+
+structured:
+  ignored: true

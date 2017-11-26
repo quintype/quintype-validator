@@ -32,6 +32,32 @@ headers:
       errors:
         presence: true
         regex: !!js/regexp /gzip/
+
+seo:
+  rules:
+    - type: dom
+      selector: head title
+      contentAttr: body
+      errors:
+        presence: true
+        count: 1
+    - type: dom
+      selector: body h1
+      contentAttr: body
+      errors:
+        presence: true
+        count: 1
+      warnings:
+        length_le: 66
+    - type: dom
+      selector: meta[name=description]
+      contentAttr: content
+      errors:
+        presence: true
+        count: 1
+      warnings:
+        length_le: 160
+
 og:
   rules:
     - type: dom

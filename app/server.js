@@ -57,43 +57,6 @@ function runAmpValidator(dom, url) {
     });
 }
 
-function validate($, selector, contentAttr, errors, rules = {}) {
-  const elements = $(selector);
-
-  if(rules.presence && elements.length == 0)
-    return errors.push(`Could not find an element with selector ${selector}`);
-  else if (rules.count && elements.length != rules.count)
-    return errors.push(`Expected to find ${rules.count} elements with selector ${selector}, got ${elements.length}`)
-
-  elements.each((i, element) => {
-    const content = contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr);
-    if(rules.presence && (!content || content == ''))
-      return errors.push(`Found an empty ${selector}`)
-
-    if(rules.length_le && content.length > rules.length_le)
-      return errors.push(`Content in ${selector} is longer than ${rules.length_le}`)
-  });
-}
-
-function runSeoValidator(dom) {
-  var errors = [];
-  var warnings = [];
-
-  validate(dom, "head title", 'body', errors, {count: 1, presence: true});
-
-  validate(dom, "body h1", 'body', errors, {count: 1, presence: true});
-  validate(dom, "body h1", 'body', warnings, {length_le: 66});
-
-  validate(dom, "meta[name=description]", 'content', errors, {count: 1, presence: true})
-  validate(dom, "meta[name=description]", 'content', warnings, {length_le: 160})
-
-  return {
-    status: errors.length == 0 ? "PASS" : "FAIL",
-    errors: errors,
-    warnings: warnings
-  };
-}
-
 function validateHeader(headers, {header, errors, warnings}, outputLists) {
   const value = headers[header.toLowerCase()];
 
@@ -130,7 +93,7 @@ function validateDom($, {selector, contentAttr, errors, warnings}, outputLists) 
       return outputList.push(`Expected to find ${rules.count} elements with selector ${selector}, got ${elements.length}`);
 
     elements.each((i, element) => {
-      const content = contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr);
+      const content = (contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr)) || '';
       if(rules.presence && (!content || content == ''))
         return outputList.push(`Found an empty ${selector}`)
 
@@ -160,6 +123,10 @@ function runValidator(category, dom, url, response) {
   });
 
   return {status: errors.length == 0 ? "PASS" : "FAIL", errors, warnings, debug};
+}
+
+function runSeoValidator(dom, url, response) {
+  return runValidator('seo', dom, url, response);
 }
 
 function runHeaderValidator(dom, url, response) {
@@ -227,8 +194,8 @@ app.post("/api/validate.json", (req, res) => {
     .catch(error => {
       res.status(500);
       res.setHeader("Content-Type", "application/json");
-      res.json({error: {message: error.message}});
-      console.error(error.stack);
+      res.json({error: {message: error.message || error}});
+      console.error(error.stack || error);
     })
     .finally(() => res.end());
 });

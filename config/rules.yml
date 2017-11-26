@@ -32,6 +32,49 @@ headers:
       errors:
         presence: true
         regex: !!js/regexp /gzip/
+og:
+  rules:
+    - type: dom
+      selector: meta[property=og\:type]
+      contentAttr: content
+      errors:
+        presence: true
+        count: 1
+        length_le: 12
+    - type: dom
+      selector: meta[property=og\:title]
+      contentAttr: content
+      warnings:
+        presence: true
+        count: 1
+        length_le: 66
+    - type: dom
+      selector: meta[property=og\:site_name]
+      contentAttr: content
+      warnings:
+        presence: true
+        count: 1
+        length_le: 30
+
+    # OG Image related
+    - type: dom
+      selector: meta[property=og\:image]
+      contentAttr: content
+      errors:
+        presence: true
+        count: 1
+    - type: dom
+      selector: meta[property=og\:image\:height]
+      contentAttr: content
+      warnings:
+        presence: true
+        count: 1
+    - type: dom
+      selector: meta[property=og\:image\:width]
+      contentAttr: content
+      warnings:
+        presence: true
+        count: 1
 
 amp:
   ignored: true

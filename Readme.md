@@ -45,3 +45,48 @@ The following Structured Data validations are run:
 ## Links
 
 The API also returns a list of links. A crawler can be written which calls the validation API, recieves a list of linked pages, then continues validating the next page.
+
+## Future Direction
+
+In the next version of this application, the rules will be read from a YAML file, so that one need not read the documentation. That yaml file will look something like this. The Structured data and amp rules may not be YAMLable.
+
+```yaml
+headers:
+  errors:
+    - type: header
+      name: Cache-Control
+      present: true
+      regex: /public,max-age=\d+/
+
+    - type: header
+      name: Set-Cookie
+      absent: true
+
+seo:
+  errors:
+    - type: dom
+      matcher: head meta[name=description]
+      content: content
+      presence: true
+      count: 1
+
+  warnings:
+    - type: dom
+      matcher: head meta[name=description]
+      content: content
+      length_le: 160
+
+og:
+  errors:
+    - type: dom
+      matcher: head meta[name=og\:title]
+      content: content
+      presence: true
+      count: 1
+
+  warnings:
+    - type: dom
+      matcher: head meta[name=og\:title]
+      content: content
+      length_le: 66
+```

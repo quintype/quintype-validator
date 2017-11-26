@@ -14,27 +14,15 @@ The following AMP validations are run:
 
 ### SEO
 
-The following SEO validations are run:
-* The page should have exactly one title (length < 66)
-* The page should have exactly one h1 (length < 66)
-* The page should have exactly one meta description (length < 160)
+Please see [rules.yml](config/rules.yml) for a list of rules that are run
 
 ### OG Tags
 
-The following OG Tag validations are run:
-* The page should have exactly one og:title (length < 66)
-* (The page should have exactly one og:site_name, length < 12)
-* The page should have exactly one og:image (and og:image:height / og:image:width)
+Please see [rules.yml](config/rules.yml) for a list of rules that are run
 
 ### Headers
 
-The following Header validations are run:
-* Presence of Cache-Control with public,max-age
-* Presence of Surrogate-Control with public,max-age,stale-while-revalidate,stale-if-error
-* Presence of Vary with Accept-Encoding
-* Absence of a Set-Cookie header
-* (Presence of a Surrogate-Key)
-* Presence of Content-Encoding with gzip
+Please see [rules.yml](config/rules.yml) for a list of rules that are run
 
 ### Structured Data
 

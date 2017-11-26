@@ -8,6 +8,8 @@ const rp = require('request-promise');
 const cheerio = require("cheerio");
 const URL = require("url");
 const _ = require("lodash");
+const fs = require("fs");
+const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -111,39 +113,49 @@ function runOgTagValidator(dom) {
   };
 }
 
-function validateHeader(headers, header, regex, errors) {
+function validateHeader(headers, {header, errors, warnings}, outputLists) {
   const value = headers[header.toLowerCase()];
 
-  if(!value || value == '')
-    return errors.push(`Could not find header ${header}`);
+  if(value) {
+    outputLists.debug[header] = value;
+  }
 
-  if(!value.match(regex))
-    return errors.push(`Expected header ${header} to match ${regex} (got ${value})`);
+  [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(([rules, outputList]) => {
+    if(!rules)
+      return;
+
+    if(rules.presence && (!value || value == ''))
+      return outputList.push(`Could not find header ${header}`);
+
+    if(rules.absence && value)
+      return outputList.push(`Found header that should be absent ${header}`)
+
+    if(rules.regex && !value.match())
+      return outputList.push(`Expected header ${header} to match ${regex} (got ${value})`)
+  })
+}
+
+function runValidator(category, dom, url, response) {
+  var errors = [];
+  var warnings = [];
+  const debug = {};
+  const rules = config[category].rules;
+
+  rules.forEach(rule => {
+    switch(rule.type) {
+      case 'header':
+        validateHeader(response.headers, rule, {errors, warnings, debug});
+        break;
+      default:
+        throw `Unknown rule type: ${rule.type}`;
+    }
+  });
+
+  return {status: errors.length == 0 ? "PASS" : "FAIL", errors, warnings, debug};
 }
 
 function runHeaderValidator(dom, url, response) {
-  const headers = response.headers;
-
-  var errors = [];
-  var warnings = [];
-
-  validateHeader(headers, 'Cache-Control', /public, ?max-age=\d+/, errors);
-  validateHeader(headers, 'Vary', /Accept-Encoding/, errors);
-  validateHeader(headers, 'Surrogate-Control', /public, ?max-age=\d+, ?stale-while-revalidate=\d+, ?stale-if-error=\d+/, errors);
-  validateHeader(headers, 'Surrogate-Key', /./, warnings);
-
-  if(headers["set-cookie"]) {
-    errors.push("Illegal Header Set-Cookie found");
-  }
-
-  validateHeader(headers, 'Content-Encoding', /gzip/, errors);
-
-  return {
-    status: errors.length == 0 ? "PASS" : "FAIL",
-    errors: errors,
-    warnings: warnings,
-    debug: _.pick(headers,['cache-control', 'vary', 'surrogate-key', 'surrogate-control', 'set-cookie', 'content-encoding'])
-  };
+  return runValidator('headers', dom, url, response);
 }
 
 const structuredErrorToMessage = ({ownerSet, errorType, args, begin, end}) => `[${_.keys(ownerSet).join(" ")}] ${errorType} ${args.join(" ")} (${begin} - ${end})`;
@@ -209,7 +221,6 @@ app.post("/api/validate.json", (req, res) => {
     .finally(() => res.end());
 });
 
-const fs = require("fs");
 const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));
 
 function assetPath(asset) {

@@ -1,5 +1,3 @@
-matchers: [amp, structured, headers, seo, og]
-
 headers:
   rules:
     # This set of rules is related to caching
@@ -26,7 +24,7 @@ headers:
     - type: header
       header: Set-Cookie
       errors:
-        absent: true
+        absence: true
 
     # These rules are related to compression
     - type: header

@@ -128,7 +128,7 @@ class Results extends React.Component {
   render() {
     return <div>
       <ResultSection title="AMP" result={this.props.results.amp} />
-      <ResultSection title="Headers" result={this.props.results.headers} />
+      <ResultSection title="Caching Headers" result={this.props.results.headers} />
       <ResultSection title="Structured Data" result={this.props.results.structured}>
         <div>Number of Objects: {this.props.results.structured.numObjects}</div>
         <div>Content Id: {this.props.results.structured.contentId}</div>

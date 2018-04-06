@@ -140,7 +140,7 @@ function runOgTagValidator(dom, url, response) {
 
 const BOTS = ["GoogleBot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider"];
 function runRobotsValidator(dom, url, response) {
-  const robotsUrl = new URL.URL("/robots.txt", url);
+  const robotsUrl = URL.resolve(url, "/robots.txt");
   return rp(robotsUrl, {
     resolveWithFullResponse: true,
     gzip: true,
@@ -150,14 +150,15 @@ function runRobotsValidator(dom, url, response) {
       return {status: "FAIL", errors: [`Status Code Was ${response.statusCode}`], debug: {statusCode: response.statusCode}};
     } else {
       const robots = robotsParser(robotsUrl, response.body);
-      const errors = BOTS.filter(bot => robots.isDisallowed(url, bot)).map(bot => `${bot} was disallowed from crawling the page`);
-      const sitemaps = robots.getSitemaps();
+      const errors = BOTS.filter(bot => !robots.isAllowed(url, bot))
+                         .map(bot => `${bot} was not allowed to crawl this page`);
 
+      const sitemaps = robots.getSitemaps();
       if(sitemaps.length == 0) {
         errors.push("There was no sitemap configured");
       }
 
-      const debug = {content: response.body, sitemaps: sitemaps.join(",")};
+      const debug = {content: response.body, sitemaps: sitemaps.join(","), lineNo: robots.getMatchingLineNumber(url)};
 
       if(errors.length == 0) {
         return {status: "PASS", debug: debug};

@@ -150,11 +150,19 @@ function runRobotsValidator(dom, url, response) {
       return {status: "FAIL", errors: [`Status Code Was ${response.statusCode}`], debug: {statusCode: response.statusCode}};
     } else {
       const robots = robotsParser(robotsUrl, response.body);
-      const failingBots = BOTS.filter(bot => robots.isDisallowed(url, bot));
-      if(failingBots.length == 0) {
-        return {status: "PASS"};
+      const errors = BOTS.filter(bot => robots.isDisallowed(url, bot)).map(bot => `${bot} was disallowed from crawling the page`);
+      const sitemaps = robots.getSitemaps();
+
+      if(sitemaps.length == 0) {
+        errors.push("There was no sitemap configured");
+      }
+
+      const debug = {content: response.body, sitemaps: sitemaps.join(",")};
+
+      if(errors.length == 0) {
+        return {status: "PASS", debug: debug};
       } else {
-        return {status: "FAIL", errors: failingBots.map(bot => `${bot} was disallowed from crawling the page`)};
+        return {status: "FAIL", errors: errors, debug: debug};
       }
     }
   });

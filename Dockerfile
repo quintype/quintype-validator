@@ -16,8 +16,8 @@ COPY . /app/
 RUN git log -n1 --pretty="Commit Date: %aD%nBuild Date: `date --rfc-2822`%n%h %an%n%s%n" > public/round-table.txt && \
     npm run compile && \
     rm -rf node-modules && \
-    npm install --ignore-optionals --production && \
-    rm -rf /app/yarn-cache /app/.git
+    npm install --no-optional --production && \
+    rm -rf /app/.npm /app/.git
 
 FROM node:8.9-alpine
 MAINTAINER Quintype Developers <dev-core@quintype.com>

@@ -10,6 +10,7 @@ const URL = require("url");
 const _ = require("lodash");
 const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
+const robotsParser = require('robots-parser');
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -137,6 +138,28 @@ function runOgTagValidator(dom, url, response) {
   return runValidator('og', dom, url, response);
 }
 
+const BOTS = ["GoogleBot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider"];
+function runRobotsValidator(dom, url, response) {
+  const robotsUrl = new URL.URL("/robots.txt", url);
+  return rp(robotsUrl, {
+    resolveWithFullResponse: true,
+    gzip: true,
+    simple: false
+  }).then(response => {
+    if(response.statusCode != 200) {
+      return {status: "FAIL", errors: [`Status Code Was ${response.statusCode}`], debug: {statusCode: response.statusCode}};
+    } else {
+      const robots = robotsParser(robotsUrl, response.body);
+      const failingBots = BOTS.filter(bot => robots.isDisallowed(url, bot));
+      if(failingBots.length == 0) {
+        return {status: "PASS"};
+      } else {
+        return {status: "FAIL", errors: failingBots.map(bot => `${bot} was disallowed from crawling the page`)};
+      }
+    }
+  });
+}
+
 const structuredErrorToMessage = ({ownerSet, errorType, args, begin, end}) => `[${_.keys(ownerSet).join(" ")}] ${errorType} ${args.join(" ")} (${begin} - ${end})`;
 
 function runStructuredDataValidator(dom, url) {
@@ -171,7 +194,7 @@ function fetchLinks($, url) {
   return _(links).filter(link => link.startsWith("http")).uniq().value();
 }
 
-const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, fetchLinks];
+const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, runRobotsValidator, fetchLinks];
 
 app.post("/api/validate.json", (req, res) => {
   const url = req.body.url;
@@ -182,12 +205,12 @@ app.post("/api/validate.json", (req, res) => {
   })
     .then(response => ({response: response, dom: cheerio.load(response.body)}))
     .then(({response, dom}) => Promise.all(RUNNERS.map(runner => runner(dom, url, response))))
-    .then(([amp, structured, seo, og, headers, links]) => {
+    .then(([amp, structured, seo, og, headers, robots, links]) => {
       res.status(201);
       res.setHeader("Content-Type", "application/json");
       res.json({
         url: url,
-        results: {seo, amp, og, headers, structured},
+        results: {seo, amp, og, headers, robots, structured},
         links: links
       });
     })

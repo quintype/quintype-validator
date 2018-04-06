@@ -135,6 +135,7 @@ class Results extends React.Component {
       </ResultSection>
       <ResultSection title="Facebook OG Tags" result={this.props.results.og} />
       <ResultSection title="SEO Rules" result={this.props.results.seo} />
+      <ResultSection title="Robots" result={this.props.results.robots} />
 
       <DebugSection results={this.props.results} links={this.props.links} onValidate={this.props.onValidate}/>
 

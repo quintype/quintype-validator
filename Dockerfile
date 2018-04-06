@@ -6,17 +6,17 @@ RUN apk update && \
 RUN mkdir /app
 WORKDIR /app
 
-COPY package.json yarn.lock /app/
-RUN yarn install --cache-folder /app/yarn-cache
+COPY package.json package-lock.json /app/
+RUN npm install
 ENV NODE_ENV production
 
 # Everything above should be cached by docker. The below should run on every build
 
 COPY . /app/
 RUN git log -n1 --pretty="Commit Date: %aD%nBuild Date: `date --rfc-2822`%n%h %an%n%s%n" > public/round-table.txt && \
-    yarn run compile && \
+    npm run compile && \
     rm -rf node-modules && \
-    yarn install --ignore-optionals --production --cache-folder /app/yarn-cache && \
+    npm install --ignore-optionals --production && \
     rm -rf /app/yarn-cache /app/.git
 
 FROM node:8.9-alpine

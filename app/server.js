@@ -58,7 +58,7 @@ function runAmpValidator(dom, url) {
     });
 }
 
-function validateHeader(headers, {header, errors, warnings}, outputLists) {
+function validateHeader(headers, {header, errors, warnings}, url, outputLists) {
   const value = headers[header.toLowerCase()];
 
   if(value) {
@@ -80,7 +80,7 @@ function validateHeader(headers, {header, errors, warnings}, outputLists) {
   })
 }
 
-function validateDom($, {selector, contentAttr, errors, warnings}, outputLists) {
+function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLists) {
   const elements = $(selector);
 
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(([rules, outputList]) => {
@@ -99,7 +99,11 @@ function validateDom($, {selector, contentAttr, errors, warnings}, outputLists) 
         return outputList.push(`Found an empty ${selector}`)
 
       if(rules.length_le && content.length > rules.length_le)
-        return outputList.push(`Content in ${selector} is longer than ${rules.length_le}`)
+        return outputList.push(`Content in ${selector} is longer than ${rules.length_le}`);
+
+      if(rules.value == 'url' && content != url) {
+        return outputList.push(`Content in ${selector} should have value ${url} (got ${content})`);
+      }
     });
   });
 }
@@ -113,10 +117,10 @@ function runValidator(category, dom, url, response) {
   rules.forEach(rule => {
     switch(rule.type) {
       case 'header':
-        validateHeader(response.headers, rule, {errors, warnings, debug});
+        validateHeader(response.headers, rule, url, {errors, warnings, debug});
         break;
       case 'dom':
-        validateDom(dom, rule, {errors, warnings, debug})
+        validateDom(dom, rule, url, {errors, warnings, debug})
         break;
       default:
         throw `Unknown rule type: ${rule.type}`;
@@ -137,6 +141,7 @@ function runHeaderValidator(dom, url, response) {
 function runOgTagValidator(dom, url, response) {
   return runValidator('og', dom, url, response);
 }
+
 
 const BOTS = ["GoogleBot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider"];
 function runRobotsValidator(dom, url, response) {

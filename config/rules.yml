@@ -76,6 +76,21 @@ seo:
         presence: true
         length_le: 2
 
+    # Meta Name=robots should not be there
+    - type: dom
+      selector: meta[name=robots]
+      contentAttr: content
+      errors:
+        count: 0
+
+    # Canonical should be presennt
+    - type: dom
+      selector: head link[rel=canonical]
+      contentAttr: href
+      errors:
+        presence: true
+        value: url
+
 og:
   rules:
     - type: dom

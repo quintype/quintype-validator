@@ -58,6 +58,7 @@ seo:
       warnings:
         length_le: 66
 
+    # Meta Description should be 160 chars or less
     - type: dom
       selector: meta[name=description]
       contentAttr: content
@@ -66,6 +67,14 @@ seo:
         count: 1
       warnings:
         length_le: 160
+
+    # Meta Lang Should Be Present
+    - type: dom
+      selector: html[lang]
+      contentAttr: lang
+      errors:
+        presence: true
+        length_le: 2
 
 og:
   rules:

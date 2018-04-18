@@ -118,6 +118,12 @@ seo:
       errors:
         regex: !!js/regexp /^https/
 
+    # URL should not contain special characters and underscores
+    # Alternatively, it should only contain lowercase letters, underscores and numbers
+    - type: url
+      errors:
+        regex: !!js/regexp /^https?:\/\/[a-z0-9.\-_]+\/[a-z0-9\-\/]*$/
+
 og:
   rules:
     - type: dom

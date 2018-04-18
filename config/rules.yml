@@ -98,11 +98,20 @@ seo:
       errors:
         presence_if_node_exists: true
 
+    # Every iframe should have a src
     - type: dom
       selector: iframe
       contentAttr: src
       errors:
         presence_if_node_exists: true
+
+    # Viewport should be present
+    - type: dom
+      selector: head meta[name=viewport]
+      contentAttr: content
+      errors:
+        presence: true
+        count: 1
 
 og:
   rules:

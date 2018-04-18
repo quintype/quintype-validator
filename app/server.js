@@ -80,6 +80,10 @@ function validateHeader(headers, {header, errors, warnings}, url, outputLists) {
   })
 }
 
+function getContent($, element, contentAttr) {
+  return (contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr)) || '';
+}
+
 function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLists) {
   const elements = $(selector);
 
@@ -94,7 +98,7 @@ function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLi
       return outputList.push(`Expected to find ${rules.count} elements with selector ${selector}, got ${elements.length}`);
 
     elements.each((i, element) => {
-      const content = (contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr)) || '';
+      const content = getContent($, element, contentAttr);
 
       // Reuse this?
       if((rules.presence || rules.presence_if_node_exists) && (!content || content == ''))
@@ -105,6 +109,15 @@ function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLi
 
       if(rules.value == 'url' && content != url) {
         return outputList.push(`Content in ${selector} should have value ${url} (got ${content})`);
+      }
+
+      if(rules.different_from) {
+        const otherElements = $(rules.different_from.selector);
+        otherElements.each((i, otherElement) => {
+          const otherContent = getContent($, otherElement, rules.different_from.contentAttr);
+          if(content == otherContent)
+          return outputList.push(`Content in ${selector} should not have the same value as ${rules.different_from.selector}`);
+        });
       }
     });
   });

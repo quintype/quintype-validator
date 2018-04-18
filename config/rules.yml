@@ -58,13 +58,16 @@ seo:
       warnings:
         length_le: 66
 
-    # Meta Description should be 160 chars or less
+    # Meta Description should be 160 chars or less, and be different from title
     - type: dom
       selector: meta[name=description]
       contentAttr: content
       errors:
         presence: true
         count: 1
+        different_from:
+          selector: head title
+          contentAttr: body
       warnings:
         length_le: 160
 

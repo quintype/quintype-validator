@@ -113,6 +113,11 @@ seo:
         presence: true
         count: 1
 
+    # URL should be https
+    - type: url
+      errors:
+        regex: !!js/regexp /^https/
+
 og:
   rules:
     - type: dom

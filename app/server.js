@@ -95,6 +95,8 @@ function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLi
 
     elements.each((i, element) => {
       const content = (contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr)) || '';
+
+      // Reuse this?
       if((rules.presence || rules.presence_if_node_exists) && (!content || content == ''))
         return outputList.push(`Found an empty ${selector} (attribute ${contentAttr})`)
 
@@ -108,6 +110,16 @@ function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLi
   });
 }
 
+function validateUrl(url, {errors, warnings}, _unused_, outputLists) {
+  [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(([rules, outputList]) => {
+    if(!rules)
+      return;
+
+    if(rules.regex && !url.match(rules.regex))
+      return outputList.push(`Expected url ${url} to match ${rules.regex}`)
+  })
+}
+
 function runValidator(category, dom, url, response) {
   var errors = [];
   var warnings = [];
@@ -116,14 +128,10 @@ function runValidator(category, dom, url, response) {
 
   rules.forEach(rule => {
     switch(rule.type) {
-      case 'header':
-        validateHeader(response.headers, rule, url, {errors, warnings, debug});
-        break;
-      case 'dom':
-        validateDom(dom, rule, url, {errors, warnings, debug})
-        break;
-      default:
-        throw `Unknown rule type: ${rule.type}`;
+      case 'header': return validateHeader(response.headers, rule, url, {errors, warnings, debug});
+      case 'dom': return validateDom(dom, rule, url, {errors, warnings, debug});
+      case 'url': return validateUrl(url, rule, url, {errors, warnings, debug});
+      default: throw `Unknown rule type: ${rule.type}`;
     }
   });
 

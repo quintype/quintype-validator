@@ -91,6 +91,19 @@ seo:
         presence: true
         value: url
 
+    # Every image should have an alt text
+    - type: dom
+      selector: img
+      contentAttr: alt
+      errors:
+        presence_if_node_exists: true
+
+    - type: dom
+      selector: iframe
+      contentAttr: src
+      errors:
+        presence_if_node_exists: true
+
 og:
   rules:
     - type: dom

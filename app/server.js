@@ -95,8 +95,8 @@ function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLi
 
     elements.each((i, element) => {
       const content = (contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr)) || '';
-      if(rules.presence && (!content || content == ''))
-        return outputList.push(`Found an empty ${selector}`)
+      if((rules.presence || rules.presence_if_node_exists) && (!content || content == ''))
+        return outputList.push(`Found an empty ${selector} (attribute ${contentAttr})`)
 
       if(rules.length_le && content.length > rules.length_le)
         return outputList.push(`Content in ${selector} is longer than ${rules.length_le}`);

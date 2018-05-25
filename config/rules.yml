@@ -5,7 +5,7 @@ headers:
       header: Cache-Control
       errors:
         presence: true
-        regex: !!js/regexp /public, ?max-age=\d+/
+        regex: !!js/regexp /max-age=\d+/
     - type: header
       header: Vary
       errors:

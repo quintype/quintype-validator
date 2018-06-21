@@ -10,7 +10,7 @@ const URL = require("url");
 const _ = require("lodash");
 const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
-const robotsParser = require('robots-parser');
+const {runRobotsValidator} = require("./robots");
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -161,38 +161,6 @@ function runHeaderValidator(dom, url, response) {
 
 function runOgTagValidator(dom, url, response) {
   return runValidator('og', dom, url, response);
-}
-
-
-const BOTS = ["GoogleBot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider"];
-function runRobotsValidator(dom, url, response) {
-  const robotsUrl = URL.resolve(url, "/robots.txt");
-  return rp(robotsUrl, {
-    resolveWithFullResponse: true,
-    gzip: true,
-    simple: false
-  }).then(response => {
-    if(response.statusCode != 200) {
-      return {status: "FAIL", errors: [`Status Code Was ${response.statusCode}`], debug: {statusCode: response.statusCode}};
-    } else {
-      const robots = robotsParser(robotsUrl, response.body);
-      const errors = BOTS.filter(bot => !robots.isAllowed(url, bot))
-                         .map(bot => `${bot} was not allowed to crawl this page`);
-
-      const sitemaps = robots.getSitemaps();
-      if(sitemaps.length == 0) {
-        errors.push("There was no sitemap configured");
-      }
-
-      const debug = {content: response.body, sitemaps: sitemaps.join(","), lineNo: robots.getMatchingLineNumber(url)};
-
-      if(errors.length == 0) {
-        return {status: "PASS", debug: debug};
-      } else {
-        return {status: "FAIL", errors: errors, debug: debug};
-      }
-    }
-  });
 }
 
 const structuredErrorToMessage = ({ownerSet, errorType, args, begin, end}) => `[${_.keys(ownerSet).join(" ")}] ${errorType} ${args.join(" ")} (${begin} - ${end})`;

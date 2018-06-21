@@ -10,7 +10,7 @@ const URL = require("url");
 const _ = require("lodash");
 const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
-const {runRobotsValidator} = require("./robots");
+const {runRobotsValidator, checkRobots} = require("./robots");
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -231,6 +231,21 @@ const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));
 function assetPath(asset) {
   return assets[asset];
 }
+
+app.get("/validate-robots", (req, res) => {
+  const {allowed = "", disallowed = ""} = req.query;
+  checkRobots(allowed.split(" "), disallowed.split(" ")).then(results => {
+    if(results.find(result => result.status != "PASS")) {
+      res.status(418)
+    }
+    res.setHeader("Content-Type", "text/html");
+    res.setHeader("Cache-Control", "public,max-age=60");
+    res.render("validate-robots", {
+      results: results,
+      assetPath: assetPath
+    })
+  });
+});
 
 app.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");

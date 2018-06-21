@@ -244,6 +244,9 @@ app.get("/validate-robots", (req, res) => {
       results: results,
       assetPath: assetPath
     })
+  }).catch(e => {
+    res.status(500);
+    res.end();
   });
 });
 

@@ -51,6 +51,12 @@ function checkUrl(url, allowed = true) {
       url: url,
       debug: firstInvalidBot ? `${firstInvalidBot} was not allowed to crawl this page` : "All bots were allowed to crawl"
     }
+  }).catch(e => {
+    return {
+      status: "ERROR",
+      url: url,
+      debug: `Something crashed. Does ${robotsUrl} load?`
+    }
   })
 }
 

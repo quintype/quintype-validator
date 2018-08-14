@@ -202,7 +202,7 @@ const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, r
 app.post("/api/validate.json", (req, res) => {
   const url = req.body.url;
   rp(url, {
-    headers: {"Fastly-Debug": "1"},
+    headers: {"Fastly-Debug": "1", "QT-Debug: 1"},
     resolveWithFullResponse: true,
     gzip: true
   })

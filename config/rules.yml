@@ -12,12 +12,21 @@ headers:
         presence: true
         regex: !!js/regexp /Accept-Encoding/
     - type: header
+      header: Etag
+      errors:
+        presence: true
+    - type: header
       header: Surrogate-Control
       errors:
         presence: true
         regex: !!js/regexp /public, ?max-age=\d+, ?stale-while-revalidate=\d+, ?stale-if-error=\d+/
     - type: header
       header: Surrogate-Key
+      warnings:
+        presence: true
+        regex: !!js/regexp /./
+    - type: header
+      header: Cache-Tag
       warnings:
         presence: true
         regex: !!js/regexp /./

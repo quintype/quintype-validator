@@ -11,9 +11,14 @@ const _ = require("lodash");
 const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
 const {runRobotsValidator, checkRobots} = require("./robots");
+const cors = require('cors')
+
 
 app.use(compression());
 app.use(bodyParser.json());
+app.use(cors());
+
+
 
 app.set("view engine", "ejs");
 app.use(express.static("public", {maxage: 86400000}));
@@ -83,7 +88,7 @@ function validateHeader(headers, {header, errors, warnings}, url, outputLists) {
 function getContent($, element, contentAttr) {
   return (contentAttr == 'body' ? $(element).html() : $(element).attr(contentAttr)) || '';
 }
-
+//validateDom(dom, rule, url, {errors, warnings, debug});
 function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLists) {
   const elements = $(selector);
 
@@ -224,6 +229,25 @@ app.post("/api/validate.json", (req, res) => {
       console.error(error.stack || error);
     })
     .finally(() => res.end());
+});
+
+app.get("/seo", (req, res) => {
+  res.status(200);
+  res.setHeader("Content-Type", "application/json");
+  //res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  //res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  res.json({
+    "errors": [{"group": "title", "message": "Page title should not be empty"},
+               {"group": "metadata", "message": "Metadata should not be empty"},
+               {"group": "content", "message": "Content has typos"}],
+    "warnings": [{"group": "title", "message": "Page title has focus point at the end"},
+                 {"group": "metadata", "message": "Metadata better have focus point"},
+                 {"group": "content", "message": "Content is less than 300 chars"}],
+    "goodies": [{"group": "title", "message": "Page title doesn't have typos"},
+                    {"group": "metadata", "message": "Metadata is good"},
+                    {"group": "content", "message": "Content is well organised"}]
+  })
 });
 
 const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));

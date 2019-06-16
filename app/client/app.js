@@ -156,7 +156,7 @@ class HomeComponent extends React.Component {
   }
 
   loadRules(url) {
-    request.post("/api/validate.json", {url: url})
+    request.post("/seo", {url: url})
            .then(response => this.setState({response: response.body, loading: false, url: response.body.url}))
            .catch(e => this.setState({loading: false, error: e.message}));
   }

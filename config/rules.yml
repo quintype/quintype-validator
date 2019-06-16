@@ -185,3 +185,89 @@ amp:
 
 structured:
   ignored: true
+
+
+new-seo:
+  rules:
+    # There should be exactly one title in head, and none in body
+    - type: dom
+      selector: head title
+      contentAttr: body
+      errors:
+        presence: true
+        count: 1
+    - type: dom
+      selector: body title
+      contentAttr: body
+      errors:
+        count: 0
+
+    # Should be exactly one h1
+    - type: dom
+      selector: body h1
+      contentAttr: body
+      errors:
+        presence: true
+        count: 1
+      warnings:
+        length_le: 66
+
+    # Meta Description should be 160 chars or less, and be different from title
+    - type: dom
+      selector: meta[name=description]
+      contentAttr: content
+      errors:
+        presence: true
+        count: 1
+        different_from:
+          selector: head title
+          contentAttr: body
+      warnings:
+        length_le: 160
+
+    # Meta Lang Should Be Present
+    - type: dom
+      selector: html[lang]
+      contentAttr: lang
+      errors:
+        presence: true
+        length_le: 2
+
+    # Meta Name=robots should not be there
+    - type: dom
+      selector: meta[name=robots]
+      contentAttr: content
+      errors:
+        count: 0
+
+    # Canonical should be presennt
+    - type: dom
+      selector: head link[rel=canonical]
+      contentAttr: href
+      errors:
+        presence: true
+        value: url
+
+    # Every image should have an alt text
+    - type: dom
+      selector: img
+      contentAttr: alt
+      errors:
+        presence_if_node_exists: true
+
+    # Every iframe should have a src
+    - type: dom
+      selector: iframe
+      contentAttr: src
+      errors:
+        presence_if_node_exists: true
+
+    # Viewport should be present
+    - type: dom
+      selector: head meta[name=viewport]
+      contentAttr: content
+      errors:
+        presence: true
+        count: 1
+
+  

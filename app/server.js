@@ -12,6 +12,7 @@ const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
 const {runRobotsValidator, checkRobots} = require("./robots");
 const cors = require('cors')
+const runNewValidator = require("./bold-validator");
 
 
 app.use(compression());
@@ -27,21 +28,21 @@ const ampErrorToMessage = ({line, col, message, specUrl}) => `line ${line}, col 
 
 function getAmpUrlFromPage(url, dom) {
   var ampUrl = dom('link[rel=amphtml]').attr('href');
-
+  
   if(!ampUrl || ampUrl == '') {
     return null;
   }
-
+  
   if(ampUrl.startsWith('/')) {
     return URL.resolve(url, ampUrl);
   }
-
+  
   return ampUrl;
 }
 
 function runAmpValidator(dom, url) {
   const ampUrl = getAmpUrlFromPage(url, dom);
-
+  
   if(!ampUrl) {
     return Promise.resolve({
       status: "NA",
@@ -49,39 +50,39 @@ function runAmpValidator(dom, url) {
       errors: ["No AMP Page Found"]
     })
   };
-
+  
   return Promise.all([rp(ampUrl), amphtmlValidator.getInstance()])
-    .then(([htmlString, validator]) => {
-      const result = validator.validateString(htmlString);
-      return {
-        status: result.status,
-        ampUrl: ampUrl,
-        errors: result.errors.filter(({severity}) => severity == "ERROR").map(ampErrorToMessage),
-        warnings: result.errors.filter(({severity}) => severity != "ERROR").map(ampErrorToMessage),
-        debug: {"Amp Url": ampUrl}
-      }
-    });
+  .then(([htmlString, validator]) => {
+    const result = validator.validateString(htmlString);
+    return {
+      status: result.status,
+      ampUrl: ampUrl,
+      errors: result.errors.filter(({severity}) => severity == "ERROR").map(ampErrorToMessage),
+      warnings: result.errors.filter(({severity}) => severity != "ERROR").map(ampErrorToMessage),
+      debug: {"Amp Url": ampUrl}
+    }
+  });
 }
 
 function validateHeader(headers, {header, errors, warnings}, url, outputLists) {
   const value = headers[header.toLowerCase()];
-
+  
   if(value) {
     outputLists.debug[header] = value;
   }
-
+  
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(([rules, outputList]) => {
     if(!rules)
-      return;
-
+    return;
+    
     if(rules.presence && (!value || value == ''))
-      return outputList.push(`Could not find header ${header}`);
-
+    return outputList.push(`Could not find header ${header}`);
+    
     if(rules.absence && value)
-      return outputList.push(`Found header that should be absent ${header}`)
-
+    return outputList.push(`Found header that should be absent ${header}`)
+    
     if(rules.regex && !value.match(rules.regex))
-      return outputList.push(`Expected header ${header} to match ${rules.regex} (got ${value})`)
+    return outputList.push(`Expected header ${header} to match ${rules.regex} (got ${value})`)
   })
 }
 
@@ -91,31 +92,31 @@ function getContent($, element, contentAttr) {
 //validateDom(dom, rule, url, {errors, warnings, debug});
 function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLists) {
   const elements = $(selector);
-
+  
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(([rules, outputList]) => {
     if(!rules)
-      return;
-
+    return;
+    
     if(rules.presence && elements.length == 0)
-      return outputList.push(`Could not find an element with selector ${selector}`);
-
+    return outputList.push(`Could not find an element with selector ${selector}`);
+    
     if(rules.count != null && elements.length != rules.count)
-      return outputList.push(`Expected to find ${rules.count} elements with selector ${selector}, got ${elements.length}`);
-
+    return outputList.push(`Expected to find ${rules.count} elements with selector ${selector}, got ${elements.length}`);
+    
     elements.each((i, element) => {
       const content = getContent($, element, contentAttr);
-
+      
       // Reuse this?
       if((rules.presence || rules.presence_if_node_exists) && (!content || content == ''))
-        return outputList.push(`Found an empty ${selector} (attribute ${contentAttr})`)
-
+      return outputList.push(`Found an empty ${selector} (attribute ${contentAttr})`)
+      
       if(rules.length_le && content.length > rules.length_le)
-        return outputList.push(`Content in ${selector} is longer than ${rules.length_le}`);
-
+      return outputList.push(`Content in ${selector} is longer than ${rules.length_le}`);
+      
       if(rules.value == 'url' && content != url) {
         return outputList.push(`Content in ${selector} should have value ${url} (got ${content})`);
       }
-
+      
       if(rules.different_from) {
         const otherElements = $(rules.different_from.selector);
         otherElements.each((i, otherElement) => {
@@ -131,10 +132,10 @@ function validateDom($, {selector, contentAttr, errors, warnings}, url, outputLi
 function validateUrl(url, {errors, warnings}, _unused_, outputLists) {
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(([rules, outputList]) => {
     if(!rules)
-      return;
-
+    return;
+    
     if(rules.regex && !url.match(rules.regex))
-      return outputList.push(`Expected url ${url} to match ${rules.regex}`)
+    return outputList.push(`Expected url ${url} to match ${rules.regex}`)
   })
 }
 
@@ -143,7 +144,7 @@ function runValidator(category, dom, url, response) {
   var warnings = [];
   const debug = {};
   const rules = config[category].rules;
-
+  
   rules.forEach(rule => {
     switch(rule.type) {
       case 'header': return validateHeader(response.headers, rule, url, {errors, warnings, debug});
@@ -152,12 +153,16 @@ function runValidator(category, dom, url, response) {
       default: throw `Unknown rule type: ${rule.type}`;
     }
   });
-
+  
   return {status: errors.length == 0 ? "PASS" : "FAIL", errors, warnings, debug};
 }
 
 function runSeoValidator(dom, url, response) {
   return runValidator('seo', dom, url, response);
+}
+
+function runNewSeoValidator(dom, url, response) {
+  return runNewValidator('new-seo', dom, url, response);
 }
 
 function runHeaderValidator(dom, url, response) {
@@ -207,47 +212,55 @@ const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, r
 app.post("/api/validate.json", (req, res) => {
   const url = req.body.url;
   rp(url, {
-    headers: {"Fastly-Debug": "1", "QT-Debug: 1"},
+    headers: {"Fastly-Debug": "1", "QT-Debug": "1"},
     resolveWithFullResponse: true,
     gzip: true
   })
-    .then(response => ({response: response, dom: cheerio.load(response.body)}))
-    .then(({response, dom}) => Promise.all(RUNNERS.map(runner => runner(dom, url, response))))
-    .then(([amp, structured, seo, og, headers, robots, links]) => {
-      res.status(201);
-      res.setHeader("Content-Type", "application/json");
-      res.json({
-        url: url,
-        results: {seo, amp, og, headers, robots, structured},
-        links: links
-      });
-    })
-    .catch(error => {
-      res.status(500);
-      res.setHeader("Content-Type", "application/json");
-      res.json({error: {message: error.message || error}});
-      console.error(error.stack || error);
-    })
-    .finally(() => res.end());
+  .then(response => ({response: response, dom: cheerio.load(response.body)}))
+  .then(({response, dom}) => Promise.all(RUNNERS.map(runner => runner(dom, url, response))))
+  .then(([amp, structured, seo, og, headers, robots, links]) => {
+    res.status(201);
+    res.setHeader("Content-Type", "application/json");
+    res.json({
+      url: url,
+      results: {seo, amp, og, headers, robots, structured},
+      links: links
+    });
+  })
+  .catch(error => {
+    res.status(500);
+    res.setHeader("Content-Type", "application/json");
+    res.json({error: {message: error.message || error}});
+    console.error(error.stack || error);
+  })
+  .finally(() => res.end());
 });
 
-app.get("/seo", (req, res) => {
-  res.status(200);
-  res.setHeader("Content-Type", "application/json");
-  //res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  //res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  res.json({
-    "errors": [{"group": "title", "message": "Page title should not be empty"},
-               {"group": "metadata", "message": "Metadata should not be empty"},
-               {"group": "content", "message": "Content has typos"}],
-    "warnings": [{"group": "title", "message": "Page title has focus point at the end"},
-                 {"group": "metadata", "message": "Metadata better have focus point"},
-                 {"group": "content", "message": "Content is less than 300 chars"}],
-    "goodies": [{"group": "title", "message": "Page title doesn't have typos"},
-                    {"group": "metadata", "message": "Metadata is good"},
-                    {"group": "content", "message": "Content is well organised"}]
+app.post("/seo", (req, res) => {
+  const url = req.body.url;
+  rp(url, {
+    headers: {"Fastly-Debug": "1", "QT-Debug": "1"},
+    resolveWithFullResponse: true,
+    gzip: true
   })
+  .then(response => ({response: response, dom: cheerio.load(response.body)}))
+  .then(({response, dom}) => Promise.all([runNewSeoValidator].map(runner => runner(dom, url, response))))
+  .then(([seo]) => {
+    res.status(201);
+    res.setHeader("Content-Type", "application/json");
+    res.json({
+      url: url,
+      results: {seo},
+    });
+  })
+  .catch(error => {
+    res.status(500);
+    res.setHeader("Content-Type", "application/json");
+    res.json({error: {message: error.message || error}});
+    console.error(error.stack || error);
+  })
+  .finally(() => res.end());
+  
 });
 
 const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));

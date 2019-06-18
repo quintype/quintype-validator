@@ -1,4 +1,4 @@
-FROM node:8.9-alpine AS build
+FROM node:10.16.0-alpine AS build
 
 RUN apk update && \
     apk add git

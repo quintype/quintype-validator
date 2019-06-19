@@ -1,77 +1,71 @@
 const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("app/story/rules.yml"));
-/* 
-{
-  "group": "title",
-  "errors": {
-      "presence": true,
-      "focus": true
-  },
-  "warnings": {
-      "min_count": 10,
-      "max_count": 80
-  } */
+const _ = require("lodash");
 
+function wordCount(s) {
+  return s.split(/\s+/).filter(function(word) {
+    return word !== "";
+  }).length;
+}
 
-  function wordCount (s)  {
-    return s.split(/\s+/).filter(function(word) {
-      return word !== "";
-    }).length;
-  };
+function validate(text, focus, { group, errors, warnings }) {
+  let output = { errors: [], warnings: [], goodies: [] },
+    allRules = {
+      errors: errors,
+      warnings: warnings
+    };
 
-function validateTitle(text,focus,{group,errors,warnings},output) {
-  [[errors, output[group].errors], [warnings, output[group].warnings]].forEach(([rules, outputList]) => {
-    //console.log("rules>>>",rules)
-    if(!rules)
-      return;
+  _.forEach(allRules, (rule, ruleName) => {
+    if (!rule) return;
 
-    if(rules.presence && (text === null || text.length === 0)) {
-      outputList.push(`Empty ${group}`);
-    }else if(rules.presence && text.length > 0) {
-      output[group].goodies.push(`You've entered ${group}`);
+    if (rule.presence && (text === null || text.length === 0)) {
+      output[ruleName].push(`Empty ${group}`);
+    } else if (rule.presence && text.length > 0) {
+      output.goodies.push(`You've entered ${group}`);
     }
 
-    if(rules.focus && !text.includes(focus)) {
-      outputList.push(`${group} doesn't contains focus keyword.`); 
-    }else if (rules.focus) {
-      output[group].goodies.push(`${group} contains focus keyword.`);
+    if (rule.focus && !text.includes(focus)) {
+      output[ruleName].push(`${group} doesn't contains focus keyword.`);
+    } else if (rule.focus) {
+      output.goodies.push(`${group} contains focus keyword.`);
     }
 
-    if(rules.min_count &&  text.length < rules.min_count) {
-      outputList.push(`The ${group} is too short.`);
-    }else if(rules.max_count && text.length > rules.max_count) {
-      output[group].goodies.push(`The ${group} is too long.`);
-    }else if(rules.min_count && rules.max_count && text.length > rules.min_count && text.length <= rules.max_count) {
-      output[group].goodies.push(`The ${group} length is perfect.`);
+    if (rule.min_count && text.length < rule.min_count) {
+      output[ruleName].push(`The ${group} is too short.`);
+    } else if (rule.max_count && text.length > rule.max_count) {
+      output.goodies.push(`The ${group} is too long.`);
+    } else if (
+      rule.min_count &&
+      rule.max_count &&
+      text.length > rule.min_count &&
+      text.length <= rule.max_count
+    ) {
+      output.goodies.push(`The ${group} length is perfect.`);
     }
 
-    if(rules.min_word_count &&  wordCount(text) < rules.min_word_count) {
-      outputList.push(`The ${group} word count is too short.`);
-    }else if(rules.min_word_count) {
-      output[group].goodies.push(`The ${group} word count is perfect.`);
+    if (rule.min_word_count && wordCount(text) < rule.min_word_count) {
+      output[ruleName].push(`The ${group} word count is too short.`);
+    } else if (rule.min_word_count) {
+      output.goodies.push(`The ${group} word count is perfect.`);
     }
-       
-  })
-} 
-
-function runValidator(story,focus) {
-  let title = {errors: [],warnings: [], goodies: []},
-      metadata ={errors: [],warnings: [], goodies: []},
-      content ={errors: [],warnings: [], goodies: []};
-  //const {title1 , metadata1, content1} = story;
-  const rules = config["seo"].rules;
-
-  rules.forEach(rule => {
-    //console.log("rule>>>",rule);
-     return validateTitle(story[rule.group], focus, rule, {title, metadata, content});
   });
-  return {title, metadata, content};
+  return output;
+}
+
+function runValidator(story, focus) {
+  const rules = config["seo"].rules;
+  return _.reduce(
+    rules,
+    function(output, rule) {
+      output[rule.group] = validate(story[rule.group], focus, rule);
+      return output;
+    },
+    {}
+  );
 }
 
 function getStorySeo(story, focus) {
-  return runValidator(story,focus);
-  //{story,focus, config};
-
+  return runValidator(story, focus);
 }
 
 module.exports = getStorySeo;

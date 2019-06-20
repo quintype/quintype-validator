@@ -10,7 +10,7 @@ seo:
         max_count: 80   
     
     # Meta Description should be 160 chars or less
-    - group: metadata
+    - group: meta-description
       errors:
         presence: true
         focus: true
@@ -23,4 +23,4 @@ seo:
         presence: true
         focus: true
       warnings:
-        min_word_count: 3
+        min_word_count: 300

@@ -13,8 +13,8 @@ if(cluster.isMaster) {
 } else {
   const app = require("./app/server.js");
   try {
-    app.listen(4000, function () {
-      console.log('Example app listening on port 4000!');
+    app.listen(3000, function () {
+      console.log('Example app listening on port 3000!');
     });
   } catch (e) {
     var sleep = require("sleep-promise");

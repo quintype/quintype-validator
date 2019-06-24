@@ -9,8 +9,13 @@ const cheerio = require("cheerio");
 const URL = require("url");
 const _ = require("lodash");
 const fs = require("fs");
+const cors = require('cors');
+
+app.use(cors());
+
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
 const {runRobotsValidator, checkRobots} = require("./robots");
+const getStorySeo = require("./story/seo");
 
 app.use(compression());
 app.use(bodyParser.json());
@@ -202,7 +207,7 @@ const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, r
 app.post("/api/validate.json", (req, res) => {
   const url = req.body.url;
   rp(url, {
-    headers: {"Fastly-Debug": "1", "QT-Debug: 1"},
+    headers: {"Fastly-Debug": "1", "QT-Debug": "1"},
     resolveWithFullResponse: true,
     gzip: true
   })
@@ -231,6 +236,17 @@ const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));
 function assetPath(asset) {
   return assets[asset];
 }
+
+
+app.post("/api/seo-scores", (req, res) => {
+  const story = req.body.story;
+  const focusKeyword = req.body["focus-keyword"];
+  res.status(200);
+  res.setHeader("Content-Type", "application/json");
+  const seoScore = getStorySeo(story, focusKeyword);
+  res.json(seoScore);
+});
+
 
 app.get("/validate-robots", (req, res) => {
   const {allowed = "", disallowed = ""} = req.query;

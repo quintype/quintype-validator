@@ -1,0 +1,26 @@
+seo:
+  rules:
+    # Title should be less than 80 chars
+    - group: title
+      errors:
+        presence: true
+        focus: true
+      warnings:
+        min_count: 10
+        max_count: 80   
+    
+    # Meta Description should be 160 chars or less
+    - group: meta-description
+      errors:
+        presence: true
+        focus: true
+      warnings:
+        min_count: 40
+        max_count: 160
+
+    - group: content
+      errors:
+        presence: true
+        focus: true
+      warnings:
+        min_word_count: 300

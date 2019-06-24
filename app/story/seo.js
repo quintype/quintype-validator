@@ -25,15 +25,15 @@ function validate(text, focus, { group, errors, warnings }) {
     }
 
     if (rule.focus && !text.includes(focus)) {
-      output[ruleName].push(`${group} doesn't contains focus keyword.`);
+      output[ruleName].push(`${group} doesn't contain focus keyword.`);
     } else if (rule.focus) {
       output.goodies.push(`${group} contains focus keyword.`);
     }
 
-    if (rule.min_count && text.length < rule.min_count) {
+    if (rule.min_count && text.length > 0 && text.length < rule.min_count) {
       output[ruleName].push(`The ${group} is too short.`);
     } else if (rule.max_count && text.length > rule.max_count) {
-      output.goodies.push(`The ${group} is too long.`);
+      output[ruleName].push(`The ${group} is too long.`);
     } else if (
       rule.min_count &&
       rule.max_count &&
@@ -43,9 +43,9 @@ function validate(text, focus, { group, errors, warnings }) {
       output.goodies.push(`The ${group} length is perfect.`);
     }
 
-    if (rule.min_word_count && wordCount(text) < rule.min_word_count) {
+    if (rule.min_word_count && text.length > 0 && wordCount(text) < rule.min_word_count) {
       output[ruleName].push(`The ${group} word count is too short.`);
-    } else if (rule.min_word_count) {
+    } else if (text.length > 0 && rule.min_word_count) {
       output.goodies.push(`The ${group} word count is perfect.`);
     }
   });

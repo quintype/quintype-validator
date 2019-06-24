@@ -7,7 +7,8 @@ const Promise = require("bluebird");
 const rp = require('request-promise');
 const cheerio = require("cheerio");
 const URL = require("url");
-const _ = require("lodash");const fs = require("fs");
+const _ = require("lodash");
+const fs = require("fs");
 const cors = require('cors');
 
 app.use(cors());

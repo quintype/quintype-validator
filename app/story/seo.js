@@ -18,34 +18,35 @@ function validate(text, focus, { group, errors, warnings }) {
   _.forEach(allRules, (rule, ruleName) => {
     if (!rule) return;
 
-    if (rule.presence && (text === null || text.length === 0)) {
+    if (rule.presence && (!text || text.length === 0)) {
       output[ruleName].push(`Empty ${group}`);
     } else if (rule.presence && text.length > 0) {
       output.goodies.push(`You've entered ${group}`);
     }
 
-    if (rule.focus && !text.includes(focus)) {
+    if (rule.focus && text && !text.includes(focus)) {
       output[ruleName].push(`${group} doesn't contain focus keyword.`);
     } else if (rule.focus) {
       output.goodies.push(`${group} contains focus keyword.`);
     }
 
-    if (rule.min_count && text.length > 0 && text.length < rule.min_count) {
+    if (rule.min_count && text && text.length > 0 && text.length < rule.min_count) {
       output[ruleName].push(`The ${group} is too short.`);
-    } else if (rule.max_count && text.length > rule.max_count) {
+    } else if (rule.max_count && text && text.length > rule.max_count) {
       output[ruleName].push(`The ${group} is too long.`);
     } else if (
       rule.min_count &&
       rule.max_count &&
+      text &&
       text.length > rule.min_count &&
       text.length <= rule.max_count
     ) {
       output.goodies.push(`The ${group} length is perfect.`);
     }
 
-    if (rule.min_word_count && text.length > 0 && wordCount(text) < rule.min_word_count) {
+    if (rule.min_word_count && text && text.length > 0 && wordCount(text) < rule.min_word_count) {
       output[ruleName].push(`The ${group} word count is too short.`);
-    } else if (text.length > 0 && rule.min_word_count) {
+    } else if (text && text.length > 0 && rule.min_word_count) {
       output.goodies.push(`The ${group} word count is perfect.`);
     }
   });

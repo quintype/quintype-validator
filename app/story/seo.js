@@ -1,72 +1,36 @@
 const fs = require("fs");
 const config = require("js-yaml").load(fs.readFileSync("app/story/rules.yml"));
+const seoValidations = require("./seo_validations")
 const _ = require("lodash");
 
-function wordCount(s) {
-  return s.split(/\s+/).filter(function(word) {
-    return word !== "";
-  }).length;
-}
-
-function validate(text, focus, { group, errors, warnings }) {
-  let output = { errors: [], warnings: [], goodies: [] },
-    allRules = {
-      errors: errors,
-      warnings: warnings
-    };
-
-  _.forEach(allRules, (rule, ruleName) => {
-    if (!rule) return;
-
-    if (rule.presence && (!text || text.length === 0)) {
-      output[ruleName].push(`Empty ${group}`);
-    } else if (rule.presence && text.length > 0) {
-      output.goodies.push(`You've entered ${group}`);
-    }
-
-    if (rule.focus && text && !text.includes(focus)) {
-      output[ruleName].push(`${group} doesn't contain focus keyword.`);
-    } else if (rule.focus) {
-      output.goodies.push(`${group} contains focus keyword.`);
-    }
-
-    if (rule.min_count && text && text.length > 0 && text.length < rule.min_count) {
-      output[ruleName].push(`The ${group} is too short.`);
-    } else if (rule.max_count && text && text.length > rule.max_count) {
-      output[ruleName].push(`The ${group} is too long.`);
-    } else if (
-      rule.min_count &&
-      rule.max_count &&
-      text &&
-      text.length > rule.min_count &&
-      text.length <= rule.max_count
-    ) {
-      output.goodies.push(`The ${group} length is perfect.`);
-    }
-
-    if (rule.min_word_count && text && text.length > 0 && wordCount(text) < rule.min_word_count) {
-      output[ruleName].push(`The ${group} word count is too short.`);
-    } else if (text && text.length > 0 && rule.min_word_count) {
-      output.goodies.push(`The ${group} word count is perfect.`);
-    }
+const runRules = (errorType, rules, output, data) => {
+  _.forEach(rules, (ruleConfig, ruleName) => {
+    seoValidations[ruleName] && seoValidations[ruleName](errorType, ruleConfig, output, data);
   });
-  return output;
-}
+};
 
-function runValidator(story, focus) {
+const validate = (field, text, rules, focusKeyword) => {
+  const output = { errors: [], warnings: [], goodies: [] },
+    fieldSpecificRules = {
+      errors: rules.errors[field],
+      warnings: rules.warnings[field]
+    };
+    data = {field, text, focusKeyword}
+  _.forEach(fieldSpecificRules, (rules, errorType) => runRules(errorType, rules, output, data));
+  return output;
+};
+
+const seoStats = (story, focusKeyword) => {
   const rules = config["seo"].rules;
+  const storyFieldsToValidate = Object.keys(story);
   return _.reduce(
-    rules,
-    function(output, rule) {
-      output[rule.group] = validate(story[rule.group], focus, rule);
+    storyFieldsToValidate,
+    function(output, field) {
+      output[field] = validate(field, story[field], rules, focusKeyword);
       return output;
     },
     {}
   );
-}
+};
 
-function getStorySeo(story, focus) {
-  return runValidator(story, focus);
-}
-
-module.exports = getStorySeo;
+module.exports = seoStats;

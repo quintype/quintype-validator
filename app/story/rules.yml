@@ -10,20 +10,21 @@ seo:
       content:
         presence: true
         focus: true
+        focus-keyword-density: true
       images:
         presence: true
-        alt_text: true
-        alt_focus: true
+        alt-text: true
+        alt-focus: true
     warnings:
       title:
-        letter_count: 
+        letter-count: 
           min: 10
           max: 80  
       meta-description:
-        letter_count: 
+        letter-count: 
           min: 40
           max: 160     
       content:
-        word_count:
+        word-count:
           min: 300    
     

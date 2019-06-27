@@ -9,13 +9,13 @@ const runRules = (errorType, rules, output, data) => {
   });
 };
 
-const validate = (field, text, rules, focusKeyword) => {
+const validate = (field, content, rules, focusKeyword) => {
   const output = { errors: [], warnings: [], goodies: [] },
     fieldSpecificRules = {
       errors: rules.errors[field],
       warnings: rules.warnings[field]
     };
-    data = {field, text, focusKeyword}
+    data = {field, content, focusKeyword}
   _.forEach(fieldSpecificRules, (rules, errorType) => runRules(errorType, rules, output, data));
   return output;
 };

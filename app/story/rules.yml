@@ -1,30 +1,39 @@
 seo:
   rules:
-    errors:
       title:
-        presence: true
-        focus: true
-      meta-description:
-        presence: true
-        focus: true 
-      content:
-        presence: true
-        focus: true
-        focus-keyword-density: true
-      images:
-        presence: true
-        alt-text: true
-        alt-focus: true
-    warnings:
-      title:
-        letter-count: 
+        presence: 
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        letter-count:
           min: 10
-          max: 80  
+          max: 80
+          throws: 'warnings'
       meta-description:
-        letter-count: 
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        letter-count:
           min: 40
-          max: 160     
+          max: 160
+          throws: 'warnings'
       content:
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        focus-keyword-density:
+          throws: 'errors'
         word-count:
-          min: 300    
+          min: 300
+          throws: 'warnings'
+      images:
+        presence:
+          throws: 'errors'
+        alt-text:
+          throws: 'errors'
+        alt-focus:
+          throws: 'errors'
+      
     

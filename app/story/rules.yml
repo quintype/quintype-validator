@@ -1,26 +1,39 @@
 seo:
   rules:
-    # Title should be less than 80 chars
-    - group: title
-      errors:
-        presence: true
-        focus: true
-      warnings:
-        min_count: 10
-        max_count: 80   
+      title:
+        presence: 
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        letter-count:
+          min: 10
+          max: 80
+          throws: 'warnings'
+      meta-description:
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        letter-count:
+          min: 40
+          max: 160
+          throws: 'warnings'
+      content:
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        focus-keyword-density:
+          throws: 'errors'
+        word-count:
+          min: 300
+          throws: 'warnings'
+      images:
+        presence:
+          throws: 'errors'
+        caption-text:
+          throws: 'errors'
+        caption-focus:
+          throws: 'errors'
+      
     
-    # Meta Description should be 160 chars or less
-    - group: meta-description
-      errors:
-        presence: true
-        focus: true
-      warnings:
-        min_count: 40
-        max_count: 160
-
-    - group: content
-      errors:
-        presence: true
-        focus: true
-      warnings:
-        min_word_count: 300

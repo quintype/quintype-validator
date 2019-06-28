@@ -31,9 +31,9 @@ seo:
       images:
         presence:
           throws: 'errors'
-        alt-text:
+        caption-text:
           throws: 'errors'
-        alt-focus:
+        caption-focus:
           throws: 'errors'
       
     

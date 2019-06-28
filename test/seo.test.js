@@ -10,7 +10,7 @@ describe("seo stats", () => {
     images: [
       {
         image: "<img><img>",
-        "alt-text": "alt text"
+        "caption-text": "alt text"
       }
     ]
   };
@@ -21,34 +21,32 @@ describe("seo stats", () => {
       warnings: [],
       goodies: [
         "You've added title",
-        "The title contains focus keyword 'Content'.",
+        "The title contains focus keyword 'content'.",
         "The title length is perfect."
       ]
     },
     "meta-description": {
-      errors: ["The meta-description doesn't contain focus keyword 'Content'."],
+      errors: ["The meta-description doesn't contain focus keyword 'content'."],
       warnings: ["The meta-description is too short."],
       goodies: ["You've added meta-description"]
     },
     content: {
-      errors: [],
+      errors: [
+        "Your keyword density 20% is too high, focus keyword 'content' used 15 time(s)"
+      ],
       warnings: ["The content word count is too short."],
       goodies: [
         "You've added content",
-        "The content contains focus keyword 'Content'.",
-        'Your keyword density 1% is pretty perfect, focus keyword "Content" is used 1 time(s)'
+        "The content contains focus keyword 'content'."
       ]
     },
     images: {
       errors: [
-        "You have not used focus keyword 'Content' in the alt tag of image"
+        "You have not used focus keyword 'content' in the caption of image"
       ],
       warnings: [],
-      goodies: [
-        "You've added images",
-        "You have used Alt attribute in all images"
-      ]
+      goodies: ["You've added images", "You have used caption in all images"]
     }
   };
-  expect(seo(story, "Content")).toStrictEqual(expectedSeoStats);
+  expect(seo(story, "content")).toStrictEqual(expectedSeoStats);
 });

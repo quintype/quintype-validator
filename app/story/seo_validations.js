@@ -1,7 +1,7 @@
 const _ = require("lodash");
 
 const _occurences = (content, keyword) => {
-  let matches = content && content.toLowerCase().match(new RegExp(keyword.toLowerCase()));
+  let matches = content && content.toLowerCase().match(new RegExp(keyword.toLowerCase(), 'g'));
   return (matches && matches.length) || 0;
 };
 
@@ -28,7 +28,7 @@ const validatePresence = (ruleConfig, output, data) => {
 };
 
 const validateFocus = (ruleConfig, output, data) => {
-  if (!data.focusKeyword) return;
+  if (!data.focusKeyword || data.content.length === 0) return;
   if (data.content && !_containsKeyword(data.content, data.focusKeyword)) {
     output[_errorType(ruleConfig)].push(
       `The ${data.field} doesn't contain focus keyword '${data.focusKeyword}'.`
@@ -40,27 +40,27 @@ const validateFocus = (ruleConfig, output, data) => {
   }
 };
 
-const validateImageAltText = (ruleConfig, output, data) => {
+const validateImageCaptionText = (ruleConfig, output, data) => {
   let images = data.content;
-  if (images && _.some(images, image => !image["alt-text"])) {
-    output[_errorType(ruleConfig)].push("Few images don't contain Alt attribute");
+  if (images.length === 0) return
+  if (images && _.some(images, image => !image["caption-text"])) {
+    output[_errorType(ruleConfig)].push("Few images don't contain caption");
   } else {
-    output.goodies.push("You have used Alt attribute in all images");
+    output.goodies.push("You have used caption in all images");
   }
 };
 
-const validateImageAltTextFocus = (ruleConfig, output, data) => {
+const validateImageCaptionTextFocus = (ruleConfig, output, data) => {
   let focusKeyword = data.focusKeyword;
-  if (!focusKeyword) return;
-  let images = data.content;
-  let altTexts = images.map(image => image["alt-text"]);
-  if (_.some(altTexts, altText => _containsKeyword(altText, focusKeyword))) {
+  let captionTexts = data.content.map(image => image["caption-text"]).filter((text) => text);
+  if (!focusKeyword || captionTexts.length === 0) return;
+  if (_.some(captionTexts, captionText => _containsKeyword(captionText, focusKeyword))) {
     output.goodies.push(
-      `You\'ve used the focus keyword '${focusKeyword}' in the alt tag of an image`
+      `You\'ve used the focus keyword '${focusKeyword}' in the caption of an image`
     );
   } else {
     output[_errorType(ruleConfig)].push(
-      `You have not used focus keyword '${focusKeyword}' in the alt tag of image`
+      `You have not used focus keyword '${focusKeyword}' in the caption of image`
     );
   }
 };
@@ -108,9 +108,9 @@ const validateFocusKeywordDensity = (ruleConfig, output, data) => {
 
   if (keywordDensity >= 1 && keywordDensity <= 5) {
     output.goodies.push(
-      `Your keyword density ${keywordDensity}% is pretty perfect, focus keyword "${focusKeyword}" is used ${keywordOccurencesInContent} time(s)`
+      `Your keyword density ${keywordDensity}% is perfect, focus keyword "${focusKeyword}" is used ${keywordOccurencesInContent} time(s)`
     );
-  } else {
+  } else if (keywordDensity > 0) {
     let errorMessage =
       contentWordCount < 75
         ? `Unable to calculate a representative keyword density, because of the low number of words (${contentWordCount})`
@@ -124,8 +124,8 @@ const soeValidations = {
   focus: validateFocus,
   "word-count": validateWordCount,
   "letter-count": validateLetterCount,
-  "alt-text": validateImageAltText,
-  "alt-focus": validateImageAltTextFocus,
+  "caption-text": validateImageCaptionText,
+  "caption-focus": validateImageCaptionTextFocus,
   "focus-keyword-density": validateFocusKeywordDensity
 };
 

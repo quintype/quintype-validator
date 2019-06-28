@@ -19,7 +19,7 @@ const seoStats = (story, focusKeyword) => {
   return _.reduce(
     storyFieldsToValidate,
     (output, field) => {
-      output[field] = runRules(field, story[field], rules[field], focusKeyword);
+      output[field] = runRules(field, story[field], rules[field], focusKeyword.trim());
       return output;
     },
     {}

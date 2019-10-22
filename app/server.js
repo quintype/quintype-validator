@@ -18,7 +18,7 @@ const {runRobotsValidator, checkRobots} = require("./robots");
 const getStorySeo = require("./story/seo");
 
 app.use(compression());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "1mb" }));
 
 app.set("view engine", "ejs");
 app.use(express.static("public", {maxage: 86400000}));

@@ -11,7 +11,7 @@
     "ejs": "^2.5.7",
     "express": "^4.16.2",
     "js-yaml": "^3.10.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.15",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "robots-parser": "^2.1.0",

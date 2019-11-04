@@ -1,4 +1,4 @@
-import './app.css';
+import './app.scss';
 
 import React from 'react';
 import request from 'superagent-bluebird-promise';
@@ -29,10 +29,10 @@ class GetUrlComponent extends React.Component {
                      acceptClassName="url-dropzone-accept"
                      rejectClassName="url-dropzone-reject"
                      disableClick={true}>
-      {_ => <form className="url-container" onSubmit={(e) => this.submit(e)}>
-        <input className="url-input" value={this.props.url} placeholder="Enter Url" onChange={(e) => this.props.onChange(e.target.value)} />
+      <form className="url-container" onSubmit={(e) => this.submit(e)} >
+        <input className="url-input" value={this.props.url} placeholder="Enter Url" onChange={(e) => this.props.onChange(e.target.value)}/>
         <input type="submit" className="url-go" value="Go!" />
-      </form>}
+      </form>
     </Dropzone>;
   }
 }
@@ -155,7 +155,7 @@ export class HomeComponent extends React.Component {
   }
 
   loadRules(url) {
-    request.post("/api/validate.json", {url: url})
+    request.post(`${process.env.REACT_APP_API_HOST || ""}/api/validate.json`, {url: url})
            .then(response => this.setState({response: response.body, loading: false, url: response.body.url}))
            .catch(e => this.setState({loading: false, error: e.message}));
   }

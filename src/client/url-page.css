@@ -1,0 +1,41 @@
+.url-container {
+  position: relative;
+  margin: 18px auto;
+}
+
+.url-input {
+  height: 40px;
+  line-height: 40px;
+  width: 100%;
+  font-size: 20px;
+
+  box-sizing: border-box;
+  border-radius: 20px;
+  padding: 0 50px 0 20px;
+  border: 1px solid black;
+}
+
+.url-go {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  height: 40px;
+  line-height: 40px;
+  width: 50px;
+  border: 1px solid #4267b2;
+  box-sizing: border-box;
+  border-radius: 20px;
+
+  background-color: #4267b2;
+  color: white;
+  padding: 0;
+
+  .url-dropzone-accept & {
+    background-color: green;
+  }
+
+  .url-dropzone-reject & {
+    background-color: red;
+  }
+}

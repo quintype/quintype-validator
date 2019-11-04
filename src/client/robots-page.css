@@ -1,0 +1,7 @@
+.robots-status-PASS {
+  color: green;
+}
+
+.robots-status-FAIL {
+  color: red;
+}

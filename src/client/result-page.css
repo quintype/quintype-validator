@@ -1,0 +1,76 @@
+section.result {
+  h2 { margin: 0; display: inline-block; }
+  h3 { margin: 0; display: inline-block; }
+  h4 { margin: 0; display: inline-block; }
+  ul {
+    margin: 0;
+    margin-top: 10px;
+  }
+}
+
+.result-header {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  position: relative;
+
+  &:hover { background-color: #ccc; }
+
+  &.expandable:after {
+    content: '\02795'; /* Unicode character for "plus" sign (+) */
+    font-size: 13px;
+    color: #777;
+    top: 12px;
+    right: 20px;
+    position: absolute;
+  }
+
+  .active &.expandable:after {
+    content: "\2796"; /* Unicode character for "minus" sign (-) */
+  }
+}
+
+.result-title {
+  line-height: 20px;
+  float: left;
+}
+
+.result-status {
+  line-height: 20px;
+  float: right;
+  color: green;
+  width: 75px;
+}
+
+.result-status-WARN {
+  color: orange;
+}
+
+.result-status-FAIL, .result-status-NA, .result-status-ERROR {
+  color: red;
+}
+
+.result-body {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  padding: 0 18px;
+  box-sizing: border-box;
+
+  & > div {
+    padding: 18px 18px 0;
+    &:last-child { padding-bottom: 18px; }
+  }
+
+  .active & {
+    max-height: fit-content;
+  }
+}
+
+.results-download {
+  margin: 18px 0;
+  float: right;
+}

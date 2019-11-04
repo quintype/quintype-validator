@@ -11,8 +11,6 @@ const _ = require("lodash");
 const fs = require("fs");
 const cors = require('cors');
 
-app.use(cors());
-
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
 const {runRobotsValidator, checkRobots} = require("./robots");
 const getStorySeo = require("./story/seo");
@@ -204,7 +202,18 @@ function fetchLinks($, url) {
 
 const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, runRobotsValidator, fetchLinks];
 
-app.post("/api/validate.json", (req, res) => {
+const whitelist = ["https://developers.quintype.com", "https://validator.quintype.com", "http://localhost:3000"];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+};
+
+app.post("/api/validate.json", cors(corsOptions), (req, res) => {
   const url = req.body.url;
   rp(url, {
     headers: {"Fastly-Debug": "1", "QT-Debug": "1"},

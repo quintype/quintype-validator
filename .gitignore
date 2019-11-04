@@ -60,3 +60,4 @@ typings/
 /asset-manifest.json
 /public/quintype-validator
 /build
+/dist

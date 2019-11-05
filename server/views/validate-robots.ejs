@@ -3,23 +3,54 @@
   <head>
     <title>Quintype Validator</title>
   </head>
+  <style>
+    body {
+      width: 780px;
+      margin: auto;
+    }
+
+    h1 {
+      margin: 20px auto;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .robots-status {
+      color: red;
+    }
+
+    .robots-status-PASS {
+      color: green;
+    }
+  </style>
 
   <body>
     <h1>Robots Validation</h1>
-    <div id="container">
+    <div>
       <table>
         <thead>
           <tr>
-            <th>Url</th>
-            <th>Result</th>
-            <th>Remarks</th>
+            <th class="center">Url</th>
+            <th class="center">Result</th>
+            <th class="left">Remarks</th>
           </tr>
         </thead>
         <tbody>
           <%_ results.map(result => { _%>
             <tr>
-              <td><%= result.url %></td>
-              <td class="robots-status-<%= result.status %>"><%= result.status %></td>
+              <td class="center"><%= result.url %></td>
+              <td class="center robots-status robots-status-<%= result.status %>"><%= result.status %></td>
               <td><%= result.debug %></td>
             </tr>
           <%_ }) _%>

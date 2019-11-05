@@ -57,7 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
-/asset-manifest.json
 /public/quintype-validator
 /build
 
@@ -72,3 +71,4 @@ coverage
 *.log
 
 yarn.lock
+.DS_Store

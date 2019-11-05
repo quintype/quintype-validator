@@ -202,18 +202,19 @@ function fetchLinks($, url) {
 
 const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, runRobotsValidator, fetchLinks];
 
-const whitelist = ["https://developers.quintype.com", "https://validator.quintype.com", "http://localhost:3000"];
-const corsOptions = {
+const corsMiddleware = cors({
+  methods: "POST",
   origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
+    if (origin.endsWith("quintype.com") ||
+       (process.env.NODE_ENV !== 'production' && origin.startsWith("http://localhost:"))) {
+      callback(null, origin)
     } else {
       callback(new Error('Not allowed by CORS'))
     }
   }
-};
-
-app.post("/api/validate.json", cors(corsOptions), (req, res) => {
+});
+app.options("/api/validate.json", corsMiddleware);
+app.post("/api/validate.json", corsMiddleware, (req, res) => {
   const url = req.body.url;
   rp(url, {
     headers: { "Fastly-Debug": "1", "QT-Debug": "1" },
@@ -240,14 +241,8 @@ app.post("/api/validate.json", cors(corsOptions), (req, res) => {
     .finally(() => res.end());
 });
 
-const assets = JSON.parse(fs.readFileSync("asset-manifest.json"));
-
-function assetPath(asset) {
-  return assets[asset];
-}
-
-
-app.post("/api/seo-scores", (req, res) => {
+app.options("/api/seo-scores", corsMiddleware);
+app.post("/api/seo-scores", corsMiddleware, (req, res) => {
   const story = req.body.story;
   const focusKeyword = req.body["focus-keyword"];
   res.status(200);
@@ -266,10 +261,10 @@ app.get("/validate-robots", (req, res) => {
     res.setHeader("Content-Type", "text/html");
     res.setHeader("Cache-Control", "public,max-age=60");
     res.render("validate-robots", {
-      results: results,
-      assetPath: assetPath
+      results: results
     })
   }).catch(e => {
+    console.log(e);
     res.status(500);
     res.end();
   });
@@ -278,9 +273,7 @@ app.get("/validate-robots", (req, res) => {
 app.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.setHeader("Cache-Control", "public,max-age=60");
-  res.render("index", {
-    assetPath: assetPath
-  })
+  res.redirect(301, "https://developers.quintype.com/quintype-validator");
 });
 
 app.get("/ping", (req, res) => res.send("pong"));

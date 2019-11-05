@@ -1,0 +1,37 @@
+seo:
+  rules:
+      title:
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        letter-count:
+          min: 10
+          max: 80
+          throws: 'warnings'
+      meta-description:
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        letter-count:
+          min: 40
+          max: 160
+          throws: 'warnings'
+      content:
+        presence:
+          throws: 'errors'
+        focus:
+          throws: 'errors'
+        focus-keyword-density:
+          throws: 'errors'
+        word-count:
+          min: 300
+          throws: 'warnings'
+      images:
+        presence:
+          throws: 'errors'
+        caption-text:
+          throws: 'errors'
+        caption-focus:
+          throws: 'errors'

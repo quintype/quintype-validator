@@ -39,6 +39,7 @@
     ]
   },
   "homepage": "https://developers.quintype.com/quintype-validator/",
+  "proxy": "http://localhost:8080",
   "devDependencies": {
     "gh-pages": "^2.1.1"
   }

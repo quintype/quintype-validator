@@ -16,7 +16,7 @@ COPY . /app/
 RUN npm run build:main && \
     rm -rf node-modules && \
     npm install --no-optional --production && \
-    mv node_modules views package.json package-lock.json config build/main
+    mv node_modules public views package.json package-lock.json config build/main
 
 FROM node:10-alpine
 MAINTAINER Quintype Developers <dev-core@quintype.com>

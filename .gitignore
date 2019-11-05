@@ -57,5 +57,18 @@ typings/
 # dotenv environment variables file
 .env
 
-/asset-manifest.json
 /public/quintype-validator
+/build
+
+node_modules
+build
+test
+src/**.js
+.idea/*
+
+coverage
+.nyc_output
+*.log
+
+yarn.lock
+.DS_Store

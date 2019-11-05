@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quintype Validator</title>
+  </head>
+
+  <body>
+    <h1>Robots Validation</h1>
+    <div id="container">
+      <table>
+        <thead>
+          <tr>
+            <th>Url</th>
+            <th>Result</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%_ results.map(result => { _%>
+            <tr>
+              <td><%= result.url %></td>
+              <td class="robots-status-<%= result.status %>"><%= result.status %></td>
+              <td><%= result.debug %></td>
+            </tr>
+          <%_ }) _%>
+        </tbody>
+      </table>
+    </div>
+   </body>
+</html>

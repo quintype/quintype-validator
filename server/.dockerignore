@@ -4,3 +4,4 @@
 *.log
 /test
 /public/quintype-validator
+/build

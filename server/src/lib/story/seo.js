@@ -1,5 +1,5 @@
 const fs = require("fs");
-const config = require("js-yaml").load(fs.readFileSync("src/lib/story/rules.yml"));
+const config = require("js-yaml").load(fs.readFileSync("config/story-rules.yml"));
 const seoValidations = require("./seo_validations");
 const _ = require("lodash");
 

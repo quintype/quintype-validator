@@ -1,8 +1,9 @@
+const { runAmpValidator } = require("./runners/runAmpValidator");
+
 const compression = require('compression');
 const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
-const amphtmlValidator = require('amphtml-validator');
 const Promise = require("bluebird");
 const rp = require('request-promise');
 const cheerio = require("cheerio");
@@ -20,46 +21,6 @@ app.use(bodyParser.json({ limit: "1mb" }));
 
 app.set("view engine", "ejs");
 app.use(express.static("public", { maxage: 86400000 }));
-
-const ampErrorToMessage = ({ line, col, message, specUrl }) => `line ${line}, col ${col}: ${message} ${specUrl ? `(see ${specUrl})` : ""}`
-
-function getAmpUrlFromPage(url, dom) {
-  var ampUrl = dom('link[rel=amphtml]').attr('href');
-
-  if (!ampUrl || ampUrl == '') {
-    return null;
-  }
-
-  if (ampUrl.startsWith('/')) {
-    return URL.resolve(url, ampUrl);
-  }
-
-  return ampUrl;
-}
-
-function runAmpValidator(dom, url) {
-  const ampUrl = getAmpUrlFromPage(url, dom);
-
-  if (!ampUrl) {
-    return Promise.resolve({
-      status: "NA",
-      ampUrl: null,
-      errors: ["No AMP Page Found"]
-    })
-  };
-
-  return Promise.all([rp(ampUrl), amphtmlValidator.getInstance()])
-    .then(([htmlString, validator]) => {
-      const result = validator.validateString(htmlString);
-      return {
-        status: result.status,
-        ampUrl: ampUrl,
-        errors: result.errors.filter(({ severity }) => severity == "ERROR").map(ampErrorToMessage),
-        warnings: result.errors.filter(({ severity }) => severity != "ERROR").map(ampErrorToMessage),
-        debug: { "Amp Url": ampUrl }
-      }
-    });
-}
 
 function validateHeader(headers, { header, errors, warnings }, url, outputLists) {
   const value = headers[header.toLowerCase()];
@@ -200,7 +161,7 @@ function fetchLinks($, url) {
   return _(links).filter(link => link.startsWith("http")).uniq().value();
 }
 
-const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, runRobotsValidator, fetchLinks];
+const RUNNERS = [runAmpValidator, runStructuredDataValidator, runSeoValidator, runOgTagValidator, runHeaderValidator, runRobotsValidator];
 
 const corsMiddleware = cors({
   methods: "POST",
@@ -222,7 +183,7 @@ app.post("/api/validate.json", corsMiddleware, (req, res) => {
     gzip: true
   })
     .then(response => ({ response: response, dom: cheerio.load(response.body) }))
-    .then(({ response, dom }) => Promise.all(RUNNERS.map(runner => runner(dom, url, response))))
+    .then(({ response, dom }) => Promise.all([...RUNNERS, fetchLinks].map(runner => runner(dom, url, response))))
     .then(([amp, structured, seo, og, headers, robots, links]) => {
       res.status(201);
       res.setHeader("Content-Type", "application/json");

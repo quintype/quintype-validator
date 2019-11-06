@@ -1,28 +1,33 @@
-const { validateRobotsHandler } = require("./handlers/validate-robots-handler");
+import { validateRobotsHandler } from "./handlers/validate-robots-handler";
 
-const { seoScoreHandler } = require("./handlers/seo-score-handler");
+import { seoScoreHandler } from "./handlers/seo-score-handler";
 
-const { validateUrlHandler } = require("./handlers/validate-url-handler");
+import { validateUrlHandler } from "./handlers/validate-url-handler";
 
-const compression = require('compression');
-const express = require('express');
-const app = express();
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const cors = require('cors');
+import compression from 'compression';
+import express from 'express';
 
+import bodyParser from "body-parser";
+import cors from 'cors';
+
+// tslint:disable: no-expression-statement
+export const app = express();
 app.use(compression());
 app.use(bodyParser.json({ limit: "1mb" }));
 
 app.set("view engine", "ejs");
-app.use(express.static("public", { maxage: 86400000 }));
+app.use(express.static("public", { maxAge: 86400000 }));
 
 const corsMiddleware = cors({
   methods: "POST",
-  origin: function (origin, callback) {
+  origin(origin, callback): void {
+    if(!origin) {
+      callback(null, true);
+      return;
+    }
     if (origin.endsWith("quintype.com") ||
        (process.env.NODE_ENV !== 'production' && origin.startsWith("http://localhost:"))) {
-      callback(null, origin)
+      callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))
     }
@@ -37,12 +42,10 @@ app.post("/api/seo-scores", corsMiddleware, seoScoreHandler);
 
 app.get("/validate-robots", validateRobotsHandler);
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.setHeader("Content-Type", "text/html");
   res.setHeader("Cache-Control", "public,max-age=60");
   res.redirect(301, "https://developers.quintype.com/quintype-validator");
 });
 
-app.get("/ping", (req, res) => res.send("pong"));
-
-module.exports = app;
+app.get("/ping", (_, res) => res.send("pong"));

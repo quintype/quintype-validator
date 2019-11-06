@@ -1,6 +1,6 @@
-const { runStructuredDataValidator } = require("./runners/structuredErrorToMessage");
-
-const { runAmpValidator } = require("./runners/runAmpValidator");
+const { runStructuredDataValidator } = require("./runners/structured-data");
+const { runAmpValidator } = require("./runners/amp");
+const { runRobotsValidator, checkRobots } = require("./runners/robots");
 
 const compression = require('compression');
 const express = require('express');
@@ -15,7 +15,6 @@ const fs = require("fs");
 const cors = require('cors');
 
 const config = require("js-yaml").load(fs.readFileSync("config/rules.yml"));
-const { runRobotsValidator, checkRobots } = require("./robots");
 const getStorySeo = require("./story/seo");
 
 app.use(compression());

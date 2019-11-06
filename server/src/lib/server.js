@@ -1,3 +1,5 @@
+const { runStructuredDataValidator } = require("./runners/structuredErrorToMessage");
+
 const { runAmpValidator } = require("./runners/runAmpValidator");
 
 const compression = require('compression');
@@ -125,35 +127,6 @@ function runHeaderValidator(dom, url, response) {
 
 function runOgTagValidator(dom, url, response) {
   return runValidator('og', dom, url, response);
-}
-
-const structuredErrorToMessage = ({ ownerSet, errorType, args, begin, end }) => `[${_.keys(ownerSet).join(" ")}] ${errorType} ${args.join(" ")} (${begin} - ${end})`;
-
-function runStructuredDataValidator(dom, url) {
-  return rp.post("https://search.google.com/structured-data/testing-tool/validate", {
-    form: { url: url }
-  })
-    .then(body => JSON.parse(body.substring(body.indexOf("{"))))
-    .then(({ errors, numObjects, contentId, url }) => {
-      const actualErrors = errors.filter(error => error.isSevere).map(structuredErrorToMessage);
-      const warnings = errors.filter(error => !error.isSevere).map(structuredErrorToMessage);
-
-      if (!contentId) {
-        warnings.push("No ContentId was found");
-      }
-
-      var status;
-      if (actualErrors.length > 0)
-        status = "FAIL";
-      else if (numObjects == 0)
-        status = "NA";
-      else
-        status = "PASS";
-      return { errors: actualErrors, warnings, numObjects, contentId, url, status };
-    }).catch(e => ({
-      status: "ERROR",
-      debug: { error: e.message }
-    }));
 }
 
 function fetchLinks($, url) {

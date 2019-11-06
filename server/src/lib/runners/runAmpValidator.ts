@@ -1,13 +1,7 @@
 import amphtmlValidator from 'amphtml-validator';
 import rp from 'request-promise';
 import URL from 'url';
-
-interface ValidationResult {
-  readonly status: string;
-  readonly errors?: ReadonlyArray<string>;
-  readonly warnings?: ReadonlyArray<string>;
-  readonly debug?: object;
-}
+import { ValidationResult } from './ValidationResult';
 
 const ampErrorToMessage = ({ line, col, message, specUrl }: any) => `line ${line}, col ${col}: ${message} ${specUrl ? `(see ${specUrl})` : ""}`;
 

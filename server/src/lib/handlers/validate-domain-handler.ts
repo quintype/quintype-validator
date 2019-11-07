@@ -4,6 +4,7 @@ import _ from "lodash";
 import rp from "request-promise";
 
 import { fetchUrl, FetchUrlResponse } from "../fetch-url";
+import { runAmpValidator } from '../runners/amp';
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { checkUrls } from "../runners/robots";
 
@@ -52,6 +53,17 @@ async function checkHTTPResponses(pages: ReadonlyArray<FetchUrlResponse>): Promi
   }
 }
 
+async function checkAmp(stories: readonly FetchUrlResponse[]): Promise<ValidationResult> {
+  const ampResults = await Promise.all(stories.map(async ({dom, url}) => ({url, result: await runAmpValidator(dom, url)})));
+  const failingAmpPages = ampResults.filter(({result}) => result.status !== "PASS");
+  const percentage = (failingAmpPages.length * 100 / stories.length);
+  return {
+    status: percentage > 40 ? 'FAIL' : 'PASS',
+    errors: flatMap(failingAmpPages, ({result, url}) => (result.errors || []).map(e => `${url}: ${e}`)),
+    debug: [`${100 - percentage}% of tested story pages had AMP versions`]
+  }
+}
+
 export async function validateDomainHandler(req: Request, res: Response): Promise<void> {
   try {
     const baseUrl = `https://${req.body.domain}`;
@@ -59,9 +71,10 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
 
     const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
 
-    const [robots, {seo, og, headers}] = await Promise.all([
+    const [robots, {seo, og, headers}, amp] = await Promise.all([
       checkUrls(allPages.map(i => i.url)),
-      checkHTTPResponses(allPages)
+      checkHTTPResponses(allPages),
+      checkAmp(stories)
     ])
 
     res
@@ -69,7 +82,7 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
       .header("Content-Type", "application/json")
       .json({
         url: `domain: ${req.body.domain}`,
-        results: {robots, seo, og, headers, structured: {}, amp: {}},
+        results: {robots, seo, og, headers, structured: {}, amp},
         links: allPages.map(p => p.url)
       })
   } catch (error) {

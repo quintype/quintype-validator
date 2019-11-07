@@ -10,7 +10,7 @@ import express from 'express';
 import bodyParser from "body-parser";
 import cors from 'cors';
 
-// tslint:disable: no-expression-statement
+
 export const app = express();
 app.use(compression());
 app.use(bodyParser.json({ limit: "1mb" }));

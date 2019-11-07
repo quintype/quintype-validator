@@ -20,7 +20,6 @@ export async function runStructuredDataValidator(_: CheerioSelector, url: string
     const actualErrors = errors.filter(error => error.isSevere).map(structuredErrorToMessage);
     const warnings = errors.filter(error => !error.isSevere).map(structuredErrorToMessage);
     if (!contentId) {
-      // tslint:disable-next-line: no-expression-statement
       warnings.push("No ContentId was found");
     }
     return {

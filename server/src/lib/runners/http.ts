@@ -62,10 +62,9 @@ const config = yaml.load(fs.readFileSync("config/rules.yml") as unknown as strin
 function validateHeader(headers: IncomingHttpHeaders, { header, errors, warnings }: HeaderRule, _: string, outputLists: OutputLists): void {
   const value = headers[header.toLowerCase()];
   if (value) {
-    // tslint:disable-next-line: no-object-mutation no-expression-statement
+    // tslint:disable-next-line: no-object-mutation
     outputLists.debug[header] = value;
   }
-  // tslint:disable-next-line: no-expression-statement
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(pair => {
     // tslint:disable-next-line: readonly-array
     const [condition, outputList] = pair as [HTTPConditions, string[]];
@@ -73,17 +72,14 @@ function validateHeader(headers: IncomingHttpHeaders, { header, errors, warnings
       return;
     }
     if (condition.presence && (!value || value === '')) {
-      // tslint:disable-next-line: no-expression-statement
       outputList.push(`Could not find header ${header}`);
       return
     }
     if (condition.absence && value) {
-      // tslint:disable-next-line: no-expression-statement
       outputList.push(`Found header that should be absent ${header}`);
       return
     }
     if (condition.regex && !(value as string).match(condition.regex)) {
-      // tslint:disable-next-line: no-expression-statement
       outputList.push(`Expected header ${header} to match ${condition.regex} (got ${value})`);
       return
     }
@@ -96,7 +92,6 @@ function getContent($: CheerioSelector, element: CheerioElement, contentAttr: st
 
 function validateDom($: CheerioSelector, { selector, contentAttr, errors, warnings }: DomRule, url: string, outputLists: OutputLists): void {
   const elements = $(selector);
-  // tslint:disable-next-line: no-expression-statement
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(pair => {
     // tslint:disable-next-line: readonly-array
     const [condition, outputList] = pair as [HTTPConditions, string[]];
@@ -104,41 +99,33 @@ function validateDom($: CheerioSelector, { selector, contentAttr, errors, warnin
       return;
     }
     if (condition.presence && elements.length == 0) {
-      // tslint:disable-next-line: no-expression-statement
       outputList.push(`Could not find an element with selector ${selector}`);
       return;
     }
     if (condition.count != null && elements.length != condition.count) {
-      // tslint:disable-next-line: no-expression-statement
       outputList.push(`Expected to find ${condition.count} elements with selector ${selector}, got ${elements.length}`);
       return;
     }
-    // tslint:disable-next-line: no-expression-statement
     elements.each((_, element) => {
       const content = getContent($, element, contentAttr);
       // Reuse this?
       if ((condition.presence || condition.presence_if_node_exists) && (!content || content == '')) {
-        // tslint:disable-next-line: no-expression-statement
         outputList.push(`Found an empty ${selector} (attribute ${contentAttr})`);
         return;
       }
       if (condition.length_le && content.length > condition.length_le) {
-        // tslint:disable-next-line: no-expression-statement
         outputList.push(`Content in ${selector} is longer than ${condition.length_le}`);
         return
       }
       if (condition.value == 'url' && content != url) {
-        // tslint:disable-next-line: no-expression-statement
         outputList.push(`Content in ${selector} should have value ${url} (got ${content})`);
         return
       }
       if (condition.different_from) {
         const otherElements = $(condition.different_from.selector);
-        // tslint:disable-next-line: no-expression-statement
         otherElements.each((_, otherElement) => {
           const otherContent = getContent($, otherElement, condition.different_from.contentAttr);
           if (content === otherContent) {
-            // tslint:disable-next-line: no-expression-statement
             outputList.push(`Content in ${selector} should not have the same value as ${condition.different_from.selector}`);
           }
         });
@@ -148,7 +135,6 @@ function validateDom($: CheerioSelector, { selector, contentAttr, errors, warnin
 }
 function validateUrl(url: string, rule: UrlRule, outputLists: OutputLists): void {
   const { errors, warnings } = rule;
-  // tslint:disable-next-line: no-expression-statement
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(pair => {
     // tslint:disable-next-line: readonly-array
     const [condition, outputList] = pair as [HTTPConditions, string[]];
@@ -156,7 +142,6 @@ function validateUrl(url: string, rule: UrlRule, outputLists: OutputLists): void
       return;
     }
     if (condition.regex && !url.match(condition.regex)) {
-      // tslint:disable-next-line: no-expression-statement
       outputList.push(`Expected url ${url} to match ${condition.regex}`);
     }
   });
@@ -170,7 +155,6 @@ async function runValidator(category: string, dom: CheerioSelector, url: string,
   }
 
   const rules = config[category].rules;
-  // tslint:disable-next-line: no-expression-statement
   rules.forEach(rule => {
     switch (rule.type) {
       case 'header': return validateHeader(response.headers, rule as HeaderRule, url, outputLists);

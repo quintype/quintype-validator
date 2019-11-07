@@ -20,7 +20,6 @@ export async function runRobotsValidator(_: CheerioAPI, url: string): Promise<Va
       .map(bot => `${bot} was not allowed to crawl this page`);
     const sitemaps = robots.getSitemaps();
     if (sitemaps.length === 0) {
-      // tslint:disable-next-line: no-expression-statement
       errors.push("There was no sitemap configured");
     }
     const debug = { content: response.body, sitemaps: sitemaps.join(","), lineNo: robots.getMatchingLineNumber(url) };

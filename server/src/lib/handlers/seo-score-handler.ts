@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import getStorySeo from "../story/seo";
 
-// tslint:disable: no-expression-statement
 export function seoScoreHandler(req: Request, res: Response): void {
   const story = req.body.story;
   const focusKeyword = req.body["focus-keyword"];

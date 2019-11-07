@@ -3,7 +3,7 @@ import { checkRobots } from "../runners/robots";
 
 export async function validateRobotsHandler(req: Request, res: Response): Promise<void> {
   const { allowed = "", disallowed = "" } = req.query;
-  // tslint:disable: no-expression-statement
+
   try {
     const results = await checkRobots(allowed.split(" "), disallowed.split(" "))
     if (results.find(result => result.status !== "PASS")) {

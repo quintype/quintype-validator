@@ -24,7 +24,7 @@ export async function validateUrlHandler(req: Request, res: Response): Promise<v
     });
     const dom = cheerio.load(response.body);
     const [amp, structured, seo, og, headers, robots, links] = await Promise.all([...RUNNERS, fetchLinks].map(runner => runner(dom, url, response)));
-    // tslint:disable: no-expression-statement
+
     res.status(201);
     res.setHeader("Content-Type", "application/json");
     res.json({

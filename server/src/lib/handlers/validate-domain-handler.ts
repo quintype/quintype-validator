@@ -66,7 +66,7 @@ async function checkAmp(stories: readonly FetchUrlResponse[]): Promise<Validatio
 
 export async function validateDomainHandler(req: Request, res: Response): Promise<void> {
   try {
-    const baseUrl = `https://${req.body.domain}`;
+    const baseUrl = `https://${req.body.url}`;
     const [homePage, stories, sections] = await Promise.all([fetchUrl(`${baseUrl}/`), randomStories(baseUrl, 5), randomSections(baseUrl, 2)]);
 
     const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
@@ -81,7 +81,7 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
       .status(200)
       .header("Content-Type", "application/json")
       .json({
-        url: `domain: ${req.body.domain}`,
+        url: `${req.body.url}`,
         results: {robots, seo, og, headers, structured: {}, amp},
         links: allPages.map(p => p.url)
       })

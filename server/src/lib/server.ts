@@ -33,10 +33,19 @@ const corsMiddleware = cors({
 });
 
 app.options("/api/validate.json", corsMiddleware);
-app.post("/api/validate.json", corsMiddleware, validateUrlHandler);
+app.post("/api/validate.json", corsMiddleware, (req, res) => {
+  const url = req.body.url;
 
-app.options("/api/validate-domain.json", corsMiddleware);
-app.post("/api/validate-domain.json", corsMiddleware, validateDomainHandler);
+  if(url && url.startsWith("http")) {
+    return validateUrlHandler(req, res);
+  }
+
+  if(url) {
+    return validateDomainHandler(req, res);
+  }
+
+  return res.status(400).json({error: {message: "Missing url"}});
+});
 
 app.options("/api/seo-scores", corsMiddleware);
 app.post("/api/seo-scores", corsMiddleware, seoScoreHandler);

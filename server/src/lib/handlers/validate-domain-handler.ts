@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import _ from "lodash";
 import rp from "request-promise";
+import { checkUrls } from "../runners/robots";
 
 async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<string>> {
   const {stories} = await rp(`${baseUrl}/api/v1/stories?fields=url`, { gzip: true, json: true});
@@ -23,11 +24,14 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
     const baseUrl = `https://${req.body.domain}`;
     const homePage = `${baseUrl}/`
     const [stories, sections] = await Promise.all([randomStories(baseUrl, 5), randomSections(baseUrl, 2)]);
+
+    const [robots] = await Promise.all([checkUrls([homePage, ...sections, ...stories])])
+
     // tslint:disable-next-line: no-expression-statement
     res
       .status(200)
       .header("Content-Type", "application/json")
-      .json({stories, sections, homePage})
+      .json({stories, sections, homePage, results: {robots}})
   } catch (error) {
     // tslint:disable-next-line: no-console
     console.error(error.stack || error);

@@ -1,47 +1,86 @@
+import flatMap from 'array.prototype.flatmap';
 import { Request, Response } from "express";
 import _ from "lodash";
 import rp from "request-promise";
+
+import { fetchUrl, FetchUrlResponse } from "../fetch-url";
+import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { checkUrls } from "../runners/robots";
 
-async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<string>> {
+async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<FetchUrlResponse>> {
   const {stories} = await rp(`${baseUrl}/api/v1/stories?fields=url`, { gzip: true, json: true});
-  return stories
-    .sort(() => 0.5 - Math.random())
-    .map((story: { readonly url: any; }) => story.url)
-    .slice(0, count);
+  return Promise.all(
+    stories
+      .sort(() => 0.5 - Math.random())
+      .slice(0, count)
+      .map((story: { readonly url: any; }) => fetchUrl(story.url))
+  );
 }
 
-async function randomSections(baseUrl: string, count: number): Promise<ReadonlyArray<string>> {
+async function randomSections(baseUrl: string, count: number): Promise<ReadonlyArray<FetchUrlResponse>> {
   const {sections} = await rp(`${baseUrl}/api/v1/config`, { gzip: true, json: true });
-  return sections
-    .sort(() => 0.5 - Math.random())
-    .map((section: { readonly "section-url": string; }) => section["section-url"])
-    .slice(0, count);
+  return Promise.all(
+    sections
+      .sort(() => 0.5 - Math.random())
+      .slice(0, count)
+      .map((section: { readonly "section-url": string; }) => fetchUrl(section["section-url"]))
+  );
+}
+
+async function checkHTTPResponses(pages: ReadonlyArray<FetchUrlResponse>): Promise<{readonly og: any, readonly seo: any, readonly headers: any}> {
+  const responses = await Promise.all(
+    pages.map(async ({url, dom, response}) => ({
+      url,
+      seo: await runSeoValidator(dom, url, response),
+      og: await runOgTagValidator(dom, url, response),
+      headers: await runHeaderValidator(dom, url, response)
+    }))
+  );
+
+  return {
+    og: combineResults('og'),
+    seo: combineResults('seo'),
+    headers: combineResults('headers')
+  }
+
+  function combineResults(key: 'og' | 'seo' | 'headers'): ValidationResult {
+    // tslint:disable-next-line: readonly-array
+    const errors = flatMap(responses, r => (r[key].errors as string[] || []).map(e => `${r.url}: ${e}`));
+    return errors.length
+      ? { status: "FAIL", errors }
+      : { status: "PASS" };
+  }
 }
 
 export async function validateDomainHandler(req: Request, res: Response): Promise<void> {
   try {
     const baseUrl = `https://${req.body.domain}`;
-    const homePage = `${baseUrl}/`
-    const [stories, sections] = await Promise.all([randomStories(baseUrl, 5), randomSections(baseUrl, 2)]);
+    const [homePage, stories, sections] = await Promise.all([fetchUrl(`${baseUrl}/`), randomStories(baseUrl, 5), randomSections(baseUrl, 2)]);
 
-    const [robots] = await Promise.all([checkUrls([homePage, ...sections, ...stories])])
+    const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
 
-    // tslint:disable-next-line: no-expression-statement
+    const [robots, {seo, og, headers}] = await Promise.all([
+      checkUrls(allPages.map(i => i.url)),
+      checkHTTPResponses(allPages)
+    ])
+
     res
       .status(200)
       .header("Content-Type", "application/json")
-      .json({stories, sections, homePage, results: {robots}})
+      .json({
+        url: `domain: ${req.body.domain}`,
+        results: {robots, seo, og, headers, structured: {}, amp: {}},
+        links: allPages.map(p => p.url)
+      })
   } catch (error) {
     // tslint:disable-next-line: no-console
     console.error(error.stack || error);
-    // tslint:disable-next-line: no-expression-statement
+
     res
       .status(500)
       .header("Content-Type", "application/json")
       .json({ error: { message: error.message || error } });
   } finally {
-    // tslint:disable-next-line: no-expression-statement
     res.end()
   }
 }

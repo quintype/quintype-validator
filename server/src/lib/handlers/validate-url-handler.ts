@@ -1,8 +1,8 @@
-import cheerio from "cheerio";
 import { Request, Response } from "express";
 import _ from "lodash";
-import rp from 'request-promise';
 import URL from "url";
+
+import { fetchUrl } from '../fetch-url';
 import { runAmpValidator } from "../runners/amp";
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { runRobotsValidator } from "../runners/robots";
@@ -17,12 +17,7 @@ const RUNNERS: ReadonlyArray<any> = [runAmpValidator, runStructuredDataValidator
 export async function validateUrlHandler(req: Request, res: Response): Promise<void> {
   try {
     const url = req.body.url;
-    const response = await rp(url, {
-      headers: { "Fastly-Debug": "1", "QT-Debug": "1" },
-      resolveWithFullResponse: true,
-      gzip: true
-    });
-    const dom = cheerio.load(response.body);
+    const { dom, response } = await fetchUrl(url);
     const [amp, structured, seo, og, headers, robots, links] = await Promise.all([...RUNNERS, fetchLinks].map(runner => runner(dom, url, response)));
 
     res.status(201);

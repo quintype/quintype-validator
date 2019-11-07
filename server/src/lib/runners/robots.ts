@@ -53,21 +53,20 @@ export async function checkUrls(urls: ReadonlyArray<string>, allowed = true): Pr
       const robots = robotsParser(robotsUrl, robotsContent);
       const firstInvalidBot = BOTS.find(bot => !robots.isAllowed(url, bot));
       if ((allowed && firstInvalidBot) || (!allowed && !firstInvalidBot)) {
-        return { status: "FAIL", debug: firstInvalidBot ? `${firstInvalidBot} was not allowed to crawl this page` : "All bots were allowed to crawl", url }
+        return { status: "FAIL", debug: [firstInvalidBot ? `${firstInvalidBot} was not allowed to crawl this page` : "All bots were allowed to crawl"], url }
       }
     }
     catch (e) {
       // tslint:disable-next-line: no-console
-      console.log(e);
       return {
         status: "ERROR",
         url,
-        debug: `Something crashed. Does ${robotsUrl} load?`
+        debug: [`Something crashed. Does ${robotsUrl} load?`]
       };
     }
   }
 
-  return { status: "PASS", debug: "All bots worked as expected", url: urls[0] };
+  return { status: "PASS", debug: ["All bots worked as expected"], url: urls[0] };
 }
 
 async function checkUrl(url: string, allowed = true): Promise<ValidationResult> {

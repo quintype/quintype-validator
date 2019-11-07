@@ -2,7 +2,7 @@ import rp from 'request-promise';
 import robotsParser from 'robots-parser';
 import URL from "url";
 
-const BOTS: ReadonlyArray<string> = ["GoogleBot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider"];
+const BOTS: ReadonlyArray<string> = ["GoogleBot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider", "YandexBot"];
 
 export async function runRobotsValidator(_: CheerioAPI, url: string): Promise<ValidationResult> {
   const robotsUrl = URL.resolve(url, "/robots.txt");

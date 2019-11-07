@@ -82,7 +82,7 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
       .header("Content-Type", "application/json")
       .json({
         url: `${req.body.url}`,
-        results: {robots, seo, og, headers, structured: {}, amp},
+        results: {robots, seo, og, headers, amp},
         links: allPages.map(p => p.url)
       })
   } catch (error) {

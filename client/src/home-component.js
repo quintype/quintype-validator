@@ -128,10 +128,12 @@ class Results extends React.Component {
     return <div>
       <ResultSection title="AMP" result={this.props.results.amp} />
       <ResultSection title="Caching Headers" result={this.props.results.headers} />
-      <ResultSection title="Structured Data" result={this.props.results.structured}>
-        <div>Number of Objects: {this.props.results.structured.numObjects}</div>
-        <div>Content Id: {this.props.results.structured.contentId}</div>
-      </ResultSection>
+      {this.props.results.structured
+        ? <ResultSection title="Structured Data" result={this.props.results.structured}>
+            <div>Number of Objects: {this.props.results.structured.numObjects}</div>
+            <div>Content Id: {this.props.results.structured.contentId}</div>
+          </ResultSection>
+        : undefined}
       <ResultSection title="Facebook OG Tags" result={this.props.results.og} />
       <ResultSection title="SEO Rules" result={this.props.results.seo} />
       <ResultSection title="Robots" result={this.props.results.robots} />

@@ -125,18 +125,20 @@ class DebugSection extends React.Component {
 
 class Results extends React.Component {
   render() {
+    const showResult = (category, title) => this.props.results[category] ? <ResultSection title={title} result={this.props.results[category]} /> : undefined;
+
     return <div>
-      <ResultSection title="AMP" result={this.props.results.amp} />
-      <ResultSection title="Caching Headers" result={this.props.results.headers} />
+      {showResult("amp", "AMP")}
+      {showResult("headers", "Caching Headers")}
       {this.props.results.structured
         ? <ResultSection title="Structured Data" result={this.props.results.structured}>
             <div>Number of Objects: {this.props.results.structured.numObjects}</div>
             <div>Content Id: {this.props.results.structured.contentId}</div>
           </ResultSection>
         : undefined}
-      <ResultSection title="Facebook OG Tags" result={this.props.results.og} />
-      <ResultSection title="SEO Rules" result={this.props.results.seo} />
-      <ResultSection title="Robots" result={this.props.results.robots} />
+      {showResult('og', "Facebook OG Tags")}
+      {showResult('seo', "SEO Rules")}
+      {showResult('robots', "Robots")}
 
       <DebugSection results={this.props.results} links={this.props.links} onValidate={this.props.onValidate}/>
 

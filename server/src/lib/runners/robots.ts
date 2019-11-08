@@ -74,7 +74,7 @@ async function checkUrl(url: string, allowed = true): Promise<ValidationResult> 
 }
 
 export function checkRobots(allowedUrls: ReadonlyArray<string>, disallowedUrls: ReadonlyArray<string>): Promise<ReadonlyArray<ValidationResult>> {
-  const allowedPromise = allowedUrls.filter(u => u != '').map(url => checkUrl(`https://${url}`));
-  const disallowedPromise = disallowedUrls.filter(u => u != '').map(url => checkUrl(`https://${url}`, false));
+  const allowedPromise = allowedUrls.filter(u => u !== '').map(url => checkUrl(`https://${url}`));
+  const disallowedPromise = disallowedUrls.filter(u => u !== '').map(url => checkUrl(`https://${url}`, false));
   return Promise.all(allowedPromise.concat(disallowedPromise));
 }

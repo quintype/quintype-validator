@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import _ from "lodash";
 import rp from "request-promise";
 
+import { fetchLighthouse } from '../fetch-lighthouse';
 import { fetchUrl, FetchUrlResponse } from "../fetch-url";
 import { runAmpValidator } from '../runners/amp';
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
@@ -64,6 +65,55 @@ async function checkAmp(stories: readonly FetchUrlResponse[]): Promise<Validatio
   }
 }
 
+async function checkLighthouseResults(homePage: FetchUrlResponse, story: FetchUrlResponse): Promise<{
+  readonly pagespeed: ValidationResult,
+  readonly lighthouseSeo?: ValidationResult,
+  readonly lighthousePwa?: ValidationResult
+}> {
+  try {
+    const [homeAudit, storyAudit] = await Promise.all([fetchLighthouse(homePage.url), fetchLighthouse(story.url)]);
+
+    const combineAudits = (category: string, minScore: number) => {
+      const homeResult = homeAudit.getAudit(category);
+      const storyResult = storyAudit.getAudit(category);
+
+      const errors: ReadonlyArray<string> =  [...homeResult.errors, ...storyResult.errors];
+
+      return {
+        status: homeResult.score >= minScore && storyResult.score >= minScore ? "PASS" : "FAIL",
+        errors: [...(errors.length > 0 ? [`Scores - Home ${homeResult.score}%, Story ${storyResult.score}%`]: []), ...errors]
+      }
+    }
+
+    return {
+      lighthousePwa: combineAudits('pwa', 50),
+      lighthouseSeo: combineAudits('seo', 95),
+      pagespeed: {
+        ...combineAudits('performance', 75),
+        debug: {
+          "home-fcp": homeAudit.getAuditScore("first-contentful-paint"),
+          "home-fmp": homeAudit.getAuditScore("first-meaningful-paint"),
+          "home-tti": homeAudit.getAuditScore("interactive"),
+          "home-mfid": homeAudit.getAuditScore("max-potential-fid"),
+          "home-si": homeAudit.getAuditScore("speed-index"),
+          "home-ttfb": homeAudit.getAuditScore("time-to-first-byte"),
+
+          "story-fcp": storyAudit.getAuditScore("first-contentful-paint"),
+          "story-fmp": storyAudit.getAuditScore("first-meaningful-paint"),
+          "story-tti": storyAudit.getAuditScore("interactive"),
+          "story-mfid": storyAudit.getAuditScore("max-potential-fid"),
+          "story-si": storyAudit.getAuditScore("speed-index"),
+          "story-ttfb": homeAudit.getAuditScore("time-to-first-byte"),
+        }
+      },
+    }
+  } catch(e) {
+    // tslint:disable-next-line: no-console
+    console.log(e);
+    return {pagespeed: { status: "NA", errors: ["Oops, it looks like PageSpeed crashed. Please try again"]}}
+  }
+}
+
 export async function validateDomainHandler(req: Request, res: Response): Promise<void> {
   try {
     const baseUrl = `https://${req.body.url}`;
@@ -71,10 +121,11 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
 
     const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
 
-    const [robots, {seo, og, headers}, amp] = await Promise.all([
+    const [robots, {seo, og, headers}, amp, {lighthouseSeo, lighthousePwa, pagespeed}] = await Promise.all([
       checkUrls(allPages.map(i => i.url)),
       checkHTTPResponses(allPages),
-      checkAmp(stories)
+      checkAmp(stories),
+      checkLighthouseResults(homePage, stories[0])
     ])
 
     res
@@ -82,7 +133,7 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
       .header("Content-Type", "application/json")
       .json({
         url: `${req.body.url}`,
-        results: {robots, seo, og, headers, amp},
+        results: {robots, seo, og, headers, amp, pagespeed, lighthouseSeo, lighthousePwa},
         links: allPages.map(p => p.url)
       })
   } catch (error) {

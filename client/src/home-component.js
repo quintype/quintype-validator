@@ -139,6 +139,9 @@ class Results extends React.Component {
       {showResult('og', "Facebook OG Tags")}
       {showResult('seo', "SEO Rules")}
       {showResult('robots', "Robots")}
+      {showResult('pagespeed', "PageSpeed")}
+      {showResult('lighthouseSeo', "LH SEO")}
+      {showResult('lighthousePwa', "PWA")}
 
       <DebugSection results={this.props.results} links={this.props.links} onValidate={this.props.onValidate}/>
 

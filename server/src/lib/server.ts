@@ -1,15 +1,13 @@
-import { validateRobotsHandler } from "./handlers/validate-robots-handler";
-
-import { seoScoreHandler } from "./handlers/seo-score-handler";
-
-import { validateUrlHandler } from "./handlers/validate-url-handler";
-
-import compression from 'compression';
 import express from 'express';
 
 import bodyParser from "body-parser";
+import compression from 'compression';
 import cors from 'cors';
 
+import { seoScoreHandler } from "./handlers/seo-score-handler";
+import { validateDomainHandler } from "./handlers/validate-domain-handler";
+import { validateRobotsHandler } from "./handlers/validate-robots-handler";
+import { validateUrlHandler } from "./handlers/validate-url-handler";
 
 export const app = express();
 app.use(compression());
@@ -35,7 +33,19 @@ const corsMiddleware = cors({
 });
 
 app.options("/api/validate.json", corsMiddleware);
-app.post("/api/validate.json", corsMiddleware, validateUrlHandler);
+app.post("/api/validate.json", corsMiddleware, (req, res) => {
+  const url = req.body.url;
+
+  if(url && url.startsWith("http")) {
+    return validateUrlHandler(req, res);
+  }
+
+  if(url) {
+    return validateDomainHandler(req, res);
+  }
+
+  return res.status(400).json({error: {message: "Missing url"}});
+});
 
 app.options("/api/seo-scores", corsMiddleware);
 app.post("/api/seo-scores", corsMiddleware, seoScoreHandler);

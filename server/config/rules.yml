@@ -26,11 +26,6 @@ headers:
         presence: true
         regex: !!js/regexp /./
     - type: header
-      header: Cache-Tag
-      warnings:
-        presence: true
-        regex: !!js/regexp /./
-    - type: header
       header: Set-Cookie
       errors:
         absence: true

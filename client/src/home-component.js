@@ -140,8 +140,9 @@ class Results extends React.Component {
       {showResult('seo', "SEO Rules")}
       {showResult('robots', "Robots")}
       {showResult('pagespeed', "PageSpeed")}
-      {showResult('lighthouseSeo', "LH SEO")}
+      {showResult('lighthouseSeo', "Lighthouse SEO")}
       {showResult('lighthousePwa', "PWA")}
+      {showResult('routeData', "Route Data Size")}
 
       <DebugSection results={this.props.results} links={this.props.links} onValidate={this.props.onValidate}/>
 

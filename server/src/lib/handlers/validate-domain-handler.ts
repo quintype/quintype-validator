@@ -8,6 +8,7 @@ import { fetchUrl, FetchUrlResponse } from "../fetch-url";
 import { runAmpValidator } from '../runners/amp';
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { checkUrls } from "../runners/robots";
+import { runRouteDataValidator } from '../runners/route-data';
 
 async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<FetchUrlResponse>> {
   const {stories} = await rp(`${baseUrl}/api/v1/stories?fields=url`, { gzip: true, json: true});
@@ -114,6 +115,24 @@ async function checkLighthouseResults(homePage: FetchUrlResponse, story: FetchUr
   }
 }
 
+async function checkRouteData(homePage: FetchUrlResponse, story: FetchUrlResponse): Promise<ValidationResult> {
+  const [homePageAudit, storyPageAudit] = await Promise.all([
+    runRouteDataValidator(homePage.dom, homePage.url),
+    runRouteDataValidator(story.dom, story.url)
+  ]);
+  return {
+    status: homePageAudit.status,
+    errors: [
+      ...(homePageAudit.errors || []).map((s: string) => `${s} (${homePage.url})`),
+      ...(storyPageAudit.errors || []).map((s: string) => `${s} (${story.url})`),
+    ],
+    debug: {
+      "hp-bytes": homePageAudit.debug && (homePageAudit.debug as any).lengthBytes,
+      "story-bytes": storyPageAudit.debug && (storyPageAudit.debug as any).lengthBytes,
+    }
+  }
+}
+
 export async function validateDomainHandler(req: Request, res: Response): Promise<void> {
   try {
     const baseUrl = `https://${req.body.url}`;
@@ -121,11 +140,12 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
 
     const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
 
-    const [robots, {seo, og, headers}, amp, {lighthouseSeo, lighthousePwa, pagespeed}] = await Promise.all([
+    const [robots, {seo, og, headers}, amp, {lighthouseSeo, lighthousePwa, pagespeed}, routeData] = await Promise.all([
       checkUrls(allPages.map(i => i.url)),
       checkHTTPResponses(allPages),
       checkAmp(stories),
-      checkLighthouseResults(homePage, stories[0])
+      checkLighthouseResults(homePage, stories[0]),
+      checkRouteData(homePage, stories[0])
     ])
 
     res
@@ -133,7 +153,7 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
       .header("Content-Type", "application/json")
       .json({
         url: `${req.body.url}`,
-        results: {robots, seo, og, headers, amp, pagespeed, lighthouseSeo, lighthousePwa},
+        results: {robots, seo, og, headers, amp, pagespeed, lighthouseSeo, lighthousePwa, routeData},
         links: allPages.map(p => p.url)
       })
   } catch (error) {

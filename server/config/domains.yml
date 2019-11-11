@@ -1,0 +1,5 @@
+appoptics_token: PUT_TOKEN_HERE
+domains:
+  - domain: www.domain.com
+    skipPwa: true
+    skipRouteData: true

@@ -1,16 +1,26 @@
 import rp from 'request-promise';
 
-export async function fetchLighthouse(url: string): Promise<any> {
+interface LighthouseResults {
+  readonly getAudit: (name: string) => { readonly score: number, readonly errors: ReadonlyArray<string> };
+  readonly getDebuggingInfo: (prefix: string) => { readonly [key: string]: number }
+}
+
+export async function fetchLighthouse(url: string): Promise<LighthouseResults> {
   const psUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?category=accessibility&category=best-practices&category=performance&category=pwa&category=seo&strategy=mobile&url=${encodeURI(url)}`;
-  const data = await rp(psUrl, {
-    json: true,
-    gzip: true
-  });
-  return new Lighthouse(url, data);
+  try {
+    const data = await rp(psUrl, {
+      json: true,
+      gzip: true
+    });
+    return new Lighthouse(url, data);
+  } catch(e) {
+    console.error(e.message || e);
+    return new LighthouseError(url);
+  }
 }
 
 // tslint:disable: no-class no-this
-class Lighthouse {
+class Lighthouse implements LighthouseResults {
   private readonly data: any;
   private readonly url: string;
 
@@ -32,7 +42,38 @@ class Lighthouse {
     }
   }
 
-  public getAuditScore(name: string): number {
+  public getDebuggingInfo(prefix: string): {readonly [key: string]: number} {
+    return {
+      [`${prefix}-fcp`]: this.getAuditScore("first-contentful-paint"),
+      [`${prefix}-fmp`]: this.getAuditScore("first-meaningful-paint"),
+      [`${prefix}-tti`]: this.getAuditScore("interactive"),
+      [`${prefix}-mfid`]: this.getAuditScore("max-potential-fid"),
+      [`${prefix}-si`]: this.getAuditScore("speed-index"),
+      [`${prefix}-ttfb`]: this.getAuditScore("time-to-first-byte"),
+    }
+  }
+
+  private getAuditScore(name: string): number {
     return this.data.lighthouseResult.audits[name].numericValue;
+  }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+class LighthouseError implements LighthouseResults {
+  private readonly url: string;
+
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  public getAudit(_: string): { readonly score: number, readonly errors: ReadonlyArray<string> } {
+    return {
+      score: -1,
+      errors: [`PageSpeed Crashed While Querying ${this.url}`]
+    }
+  }
+
+  public getDebuggingInfo(_: string): { readonly [key: string]: number } {
+    return {};
   }
 }

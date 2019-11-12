@@ -1,8 +1,11 @@
 import flatMap = require("array.prototype.flatmap");
 import { readFileSync } from "fs";
 import { load } from "js-yaml";
+import { createTransport } from 'nodemailer';
 import rp from 'request-promise';
 
+// tslint:disable-next-line: no-submodule-imports
+import Mail from "nodemailer/lib/mailer";
 import { runAllChecksAgainstDomain } from "./lib/handlers/validate-domain-handler";
 
 interface AppOpticsMetric {
@@ -12,11 +15,15 @@ interface AppOpticsMetric {
 }
 
 // tslint:disable: no-object-mutation no-delete
-async function saveToAppOptics(): Promise<void> {
-  const { domains, appoptics_token } = load(readFileSync("config/domains.yml") as unknown as string);
+async function saveToAppOptics(appoptics_token?: string, gmail_user?: string, gmail_password?: string): Promise<void> {
+  const { domains } = load(readFileSync("config/domains.yml") as unknown as string);
+  const emailTransport = createTransport({
+    service: 'gmail',
+    auth: { user: gmail_user, pass: gmail_password }
+  })
   for(const x of domains) {
     try {
-      await runChecksAndPostToAppOptics(x, appoptics_token);
+      await runChecksAndPostToAppOptics(x, appoptics_token, emailTransport);
     } catch(e) {
       // tslint:disable-next-line: no-console
       console.error(`Could Not Save Domain ${x.domain}`)
@@ -26,7 +33,7 @@ async function saveToAppOptics(): Promise<void> {
   }
 }
 
-async function runChecksAndPostToAppOptics({ domain, skipPwa, skipRouteData }: any, appoptics_token: string): Promise<void> {
+async function runChecksAndPostToAppOptics({ domain, skipPwa, skipRouteData, email }: any, appoptics_token: string | undefined, mailer: Mail): Promise<void> {
   // tslint:disable-next-line: no-console
   console.log(`Starting To Process ${domain}`);
   const auditResults = await runAllChecksAgainstDomain(domain);
@@ -54,6 +61,31 @@ async function runChecksAndPostToAppOptics({ domain, skipPwa, skipRouteData }: a
     },
     json: true
   });
+
+  // The next line is typescript for typescripts sake :-)
+  const mandatoryToPass: ReadonlyArray<"amp" | "robots" | "seo" | "headers" | "og"> = ["amp", "robots", "seo", "headers", "og"];
+  if(!mandatoryToPass.every(test => auditResults.results[test].status === "PASS")) {
+    if(email) {
+      // tslint:disable-next-line: no-console
+      console.log("Sending Email");
+      mailer.sendMail({
+        to: email,
+        subject: `[Validator] The domain ${domain} failed some validation tests`,
+        html: `
+The Quintype Validator found some issues with your domain ${domain}.<br/>
+<table>
+  <tr><th>Test</th><th>Status</th></tr>
+  ${mandatoryToPass.map(test => `<tr><td>${test}</td><td>${auditResults.results[test].status}</td></tr>`).join("")}
+</table>
+Please drop the attached json file into <a href="https://developers.quintype.com/quintype-validator">https://developers.quintype.com/quintype-validator</a> for more details.<br/>
+`,
+        text: `Please drop the attached json file into https://developers.quintype.com/quintype-validator for more details.`,
+        attachments: [
+          {filename: "validator-results.json", content: JSON.stringify(auditResults)}
+        ]
+      })
+    }
+  }
 }
 
 function lightHouseMetrics(domain: string, auditResults: ValidationResult): readonly AppOpticsMetric[] {
@@ -90,4 +122,4 @@ function routeDataMetrics(domain: string, auditResults: ValidationResult): reado
   }))
 }
 
-saveToAppOptics();
+saveToAppOptics(process.env.APPOPTICS_TOKEN, process.env.GMAIL_USER, process.env.GMAIL_PASSWORD);

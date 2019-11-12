@@ -9,6 +9,7 @@ import { runAmpValidator } from '../runners/amp';
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { checkUrls } from "../runners/robots";
 import { runRouteDataValidator } from '../runners/route-data';
+import { INVALID_LIGHTHOUSE_SCORE } from '../fetch-lighthouse';
 
 async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<FetchUrlResponse>> {
   const {stories} = await rp(`${baseUrl}/api/v1/stories?fields=url`, { gzip: true, json: true});
@@ -71,47 +72,41 @@ async function checkLighthouseResults(homePage: FetchUrlResponse, story: FetchUr
   readonly lighthouseSeo?: ValidationResult,
   readonly lighthousePwa?: ValidationResult
 }> {
-  try {
-    const [homeAudit, storyAudit] = await Promise.all([fetchLighthouse(homePage.url), fetchLighthouse(story.url)]);
+  const audits = await Promise.all([fetchLighthouse(homePage.url), fetchLighthouse(story.url)]);
+  const [homeAudit, storyAudit] = audits;
 
-    const combineAudits = (category: string, minScore: number) => {
-      const homeResult = homeAudit.getAudit(category);
-      const storyResult = storyAudit.getAudit(category);
-
-      const errors: ReadonlyArray<string> =  [...homeResult.errors, ...storyResult.errors];
-
-      return {
-        status: homeResult.score >= minScore && storyResult.score >= minScore ? "PASS" : "FAIL",
-        errors: [...(errors.length > 0 ? [`Scores - Home ${homeResult.score}%, Story ${storyResult.score}%`]: []), ...errors]
-      }
+  const getStatus = (scores: readonly number[], minScore: number) => {
+    if(scores.every(score => score >= minScore)) {
+      return "PASS";
+    } else if (scores.includes(INVALID_LIGHTHOUSE_SCORE)) {
+      return "NA";
+    } else {
+      return "FAIL";
     }
+  }
+
+  const combineAudits = (category: string, minScore: number) => {
+    const results = audits.map(audit => audit.getAudit(category));
+    const [homeResult, storyResult] = results;
+    // tslint:disable-next-line: readonly-array
+    const errors = flatMap(results, result => result.errors as string[]);
 
     return {
-      lighthousePwa: combineAudits('pwa', 50),
-      lighthouseSeo: combineAudits('seo', 95),
-      pagespeed: {
-        ...combineAudits('performance', 75),
-        debug: {
-          "home-fcp": homeAudit.getAuditScore("first-contentful-paint"),
-          "home-fmp": homeAudit.getAuditScore("first-meaningful-paint"),
-          "home-tti": homeAudit.getAuditScore("interactive"),
-          "home-mfid": homeAudit.getAuditScore("max-potential-fid"),
-          "home-si": homeAudit.getAuditScore("speed-index"),
-          "home-ttfb": homeAudit.getAuditScore("time-to-first-byte"),
-
-          "story-fcp": storyAudit.getAuditScore("first-contentful-paint"),
-          "story-fmp": storyAudit.getAuditScore("first-meaningful-paint"),
-          "story-tti": storyAudit.getAuditScore("interactive"),
-          "story-mfid": storyAudit.getAuditScore("max-potential-fid"),
-          "story-si": storyAudit.getAuditScore("speed-index"),
-          "story-ttfb": homeAudit.getAuditScore("time-to-first-byte"),
-        }
-      },
+      status: getStatus(results.map(i => i.score), minScore),
+      errors: [...(errors.length > 0 ? [`Scores - Home ${homeResult.score}%, Story ${storyResult.score}%`] : []), ...errors]
     }
-  } catch(e) {
-    // tslint:disable-next-line: no-console
-    console.log(e);
-    return {pagespeed: { status: "NA", errors: ["Oops, it looks like PageSpeed crashed. Please try again"]}}
+  }
+
+  return {
+    lighthousePwa: combineAudits('pwa', 50),
+    lighthouseSeo: combineAudits('seo', 95),
+    pagespeed: {
+      ...combineAudits('performance', 75),
+      debug: {
+        ...homeAudit.getDebuggingInfo("home"),
+        ...storyAudit.getDebuggingInfo("story")
+      }
+    },
   }
 }
 
@@ -127,7 +122,7 @@ async function checkRouteData(homePage: FetchUrlResponse, story: FetchUrlRespons
       ...(storyPageAudit.errors || []).map((s: string) => `${s} (${story.url})`),
     ],
     debug: {
-      "hp-bytes": homePageAudit.debug && (homePageAudit.debug as any).lengthBytes,
+      "home-bytes": homePageAudit.debug && (homePageAudit.debug as any).lengthBytes,
       "story-bytes": storyPageAudit.debug && (storyPageAudit.debug as any).lengthBytes,
     }
   }
@@ -135,27 +130,13 @@ async function checkRouteData(homePage: FetchUrlResponse, story: FetchUrlRespons
 
 export async function validateDomainHandler(req: Request, res: Response): Promise<void> {
   try {
-    const baseUrl = `https://${req.body.url}`;
-    const [homePage, stories, sections] = await Promise.all([fetchUrl(`${baseUrl}/`), randomStories(baseUrl, 5), randomSections(baseUrl, 2)]);
-
-    const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
-
-    const [robots, {seo, og, headers}, amp, {lighthouseSeo, lighthousePwa, pagespeed}, routeData] = await Promise.all([
-      checkUrls(allPages.map(i => i.url)),
-      checkHTTPResponses(allPages),
-      checkAmp(stories),
-      checkLighthouseResults(homePage, stories[0]),
-      checkRouteData(homePage, stories[0])
-    ])
+    const domain = req.body.url;
+    const response = await runAllChecksAgainstDomain(domain);
 
     res
       .status(200)
       .header("Content-Type", "application/json")
-      .json({
-        url: `${req.body.url}`,
-        results: {robots, seo, og, headers, amp, pagespeed, lighthouseSeo, lighthousePwa, routeData},
-        links: allPages.map(p => p.url)
-      })
+      .json(response)
   } catch (error) {
     // tslint:disable-next-line: no-console
     console.error(error.stack || error);
@@ -168,3 +149,24 @@ export async function validateDomainHandler(req: Request, res: Response): Promis
     res.end()
   }
 }
+// tslint:disable-next-line: typedef
+export async function runAllChecksAgainstDomain(domain: string) {
+  const baseUrl = `https://${domain}`;
+  const [homePage, stories, sections] = await Promise.all([fetchUrl(`${baseUrl}/`), randomStories(baseUrl, 5), randomSections(baseUrl, 2)]);
+  const allPages = [homePage, ...stories, ...sections] as ReadonlyArray<FetchUrlResponse>;
+
+  const [robots, { seo, og, headers }, amp, { lighthouseSeo, lighthousePwa, pagespeed }, routeData] = await Promise.all([
+    checkUrls(allPages.map(i => i.url)),
+    checkHTTPResponses(allPages),
+    checkAmp(stories),
+    checkLighthouseResults(homePage, stories[0]),
+    checkRouteData(homePage, stories[0])
+  ]);
+
+  return {
+    url: domain,
+    results: { robots, seo, og, headers, amp, pagespeed, lighthouseSeo, lighthousePwa, routeData },
+    links: allPages.map(p => p.url)
+  };
+}
+

@@ -3,13 +3,12 @@ import { Request, Response } from "express";
 import _ from "lodash";
 import rp from "request-promise";
 
-import { fetchLighthouse } from '../fetch-lighthouse';
+import { fetchLighthouse, INVALID_LIGHTHOUSE_SCORE } from '../fetch-lighthouse';
 import { fetchUrl, FetchUrlResponse } from "../fetch-url";
 import { runAmpValidator } from '../runners/amp';
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { checkUrls } from "../runners/robots";
 import { runRouteDataValidator } from '../runners/route-data';
-import { INVALID_LIGHTHOUSE_SCORE } from '../fetch-lighthouse';
 
 async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<FetchUrlResponse>> {
   const {stories} = await rp(`${baseUrl}/api/v1/stories?fields=url`, { gzip: true, json: true});
@@ -31,7 +30,7 @@ async function randomSections(baseUrl: string, count: number): Promise<ReadonlyA
   );
 }
 
-async function checkHTTPResponses(pages: ReadonlyArray<FetchUrlResponse>): Promise<{readonly og: any, readonly seo: any, readonly headers: any}> {
+async function checkHTTPResponses(pages: ReadonlyArray<FetchUrlResponse>): Promise<{readonly og: ValidationResult, readonly seo: ValidationResult, readonly headers: ValidationResult}> {
   const responses = await Promise.all(
     pages.map(async ({url, dom, response}) => ({
       url,

@@ -8,6 +8,8 @@ import rp from 'request-promise';
 import Mail from "nodemailer/lib/mailer";
 import { runAllChecksAgainstDomain } from "./lib/handlers/validate-domain-handler";
 
+const SEND_EMAILS_BEFORE_HOUR = 2;
+
 interface AppOpticsMetric {
   readonly name: string;
   readonly value: number;
@@ -62,10 +64,11 @@ async function runChecksAndPostToAppOptics({ domain, skipPwa, skipRouteData, ema
     json: true
   });
 
-  // The next line is typescript for typescripts sake :-)
+  // Tejas: The next line is typescript for typescripts sake :-)
   const mandatoryToPass: ReadonlyArray<"amp" | "robots" | "seo" | "headers" | "og"> = ["amp", "robots", "seo", "headers", "og"];
   if(!mandatoryToPass.every(test => auditResults.results[test].status === "PASS")) {
-    if(email) {
+    // Tejas: putting this ugly hack to ensure emails are only sent out once a day
+    if(email && new Date().getHours() < SEND_EMAILS_BEFORE_HOUR) {
       // tslint:disable-next-line: no-console
       console.log("Sending Email");
       mailer.sendMail({

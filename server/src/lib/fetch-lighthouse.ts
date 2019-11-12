@@ -1,5 +1,7 @@
 import rp from 'request-promise';
 
+export const INVALID_LIGHTHOUSE_SCORE = -1;
+
 interface LighthouseResults {
   readonly getAudit: (name: string) => { readonly score: number, readonly errors: ReadonlyArray<string> };
   readonly getDebuggingInfo: (prefix: string) => { readonly [key: string]: number }
@@ -68,7 +70,7 @@ class LighthouseError implements LighthouseResults {
 
   public getAudit(_: string): { readonly score: number, readonly errors: ReadonlyArray<string> } {
     return {
-      score: -1,
+      score: INVALID_LIGHTHOUSE_SCORE,
       errors: [`PageSpeed Crashed While Querying ${this.url}`]
     }
   }

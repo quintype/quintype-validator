@@ -9,6 +9,7 @@ import { runAmpValidator } from '../runners/amp';
 import { runHeaderValidator, runOgTagValidator, runSeoValidator } from "../runners/http";
 import { checkUrls } from "../runners/robots";
 import { runRouteDataValidator } from '../runners/route-data';
+import { INVALID_LIGHTHOUSE_SCORE } from '../fetch-lighthouse';
 
 async function randomStories(baseUrl: string, count: number): Promise<ReadonlyArray<FetchUrlResponse>> {
   const {stories} = await rp(`${baseUrl}/api/v1/stories?fields=url`, { gzip: true, json: true});
@@ -71,16 +72,27 @@ async function checkLighthouseResults(homePage: FetchUrlResponse, story: FetchUr
   readonly lighthouseSeo?: ValidationResult,
   readonly lighthousePwa?: ValidationResult
 }> {
-  const [homeAudit, storyAudit] = await Promise.all([fetchLighthouse(homePage.url), fetchLighthouse(story.url)]);
+  const audits = await Promise.all([fetchLighthouse(homePage.url), fetchLighthouse(story.url)]);
+  const [homeAudit, storyAudit] = audits;
+
+  const getStatus = (scores: readonly number[], minScore: number) => {
+    if(scores.every(score => score >= minScore)) {
+      return "PASS";
+    } else if (scores.includes(INVALID_LIGHTHOUSE_SCORE)) {
+      return "NA";
+    } else {
+      return "FAIL";
+    }
+  }
 
   const combineAudits = (category: string, minScore: number) => {
-    const homeResult = homeAudit.getAudit(category);
-    const storyResult = storyAudit.getAudit(category);
-
-    const errors: ReadonlyArray<string> = [...homeResult.errors, ...storyResult.errors];
+    const results = audits.map(audit => audit.getAudit(category));
+    const [homeResult, storyResult] = results;
+    // tslint:disable-next-line: readonly-array
+    const errors = flatMap(results, result => result.errors as string[]);
 
     return {
-      status: homeResult.score >= minScore && storyResult.score >= minScore ? "PASS" : "FAIL",
+      status: getStatus(results.map(i => i.score), minScore),
       errors: [...(errors.length > 0 ? [`Scores - Home ${homeResult.score}%, Story ${storyResult.score}%`] : []), ...errors]
     }
   }

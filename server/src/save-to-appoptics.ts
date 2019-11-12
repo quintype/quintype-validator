@@ -41,7 +41,7 @@ async function runChecksAndPostToAppOptics({ domain, skipPwa, skipRouteData }: a
     ...routeDataMetrics(domain, auditResults.results.routeData),
   ];
   // tslint:disable-next-line: no-console
-  console.log(`Posting ${measurements.length} metrics for ${domain}`);
+  console.log(`Posting ${measurements.length} metrics for ${domain}: ${JSON.stringify(measurements)}`);
   await rp({
     method: 'POST',
     uri: "https://api.appoptics.com/v1/measurements",
@@ -64,6 +64,7 @@ function lightHouseMetrics(domain: string, auditResults: ValidationResult): read
   }
 
   return flatMap(metrics, metric => [[metric, 'home'], [metric, 'story']])
+    .filter(([metric, page]) => (auditResults.debug || {})[`${page}-${metric}`])
     .map(([metric, page]) => ({
       name: `frontend.metrics.${metric}`,
       value: (auditResults.debug || {})[`${page}-${metric}`] as number,

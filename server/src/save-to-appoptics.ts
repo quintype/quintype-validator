@@ -92,7 +92,7 @@ Please drop the attached json file into <a href="https://developers.quintype.com
 }
 
 function lightHouseMetrics(domain: string, auditResults: ValidationResult): readonly AppOpticsMetric[] {
-  const metrics: readonly string[] = ['fcp', 'fmp', 'tti', 'mfid', 'si', 'ttfb']
+  const metrics: readonly string[] = ['fcp', 'fmp', 'tti', 'mfid', 'si', 'ttfb', 'pagespeed']
 
   if (!auditResults || !auditResults.debug) {
     return []

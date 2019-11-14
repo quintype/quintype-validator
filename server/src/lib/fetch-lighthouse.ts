@@ -52,6 +52,7 @@ class Lighthouse implements LighthouseResults {
       [`${prefix}-mfid`]: this.getAuditScore("max-potential-fid"),
       [`${prefix}-si`]: this.getAuditScore("speed-index"),
       [`${prefix}-ttfb`]: this.getAuditScore("time-to-first-byte"),
+      [`${prefix}-fci`]: this.getAuditScore("first-cpu-idle"),
     }
   }
 

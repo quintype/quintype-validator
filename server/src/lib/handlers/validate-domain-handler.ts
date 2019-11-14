@@ -92,18 +92,26 @@ async function checkLighthouseResults(homePage: FetchUrlResponse, story: FetchUr
 
     return {
       status: getStatus(results.map(i => i.score), minScore),
-      errors: [...(errors.length > 0 ? [`Scores - Home ${homeResult.score}%, Story ${storyResult.score}%`] : []), ...errors]
+      errors: [...(errors.length > 0 ? [`Scores - Home ${homeResult.score}%, Story ${storyResult.score}%`] : []), ...errors],
+      debug: {
+        "home-score": homeResult.score > 0 ? homeResult.score : undefined,
+        "story-score": storyResult.score > 0 ? storyResult.score : undefined,
+      }
     }
   }
+
+  const pageSpeedResult = combineAudits('performance', 75);
 
   return {
     lighthousePwa: combineAudits('pwa', 50),
     lighthouseSeo: combineAudits('seo', 95),
     pagespeed: {
-      ...combineAudits('performance', 75),
+      ...pageSpeedResult,
       debug: {
         ...homeAudit.getDebuggingInfo("home"),
-        ...storyAudit.getDebuggingInfo("story")
+        ...storyAudit.getDebuggingInfo("story"),
+        "home-pagespeed": pageSpeedResult.debug["home-score"],
+        "story-pagespeed": pageSpeedResult.debug["story-score"],
       }
     },
   }

@@ -1,4 +1,4 @@
-import flatMap = require("array.prototype.flatmap");
+import flatMap from "array.prototype.flatmap";
 import { readFileSync } from "fs";
 import { load } from "js-yaml";
 import { createTransport } from 'nodemailer';

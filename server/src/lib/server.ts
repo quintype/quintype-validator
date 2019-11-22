@@ -3,6 +3,7 @@ import express from 'express';
 import bodyParser from "body-parser";
 import compression from 'compression';
 import cors from 'cors';
+import * as validator from './migrator/validator';
 
 import { seoScoreHandler } from "./handlers/seo-score-handler";
 import { validateDomainHandler } from "./handlers/validate-domain-handler";
@@ -51,6 +52,13 @@ app.options("/api/seo-scores", corsMiddleware);
 app.post("/api/seo-scores", corsMiddleware, seoScoreHandler);
 
 app.get("/validate-robots", validateRobotsHandler);
+
+app.options('/api/migrator/validate', corsMiddleware);
+app.post('/api/migrator/validate', (req: any, res: any) => {
+  const { type, filepattern, source, data } = req.body;
+  const result = validator.validator(type, filepattern, source, data);
+  res.status(200).send(result);
+})
 
 app.get("/", (_, res) => {
   res.setHeader("Content-Type", "text/html");

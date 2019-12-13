@@ -3,10 +3,11 @@ import "./app.scss";
 import React from "react";
 import request from "superagent-bluebird-promise";
 import Dropzone from "react-dropzone";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import _ from "lodash";
 
 import FileSaver from "file-saver";
+import QuintypeLogo from "./quintype-logo";
 class GetUrlComponent extends React.Component {
   submit(e) {
     e.preventDefault();
@@ -48,35 +49,52 @@ class GetUrlComponent extends React.Component {
 }
 
 export class Sidebar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isPage: "website"
+    };
+    this.clickHandler = this.clickHandler.bind(this);
+  }
+
+  clickHandler = validator => {
+    this.setState({
+      isPage: validator
+    });
+  };
+
   render() {
     return (
       <div className="sidebar">
         <div className="sidebar-container">
-          <div className="sidebar-logo"></div>
+          <QuintypeLogo />
         </div>
         <div className="menu">
-          <Link to="/website">
-            <div className="menu__container">
+          <NavLink to="/website">
+            <div
+              className={`menu__container ${this.state.isPage === "website" &&  "is-active"}`} onClick={() => this.clickHandler("website")}>
               <div className="menu__website logo"></div>
             </div>
-          </Link>
-          <Link to="/migrator">
-            <div className="menu__container">
+          </NavLink>
+          <NavLink to="/migrator">
+            <div 
+            className={`menu__container ${this.state.isPage === "migrator" && "is-active"}`}
+            onClick={() => this.clickHandler("migrator")}>
               <div className="menu__migrator logo"></div>
             </div>
-          </Link>
+          </NavLink>
         </div>
       </div>
     );
   }
 }
 
-export function Migrator () {
+export function Migrator() {
   return (
     <div>
       <h1>Migration Data Validator</h1>
     </div>
-  )
+  );
 }
 
 class ResultSection extends React.Component {
@@ -332,7 +350,7 @@ export class HomeComponent extends React.Component {
 
   render() {
     return (
-      <div>        
+      <div>
         <h1>Quintype Validator</h1>
         <GetUrlComponent
           onSubmit={url => this.processUrl(url)}

@@ -49,20 +49,6 @@ class GetUrlComponent extends React.Component {
 }
 
 export class Sidebar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isPage: "website"
-    };
-    this.clickHandler = this.clickHandler.bind(this);
-  }
-
-  clickHandler = validator => {
-    this.setState({
-      isPage: validator
-    });
-  };
-
   render() {
     return (
       <div className="sidebar">
@@ -70,16 +56,13 @@ export class Sidebar extends React.Component {
           <QuintypeLogo />
         </div>
         <div className="menu">
-          <NavLink to="/website">
-            <div
-              className={`menu__container ${this.state.isPage === "website" &&  "is-active"}`} onClick={() => this.clickHandler("website")}>
+          <NavLink to="/website" className="navbar" activeClassName="is-active">
+            <div>
               <div className="menu__website logo"></div>
             </div>
           </NavLink>
-          <NavLink to="/migrator">
-            <div 
-            className={`menu__container ${this.state.isPage === "migrator" && "is-active"}`}
-            onClick={() => this.clickHandler("migrator")}>
+          <NavLink to="/migrator" className="navbar" activeClassName="is-active">
+            <div>
               <div className="menu__migrator logo"></div>
             </div>
           </NavLink>

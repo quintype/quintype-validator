@@ -334,7 +334,7 @@ export class HomeComponent extends React.Component {
   render() {
     return (
       <div>
-        <h1>Quintype Validator</h1>
+        <h1 className="website-heading">Quintype Validator</h1>
         <GetUrlComponent
           onSubmit={url => this.processUrl(url)}
           url={this.state.url}

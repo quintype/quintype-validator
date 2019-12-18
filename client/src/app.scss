@@ -3,7 +3,7 @@
 
 .sidebar {
   position: fixed;
-  height: 100vh;
+  height: 100%;
   width: 70px;
   background-image: linear-gradient(235deg, #4860bc, #7842b9);
   top: 0;
@@ -31,7 +31,7 @@
   .navbar.is-active::before {
     content: "";
     display: block;
-    width: 0.3rem;
+    width: 3px;
     height: 100%;
     background-color: #f8e71c;
     position: absolute;
@@ -85,4 +85,8 @@ input:focus {
 
 .debug-key {
   text-transform: capitalize;
+}
+
+.website-heading {
+  margin: 15px 30px 15px 100px;
 }

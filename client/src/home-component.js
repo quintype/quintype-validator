@@ -79,7 +79,7 @@ export class Sidebar extends React.Component {
 export function Migrator() {
   return (
     <div>
-      <h1>Migration Data Validator</h1>
+      
     </div>
   );
 }

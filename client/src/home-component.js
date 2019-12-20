@@ -56,9 +56,12 @@ export class Sidebar extends React.Component {
           <QuintypeLogo />
         </div>
         <div className="menu">
+          <div className="menu__container">
           <NavLink to="/website" className="navbar" activeClassName="is-active">
             <div className="menu__website logo"></div>
           </NavLink>
+          </div>
+          <div className="menu__container">
           <NavLink
             to="/migrator"
             className="navbar"
@@ -66,10 +69,20 @@ export class Sidebar extends React.Component {
           >
             <div className="menu__migrator logo"></div>
           </NavLink>
+          </div>
         </div>
       </div>
     );
   }
+}
+
+
+export function Migrator() {
+  return (
+    <div>
+      
+    </div>
+  );
 }
 
 class ResultSection extends React.Component {

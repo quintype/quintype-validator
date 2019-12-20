@@ -3,6 +3,7 @@ import styles from "./migrator.module.css";
 import { TextField } from "@quintype/em/components/text-field";
 import { Button } from "@quintype/em/components/button";
 import Select from "@quintype/em/components/select";
+import { TextArea } from "@quintype/em/components/text-area";
 import { FileUpload } from "@quintype/em/components/file-upload";
 import "@quintype/em/global.css";
 
@@ -37,6 +38,7 @@ export class Migrator extends Component {
     this.setState({ selecttype });
   };
 
+
   render() {
     const { validatetype, selecttype } = this.state;
     return (
@@ -57,7 +59,7 @@ export class Migrator extends Component {
           />
 
           {validatetype && validatetype.value === "Direct text input" ? (
-            <TextField label={"Type url here"} classname={styles.input} />
+            <TextArea label="Enter the Markup to validate:" placeholder="Enter the text" />
           ) : validatetype && validatetype.value === "File Upload" ? (
             <FileUpload fieldLabel="Upload File" placeholder="Choose File" />
           ) : validatetype && validatetype.value === "S3 Location" ? (

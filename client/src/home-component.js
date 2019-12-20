@@ -57,27 +57,19 @@ export class Sidebar extends React.Component {
         </div>
         <div className="menu">
           <NavLink to="/website" className="navbar" activeClassName="is-active">
-            <div>
-              <div className="menu__website logo"></div>
-            </div>
+            <div className="menu__website logo"></div>
           </NavLink>
-          <NavLink to="/migrator" className="navbar" activeClassName="is-active">
-            <div>
-              <div className="menu__migrator logo"></div>
-            </div>
+          <NavLink
+            to="/migrator"
+            className="navbar"
+            activeClassName="is-active"
+          >
+            <div className="menu__migrator logo"></div>
           </NavLink>
         </div>
       </div>
     );
   }
-}
-
-export function Migrator() {
-  return (
-    <div>
-      <h1>Migration Data Validator</h1>
-    </div>
-  );
 }
 
 class ResultSection extends React.Component {

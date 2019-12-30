@@ -1,6 +1,64 @@
 @import "./result-page.scss";
 @import "./url-page.scss";
 
+.sidebar {
+  position: fixed;
+  height: 100%;
+  width: 70px;
+  background-image: linear-gradient(235deg, #4860bc, #7842b9);
+  top: 0;
+  left: 0;
+  margin: 0;
+  &-container {
+    background-color: #324383;
+    padding: 10px 0;
+    text-align: center;
+    cursor: pointer;
+  }
+}
+
+.menu {
+  &__container {
+    cursor: pointer;
+  }
+  &__container:hover {
+    background-color: #324383;
+  }
+
+  .is-active {
+    position: relative;
+    display: block;
+    background-color: #324383;
+  }
+
+  .navbar.is-active::before {
+    content: "";
+    display: block;
+    width: 3px;
+    height: 100%;
+    background-color: #f8e71c;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .logo {
+    height: 40px;
+    padding: 14px 23px;
+  }
+
+  &__website {
+    background: url("./website-logo.svg") no-repeat center center;
+    margin-top: 40px;
+  }
+
+  &__migrator {
+    background: url("./migrator.svg") no-repeat center center;
+    margin-top: 20px;
+  }
+}
+
 .clearfix {
   &::after {
     display: block;
@@ -9,12 +67,14 @@
   }
 }
 
-input:focus { outline: 0 }
+input:focus {
+  outline: 0;
+}
 
 .loading {
   text-align: center;
   padding-top: 150px;
-  background: url('./infinity.svg') no-repeat center center;
+  background: url("./infinity.svg") no-repeat center center;
 }
 
 .error-message {
@@ -28,4 +88,8 @@ input:focus { outline: 0 }
 
 .debug-key {
   text-transform: capitalize;
+}
+
+.website-heading {
+  margin: 15px 30px 15px 100px;
 }

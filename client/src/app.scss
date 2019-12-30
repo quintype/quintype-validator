@@ -82,8 +82,9 @@ input:focus {
   background: red;
   text-align: center;
   border-radius: 10px;
-  margin: 10px 0;
   color: white;
+  max-width: 960px;
+  margin: 20px auto;
 }
 
 .debug-key {
@@ -93,3 +94,4 @@ input:focus {
 .website-heading {
   margin: 15px 30px 15px 100px;
 }
+

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.scss';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { HomeComponent, Sidebar } from './home-component';
-import { Migrator } from "./migrator";
+import { MigratorComponent } from "./migrator";
 
 class Validator extends React.Component {
   render() {
@@ -14,7 +14,7 @@ class Validator extends React.Component {
           <Switch>
             <Redirect exact from="/" to="/website" />
             <Route exact path="/website" component={HomeComponent} />
-            <Route exact path="/migrator" component={Migrator} />
+            <Route exact path="/migrator" component={MigratorComponent} />
           </Switch>
         </Router>
       </div>

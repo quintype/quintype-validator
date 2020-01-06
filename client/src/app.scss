@@ -4,16 +4,21 @@
 .sidebar {
   position: fixed;
   height: 100%;
-  width: 70px;
-  background-image: linear-gradient(235deg, #4860bc, #7842b9);
+  width: 4.375em;
+  background-image: linear-gradient(235deg, var(--blue-1), var(--blue-2));
   top: 0;
   left: 0;
   margin: 0;
   &-container {
-    background-color: #324383;
-    padding: 10px 0;
+    background-color: var(--brand-1);
+    padding: 0.625em 0;
     text-align: center;
-    cursor: pointer;
+  }
+}
+
+@media screen and (max-width: 768px ) {
+  .sidebar {
+    width: 3.75em;
   }
 }
 
@@ -22,13 +27,13 @@
     cursor: pointer;
   }
   &__container:hover {
-    background-color: #324383;
+    background-color: var(--brand-1);
   }
 
   .is-active {
     position: relative;
     display: block;
-    background-color: #324383;
+    background-color: var(--brand-1);
   }
 
   .navbar.is-active::before {
@@ -36,7 +41,7 @@
     display: block;
     width: 3px;
     height: 100%;
-    background-color: #f8e71c;
+    background-color: var(--brand-2);
     position: absolute;
     top: 0;
     bottom: 0;
@@ -44,18 +49,24 @@
   }
 
   .logo {
-    height: 40px;
-    padding: 14px 23px;
+    height: 2.5em;
+    padding: 0.875em 1.4375em;
+  }
+  
+  @media screen and (max-width: 768px ){
+    .logo {
+      padding: 0.4375em 0.625em;
+    }
   }
 
   &__website {
     background: url("./website-logo.svg") no-repeat center center;
-    margin-top: 40px;
+    margin-top: 2.5em;
   }
 
   &__migrator {
     background: url("./migrator.svg") no-repeat center center;
-    margin-top: 20px;
+    margin-top: 1.25em;
   }
 }
 
@@ -81,8 +92,8 @@ input:focus {
   line-height: 40px;
   background: red;
   text-align: center;
-  border-radius: 10px;
-  margin: 10px 0;
+  border-radius: 0.625em;
+  margin: 0.9375em 1.875em 0.9375em 6.25em;
   color: white;
 }
 
@@ -91,5 +102,5 @@ input:focus {
 }
 
 .website-heading {
-  margin: 15px 30px 15px 100px;
+  margin: 0.935em 1.875em 0.935em 3em;
 }

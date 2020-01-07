@@ -5,7 +5,7 @@ import readline from 'readline';
 import { createGenerator, DEFAULT_CONFIG } from 'ts-json-schema-generator';
 import zlib from 'zlib';
 
-import {errorParser} from './error-parser';
+import {errorParser} from '../error-parser';
 
 let schema : {[key:string]: object}= {};
 
@@ -30,6 +30,9 @@ export function validator(type: string, filepattern: string, source: string, dat
     __dirname,
     '..',
     '..',
+    '..',
+    '..',
+    '..',
     'node_modules',
     '@quintype',
     'migration-helpers',
@@ -40,6 +43,8 @@ export function validator(type: string, filepattern: string, source: string, dat
   );
 
   if (source === 'direct') {
+    console.log(typesPath);
+    console.log("dirname",__dirname);
     const directSchema = generateJsonSchema(typesPath, type);  
     const error =  validateJson(data,directSchema);
     if(error){

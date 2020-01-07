@@ -40,7 +40,7 @@ export function validator(type: string, filepattern: string, source: string, dat
   );
 
   if (source === 'direct') {
-    const directSchema = generateJsonSchema(typesPath, type);
+    const directSchema = generateJsonSchema(typesPath, type);  
     const error =  validateJson(data,directSchema);
     if(error){
       return errorParser(error,data['external-id'],type);

@@ -22,15 +22,20 @@ const getErrorMessageFunction = (keyword: String): (error: ajv.ErrorObject, iden
       }
     case "required":
       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-        return { "message": `${schema} with id ${identifier}  ${error.message}`, "logLevel": "error" }
+        return { "message": `${schema} with id ${identifier}  ${error.message}${error.dataPath !== '' ? ` in ${error.dataPath}` : ''}`, "logLevel": "error" }
       }
     case "anyOf":
       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
         return { "message": `${schema} with id ${identifier} - has  wrong schema in ${error.dataPath}`, "logLevel": "error"}
       }
+    case "enum": 
+    return(error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
+      const params = error.params as  {allowedValues : ReadonlyArray<string>};
+      return { "message" : `${schema} with id ${identifier}  ${error.message} in ${error.dataPath} [ ${error.params && params.allowedValues.join(' ')} ]`, "logLevel": "error"}
+    }
     default:
       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-        console.log(identifier,schema);
+        console.log(error,identifier,schema);
         return { message: error.message || '', "logLevel": "warn" };
       }
   }

@@ -142,7 +142,7 @@ describe('validatorTest',() => {
     );
   });
 
-  it('should validate Author and return error wrong type and log level error',()=>{
+  it('should validate Author and return error wrong type and log level error',() => {
     const Author = {
       name: 'Author name',
       'external-id': 22,
@@ -155,11 +155,99 @@ describe('validatorTest',() => {
     );
   });
 
-  it('should validate Section and return error missing property wiht log level error',() => {
+  it('should validate Section and return error missing property with log level error',() => {
     const Section= {'external-id': 'section-id'};
     const messageObject = validator('Section','','direct',Section);
     expect(messageObject).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "Section with id section-id  should have required property 'name'","logLevel":"error"})])
     );
   })
+
+  it('should validate seo-metadata and return error with log level error', () => {
+   const Section = {
+    'external-id': 'section-id',
+    'name': "Section Name",
+    'seo-metadata': {
+      description : 33
+    }
+   };
+   const messageObject = validator('Section', '','direct',Section);
+   expect(messageObject).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({"message": "Section with id section-id has wrong type for /seo-metadata/description. It should be string","logLevel":"error"}),
+      expect.objectContaining({"logLevel": "error", "message": "Section with id section-id  should have required property 'keywords' in /seo-metadata"}),
+      expect.objectContaining({"logLevel": "error", "message": "Section with id section-id  should have required property 'page-title' in /seo-metadata"}),
+      expect.objectContaining({"logLevel": "error", "message": "Section with id section-id  should have required property 'title' in /seo-metadata"})
+    ])
+  );
+  });
+
+  it('should validate story and return error with log level error', () => {
+  const Story = {
+    'external-id' :'sec-id',
+    'headline' : 'Story-headline',
+    'slug' :'Story-slug',
+    'first-published-at' : 11234,
+    'last-published-at' : 5678,
+    'published-at': "11",
+    'temporary-hero-image-url': 123,
+    'story-template': 'Story-template',
+    'authors': [{
+      'external-id': 'user-id','name': "name",'email': "email", "username" :"username"}],
+    'tags' :[{'name':'name'}],
+    'sections': [{'external-id': 'section-id','name': "name"}],
+    'summary': 'Summary',
+    'story-elements': [{'title':"",'description':"", 'type': "ff", 'subtype': "subtype"}],
+    'body': 'Story-body',
+    'subheadline' : 'sub',
+  };
+  const messageObject = validator('Story','','direct',Story);
+  expect(messageObject).toEqual(
+    expect.arrayContaining([expect.objectContaining({"message": "Story with id sec-id has wrong type for /temporary-hero-image-url. It should be string","logLevel":"error"})
+  ]));
+  })
+
+  it('should validate story and return valid', () => {
+    const Story = {
+      'external-id' :'sec-id',
+      'headline' : 'Story-headline',
+      'slug' :'Story-slug',
+      'first-published-at' : 11234,
+      'last-published-at' : 5678,
+      'published-at': 11,
+      'temporary-hero-image-url': "url",
+      'story-template': 'Story-template',
+      'authors': [{
+        'external-id': 'user-id','name': "name",'email': "email", "username" :"username"}],
+      'tags' :[{'name':'name'}],
+      'sections': [{'external-id': 'section-id','name': "name"}],
+      'summary': 'Summary',
+      'story-elements': [{'title':"",'description':"", 'type': "text", 'subtype': "subtype"}],
+      'subheadline' : 'sub'
+    };
+    const messageObject = validator('Story','','direct',Story);
+    expect(messageObject).toEqual('valid');
+    })
+
+    it('should validate story and return valid', () => {
+      const Story = {
+        'external-id' :'sec-id',
+        'headline' : 'Story-headline',
+        'slug' :'Story-slug',
+        'first-published-at' : 11234,
+        'last-published-at' : 5678,
+        'published-at': 11,
+        'temporary-hero-image-url': "url",
+        'story-template': 'Story-template',
+        'authors': [{
+          'external-id': 'user-id','name': "name",'email': "email", "username" :"username"}],
+        'tags' :[{'name':'name'}],
+        'sections': [{'external-id': 'section-id','name': "name"}],
+        'summary': 'Summary',
+        'body': 'Body',
+        'subheadline' : 'sub'
+      };
+      const messageObject = validator('Story','','direct',Story);
+      expect(messageObject).toEqual('valid');
+      })
 })

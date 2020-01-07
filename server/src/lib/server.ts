@@ -3,11 +3,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
+import { seoScoreHandler } from "./handlers/seo-score-handler";
+import { validateDomainHandler } from "./handlers/validate-domain-handler";
+import { validateRobotsHandler } from "./handlers/validate-robots-handler";
+import { validateUrlHandler } from "./handlers/validate-url-handler";
+import * as validator from './validator';
 
-import { seoScoreHandler } from './handlers/seo-score-handler';
-import { validateDomainHandler } from './handlers/validate-domain-handler';
-import { validateRobotsHandler } from './handlers/validate-robots-handler';
-import { validateUrlHandler } from './handlers/validate-url-handler';
 
 export const app = express();
 app.use(compression());
@@ -15,6 +16,7 @@ app.use(bodyParser.json({ limit: '1mb' }));
 
 app.set('view engine', 'ejs');
 app.use(express.static('public', { maxAge: 86400000 }));
+
 
 const corsMiddleware = cors({
   methods: 'POST',
@@ -69,3 +71,10 @@ app.post('/api/validate', (request: any, response: any) => {
     status: 'Sucess',
   });   
 });
+
+// app.post('/api/validate', (req: any, res: any) => {
+//   const { type, filepattern, source, data } = req.body;
+//   // console.log(data);
+//   let result = validator.validator(type, filepattern, source, data);
+//   res.status(200).send(result);
+// })

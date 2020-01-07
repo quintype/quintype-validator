@@ -8,7 +8,7 @@ import { seoScoreHandler } from "./handlers/seo-score-handler";
 import { validateDomainHandler } from "./handlers/validate-domain-handler";
 import { validateRobotsHandler } from "./handlers/validate-robots-handler";
 import { validateUrlHandler } from "./handlers/validate-url-handler";
-import * as validator from './validator';
+import * as validator from './handlers/validator';
 
 export const app = express();
 app.use(compression());

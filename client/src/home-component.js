@@ -240,7 +240,7 @@ class Results extends React.Component {
       );
 
     return (
-      <div>
+      <div className="results">
         {showResult("amp", "AMP")}
         {showResult("headers", "Caching Headers")}
         {this.props.results.structured ? (

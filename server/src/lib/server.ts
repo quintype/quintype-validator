@@ -8,6 +8,7 @@ import { seoScoreHandler } from "./handlers/seo-score-handler";
 import { validateDomainHandler } from "./handlers/validate-domain-handler";
 import { validateRobotsHandler } from "./handlers/validate-robots-handler";
 import { validateUrlHandler } from "./handlers/validate-url-handler";
+import * as validator from './validator';
 
 export const app = express();
 app.use(compression());
@@ -16,7 +17,7 @@ app.use(bodyParser.json({ limit: "1mb" }));
 app.set("view engine", "ejs");
 app.use(express.static("public", { maxAge: 86400000 }));
 
-const corsMiddleware = cors({
+const corsMiddleware = cors({ 
   methods: "POST",
   origin(origin, callback): void {
     if(!origin) {
@@ -58,4 +59,12 @@ app.get("/", (_, res) => {
   res.redirect(301, "https://developers.quintype.com/quintype-validator");
 });
 
+
 app.get("/ping", (_, res) => res.send("pong"));
+
+app.post('/api/validate', (req: any, res: any) => {
+  const { type, filepattern, source, data } = req.body;
+  // console.log(data);
+  let result = validator.validator(type, filepattern, source, data);
+  res.status(200).send(result);
+})

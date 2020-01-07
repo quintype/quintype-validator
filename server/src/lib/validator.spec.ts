@@ -1,0 +1,165 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { generateJsonSchema, validateJson, validator } from './validator';
+
+const testSchema =  JSON.parse(readFileSync(join(__dirname,'..','..','test','test_schema.json'), 'utf8'));
+const authorSchema = generateJsonSchema(join(__dirname, '..','..','test','editor-test.ts'), 'AuthorTest');
+const sectionSchema = generateJsonSchema(join(__dirname, '..','..','test','editor-test.ts'), 'SectionTest');
+const storySchema = generateJsonSchema(join(__dirname, '..','..','test','editor-test.ts'), 'StoryTest');
+
+function authorJSONSchemaSample(additionalProperties: any): object {
+  return {
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    type: 'object',
+    properties: { name: { type: 'string' } },
+    required: ['name'],
+    additionalProperties,
+    description: 'Author Definition',
+    definitions: {}
+  };
+}
+
+describe('generateJsonSchema', () => {
+  it('just returns the schema of author test', () => {
+    expect(authorSchema).toEqual(testSchema.definitions.AuthorTest);
+  });
+
+  it('just returns the schema of section-test', () => {
+    expect(sectionSchema).toEqual(testSchema.definitions.SectionTest);
+  });
+  
+  it('just returns the schema of story-test', () => {
+    expect(storySchema).toEqual(testSchema.definitions.StoryTest);
+  });
+});
+
+describe('validateJsonTest', () => {
+  it('should validate json', () => {
+    const Author1 = {
+      name: 'Author1 name'
+    };
+    const Author2 = {
+      name: 'Author2 name'
+    };
+    const Section1 = {
+      name: 'Section1 name'
+    };
+    const Section2 = {
+      name: 'Section2 name'
+    };
+    const Story = {
+      name: 'Story name',
+      sections: [Section1, Section2],
+      authors: [Author1, Author2]
+    };
+    expect(validateJson(Author1, authorSchema)).toBeNull();
+    expect(validateJson(Section1, sectionSchema)).toBeNull();
+    expect(validateJson(Story, storySchema)).toBeNull();
+  });
+
+  it('should return error for additional properties in json', () => {
+    const Author = {
+      name: 'Author name',
+      id: 12
+    };
+    const Section = {
+      name: 'Section1 name',
+      id: 12
+    };
+    const Story = {
+      name: 'Story name',
+      sections: [Section],
+      authors: [Author]
+    };
+
+    expect(validateJson(Author, authorSchema)).toEqual(
+      expect.arrayContaining([expect.objectContaining({ params: { additionalProperty: 'id' } })])
+    );
+    expect(validateJson(Section, sectionSchema)).toEqual(
+      expect.arrayContaining([expect.objectContaining({ params: { additionalProperty: 'id' } })])
+    );
+    expect(validateJson(Story, storySchema)).toEqual(
+      expect.arrayContaining([expect.objectContaining({ params: { additionalProperty: 'id' } })])
+    );
+  });
+
+  it('should not return error for additional properties if additional properties is set to true in schema', () => {
+    const Author = {
+      name: 'Author name',
+      id: 12
+    };
+    const output = validateJson(Author, authorJSONSchemaSample(true));
+    expect(output).toBeNull();
+  });
+
+  it('should return error if additional properties does not match type', () => {
+    const Author = {
+      name: 'Author name',
+      id: 12
+    };
+    const output = validateJson(Author, authorJSONSchemaSample({ type: 'string' }));
+    expect(output).toEqual([
+      {
+        dataPath: '/id',
+        keyword: 'type',
+        message: 'should be string',
+        params: { type: 'string' },
+        schemaPath: '#/additionalProperties/type',
+        parentSchema: { type: 'string' },
+        schema: 'string',
+        data: 12
+      }
+    ]);
+  });
+
+  it('should valid additional properties if it matches type', () => {
+    const Author = {
+      name: 'Author name',
+      id: '12'
+    };
+    const output = validateJson(Author, authorJSONSchemaSample({ type: 'string' }));
+    expect(output).toBeNull();
+  });
+});
+
+describe('validatorTest',() => {
+  it('should validate Author and return [additional property with log level warning, required property with log level error]',()=>{
+    const Author = {
+      name: 'Author name',
+      'external-id': 'user-id',
+      'email': 'author.name@please.chan',
+      'displayName': 'Author name',
+      'bio': 'Test',
+      'designation': 'Author'
+    }
+    const messageObject = validator('Author','','direct', Author);
+    expect(messageObject).toEqual(
+      expect.arrayContaining(
+        [
+          expect.objectContaining({"message": "Author with id user-id has additional properties displayName ","logLevel":"warn"}),
+          expect.objectContaining({"message":"Author with id user-id  should have required property \'username\'","logLevel": "error" })
+        ])
+    );
+  });
+
+  it('should validate Author and return error wrong type and log level error',()=>{
+    const Author = {
+      name: 'Author name',
+      'external-id': 22,
+      'email': 'author.name@please.chan',
+      'bio': 'Test',
+    }
+    const messageObject = validator('Author','','direct', Author);
+    expect(messageObject).toEqual(
+      expect.arrayContaining([expect.objectContaining({"message": "Author with id 22 has wrong type for /external-id. It should be string","logLevel":"error"})])
+    );
+  });
+
+  it('should validate Section and return error missing property wiht log level error',() => {
+    const Section= {'external-id': 'section-id'};
+    const messageObject = validator('Section','','direct',Section);
+    expect(messageObject).toEqual(
+      expect.arrayContaining([expect.objectContaining({"message": "Section with id section-id  should have required property 'name'","logLevel":"error"})])
+    );
+  })
+})

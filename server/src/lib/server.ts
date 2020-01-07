@@ -8,7 +8,7 @@ import { seoScoreHandler } from "./handlers/seo-score-handler";
 import { validateDomainHandler } from "./handlers/validate-domain-handler";
 import { validateRobotsHandler } from "./handlers/validate-robots-handler";
 import { validateUrlHandler } from "./handlers/validate-url-handler";
-import * as validator from './validator';
+import * as validator from './handlers/validator';
 
 export const app = express();
 app.use(compression());
@@ -64,7 +64,7 @@ app.get("/ping", (_, res) => res.send("pong"));
 
 app.post('/api/validate', (req: any, res: any) => {
   const { type, filepattern, source, data } = req.body;
-  // console.log(data);
+  console.log(data);
   let result = validator.validator(type, filepattern, source, data);
   res.status(200).send(result);
 })

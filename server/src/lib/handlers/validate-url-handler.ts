@@ -10,6 +10,7 @@ import { runRouteDataValidator } from "../runners/route-data";
 import { runStructuredDataValidator } from "../runners/structured-data";
 
 function fetchLinks($: CheerioSelector, url: string): ReadonlyArray<string> {
+  // tslint:disable-next-statement
   const links = $('a[href]').map((_, element) => URL.resolve(url, $(element).attr("href"))).get();
   return _(links).filter(link => link.startsWith("http")).uniq().value();
 }

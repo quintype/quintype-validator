@@ -2,10 +2,10 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { generateJsonSchema, validateJson, validator } from './validator';
 
-const testSchema =  JSON.parse(readFileSync(join(__dirname,'..','..','..','..','test-data','test_schema.json'), 'utf8'));
-const authorSchema = generateJsonSchema(join(__dirname, '..','..','..','..','test-data','editor-test.ts'), 'AuthorTest');
-const sectionSchema = generateJsonSchema(join(__dirname, '..','..','..','..','test-data','editor-test.ts'), 'SectionTest');
-const storySchema = generateJsonSchema(join(__dirname, '..','..','..','..','test-data','editor-test.ts'), 'StoryTest');
+const testSchema =  JSON.parse(readFileSync(join(__dirname,'..','..','..','test-data','test_schema.json'), 'utf8'));
+const authorSchema = generateJsonSchema(join(__dirname, '..','..','..','test-data','editor-test.ts'), 'AuthorTest');
+const sectionSchema = generateJsonSchema(join(__dirname, '..','..','..','test-data','editor-test.ts'), 'SectionTest');
+const storySchema = generateJsonSchema(join(__dirname, '..','..','..','test-data','editor-test.ts'), 'StoryTest');
 
 const typesPath = join(__dirname,
   '..',
@@ -143,7 +143,7 @@ describe('validatorTest',() => {
       'bio': 'Test',
       'designation': 'Author'
     }
-    const messageObject = validator('Author',typesPath,'','direct', Author);
+    const messageObject = validator('Author',typesPath, Author);
     expect(messageObject).toEqual(
       expect.arrayContaining(
         [
@@ -160,7 +160,7 @@ describe('validatorTest',() => {
       'email': 'author.name@please.chan',
       'bio': 'Test',
     }
-    const messageObject = validator('Author',typesPath,'','direct', Author);
+    const messageObject = validator('Author',typesPath, Author);
     expect(messageObject).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "Author with id 22 has wrong type for /external-id. It should be string","logLevel":"error"})])
     );
@@ -168,7 +168,7 @@ describe('validatorTest',() => {
 
   it('should validate Section and return error missing property with log level error',() => {
     const Section= {'external-id': 'section-id'};
-    const messageObject = validator('Section',typesPath,'','direct',Section);
+    const messageObject = validator('Section',typesPath,Section);
     expect(messageObject).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "Section with id section-id  should have required property 'name'","logLevel":"error"})])
     );
@@ -182,7 +182,7 @@ describe('validatorTest',() => {
       description : 33
     }
    };
-   const messageObject = validator('Section', typesPath,'','direct',Section);
+   const messageObject = validator('Section', typesPath,Section);
    expect(messageObject).toEqual(
     expect.arrayContaining([
       expect.objectContaining({"message": "Section with id section-id has wrong type for /seo-metadata/description. It should be string","logLevel":"error"}),
@@ -212,7 +212,7 @@ describe('validatorTest',() => {
     'body': 'Story-body',
     'subheadline' : 'sub',
   };
-  const messageObject = validator('Story',typesPath,'','direct',Story);
+  const messageObject = validator('Story',typesPath,Story);
   expect(messageObject).toEqual(
     expect.arrayContaining([expect.objectContaining({"message": "Story with id sec-id has wrong type for /temporary-hero-image-url. It should be string","logLevel":"error"})
   ]));
@@ -236,7 +236,7 @@ describe('validatorTest',() => {
       'story-elements': [{'title':"",'description':"", 'type': "text", 'subtype': "subtype"}],
       'subheadline' : 'sub'
     };
-    const messageObject = validator('Story',typesPath,'','direct',Story);
+    const messageObject = validator('Story',typesPath,Story);
     expect(messageObject).toEqual('valid');
     })
 
@@ -258,7 +258,7 @@ describe('validatorTest',() => {
         'body': 'Body',
         'subheadline' : 'sub'
       };
-      const messageObject = validator('Story',typesPath,'','direct',Story);
+      const messageObject = validator('Story',typesPath,Story);
       expect(messageObject).toEqual('valid');
       })
 })

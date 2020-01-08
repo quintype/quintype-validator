@@ -16,6 +16,7 @@ export async function fetchLighthouse(url: string): Promise<LighthouseResults> {
     });
     return new Lighthouse(url, data);
   } catch(e) {
+    // tslint:disable: no-console
     console.error(e.message || e);
     return new LighthouseError(url);
   }

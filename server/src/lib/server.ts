@@ -1,14 +1,22 @@
 import express from 'express';
-
+import {join} from 'path';
 import bodyParser from "body-parser";
 import compression from 'compression';
 import cors from 'cors';
+import multer from 'multer';
+import {  Transform} from 'stream';
+import es from 'event-stream';
+
+const storage = multer.memoryStorage();
+
+const upload = multer({ storage: storage });
 
 import { seoScoreHandler } from "./handlers/seo-score-handler";
 import { validateDomainHandler } from "./handlers/validate-domain-handler";
 import { validateRobotsHandler } from "./handlers/validate-robots-handler";
 import { validateUrlHandler } from "./handlers/validate-url-handler";
 import * as validator from './handlers/validator';
+
 
 export const app = express();
 app.use(compression());
@@ -61,10 +69,36 @@ app.get("/", (_, res) => {
 
 
 app.get("/ping", (_, res) => res.send("pong"));
-
+const typesPath = join(__dirname,
+  '..',
+  '..',
+  '..',
+  'node_modules',
+  '@quintype/migration-helpers',
+  'build',
+  'main',
+  'lib',
+  'editor-types.d.ts');
 app.post('/api/validate', (req: any, res: any) => {
   const { type, filepattern, source, data } = req.body;
-  console.log(data);
-  let result = validator.validator(type, filepattern, source, data);
+  let result = validator.validator(type,typesPath, filepattern, source, data);
   res.status(200).send(result);
+})
+
+app.post('/api/validate-file',upload.single('file'), (req: any, res: any) => {
+  const stream = new Transform({
+    transform(chunk,_,cb){
+      cb(null,chunk)
+    }
+  });
+  stream.write(req.file.buffer);
+  stream
+  .pipe(es.split())
+  .pipe(es.map(
+    (data: any,cb: any)=>{
+      cb(null,
+        JSON.stringify(validator.validator('Story',typesPath, '', 'direct',JSON.parse(data))))
+    }))
+    .pipe(process.stdout)
+  res.sendStatus(200);
 })

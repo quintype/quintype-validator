@@ -5,7 +5,7 @@ import readline from 'readline';
 import { createGenerator, DEFAULT_CONFIG } from 'ts-json-schema-generator';
 import zlib from 'zlib';
 
-import {errorParser} from '../error-parser';
+import {errorParser} from '../utils/error-parser';
 
 let schema : {[key:string]: object}= {};
 
@@ -21,44 +21,12 @@ export function generateJsonSchema(filePath: string, interfaceName: string): any
 export function validateJson(data: object, schema: object): ReadonlyArray<ajv.ErrorObject>|null|undefined {
   const ajvt = new ajv({ verbose: true, jsonPointers: true,allErrors: true});
   const validate = ajvt.compile(schema);
-  //const testValidate =
   validate(data);
-  // if(testValidate instanceof Promise){
-  //   testValidate.then((errorData)=>{console.log(errorData)})
-  // }
-  // return betterAjvErrors(schema, data, validate.errors, {format: "js"});
   return validate.errors;
 }
 
-// function readableError(allErrors: ReadonlyArray<object>): any {
-//   if (allErrors) {
-//     console.log(allErrors);
-//     // return allErrors.map((errorObject: any) => {
-//     //   console.error(errorObject.data['external-id'], errorObject.message);
-//     // });
-//   }
-// }
-
-export function validator(type: string, filepattern: string, source: string, data: any): any {
-  const typesPath = join(
-    __dirname,
-    '..',
-    '..',
-    '..',
-    '..',
-    '..',
-    'node_modules',
-    '@quintype',
-    'migration-helpers',
-    'build',
-    'main',
-    'lib',
-    'editor-types.d.ts'
-  );
-
+export function validator(type: string, typesPath: string, filepattern: string, source: string, data: any): any {
   if (source === 'direct') {
-    console.log(typesPath);
-    console.log("dirname",__dirname);
     const directSchema = generateJsonSchema(typesPath, type);  
     const error =  validateJson(data,directSchema);
     if(error){

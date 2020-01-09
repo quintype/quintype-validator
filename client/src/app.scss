@@ -1,6 +1,75 @@
 @import "./result-page.scss";
 @import "./url-page.scss";
 
+.sidebar {
+  position: fixed;
+  height: 100%;
+  width: 4.375em;
+  background-image: linear-gradient(235deg, var(--blue-1), var(--blue-2));
+  top: 0;
+  left: 0;
+  margin: 0;
+  &-container {
+    background-color: var(--brand-1);
+    padding: 0.625em 0;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 768px ) {
+  .sidebar {
+    width: 3.75em;
+  }
+}
+
+.menu {
+  &__container {
+    cursor: pointer;
+  }
+  &__container:hover {
+    background-color: var(--brand-1);
+  }
+
+  .is-active {
+    position: relative;
+    display: block;
+    background-color: var(--brand-1);
+  }
+
+  .navbar.is-active::before {
+    content: "";
+    display: block;
+    width: 3px;
+    height: 100%;
+    background-color: var(--brand-2);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .logo {
+    height: 2.5em;
+    padding: 0.875em 1.4375em;
+  }
+  
+  @media screen and (max-width: 768px ){
+    .logo {
+      padding: 0.4375em 0.625em;
+    }
+  }
+
+  &__website {
+    background: url("./website-logo.svg") no-repeat center center;
+    margin-top: 2.5em;
+  }
+
+  &__migrator {
+    background: url("./migrator.svg") no-repeat center center;
+    margin-top: 1.25em;
+  }
+}
+
 .clearfix {
   &::after {
     display: block;
@@ -9,23 +78,29 @@
   }
 }
 
-input:focus { outline: 0 }
+input:focus {
+  outline: 0;
+}
 
 .loading {
   text-align: center;
   padding-top: 150px;
-  background: url('./infinity.svg') no-repeat center center;
+  background: url("./infinity.svg") no-repeat center center;
 }
 
 .error-message {
   line-height: 40px;
   background: red;
   text-align: center;
-  border-radius: 10px;
-  margin: 10px 0;
+  border-radius: 0.625em;
+  margin: 0.9375em 1.875em 0.9375em 6.25em;
   color: white;
 }
 
 .debug-key {
   text-transform: capitalize;
+}
+
+.website-heading {
+  margin: 0.935em 1.875em 0.935em 3em;
 }

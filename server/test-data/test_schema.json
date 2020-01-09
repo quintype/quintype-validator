@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AuthorTest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$ref": "#/definitions/AuthorTest",
+      "definitions": {
+        "AuthorTest": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Name of Author",
+              "type": "string"
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": false,
+          "description": "Author Definition"
+        }
+      }
+    },
+    "SectionTest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$ref": "#/definitions/SectionTest",
+      "definitions": {
+        "SectionTest":{
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Name of section",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "description": "Section Definition"
+        }
+      }
+    },
+    "StoryTest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$ref": "#/definitions/StoryTest",
+      "definitions": {
+        "StoryTest":{
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of story"
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SectionTest"
+              },
+              "description": "List of sections story belongs to"
+            },
+            "authors": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AuthorTest"
+              },
+              "description": "List of story authors"
+            }
+          },
+          "required": [
+            "name",
+            "sections",
+            "authors"
+          ],
+          "additionalProperties": false
+        },
+        "SectionTest": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Name of section",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "description": "Section Definition"
+        },
+        "AuthorTest": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Name of Author",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "description": "Author Definition"
+        }
+      }
+    }
+  }
+}

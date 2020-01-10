@@ -50,6 +50,8 @@
     "node": ">=8.9"
   },
   "dependencies": {
+    "@quintype/migration-helpers": "^1.14.0",
+    "ajv": "^6.10.2",
     "amphtml-validator": "^1.0.29",
     "array.prototype.flatmap": "^1.2.2",
     "body-parser": "^1.19.0",
@@ -63,7 +65,8 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
     "robots-parser": "^2.1.1",
-    "sha.js": "^2.4.11"
+    "sha.js": "^2.4.11",
+    "ts-json-schema-generator": "^0.56.0"
   },
   "devDependencies": {
     "@bitjson/npm-scripts-info": "^1.0.0",

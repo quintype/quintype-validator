@@ -1,17 +1,15 @@
 import bodyParser from "body-parser";
-import Busboy from 'busboy';
 import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import { join } from 'path';
-import split2 from 'split2';
 import { seoScoreHandler } from "./handlers/seo-score-handler";
 import { validateDomainHandler } from "./handlers/validate-domain-handler";
 import { validateRobotsHandler } from "./handlers/validate-robots-handler";
 import { validateUrlHandler } from "./handlers/validate-url-handler";
 import * as validator from './handlers/validator';
-import { Transform } from "stream";
-import { isUndefined } from "util";
+import S3 from 'aws-sdk/clients/s3'
+import {FileHandler} from "./handlers/file-handlers";
 
 export const app = express();
 app.use(compression());
@@ -81,36 +79,11 @@ app.post('/api/validate', (req: any, res: any) => {
 })
 
 app.post('/api/validate-file', (req: any, res: any) => {
-  const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
-  let type :any = undefined;
-  busboy.on('field', (fieldname, value, _0, _1, _2, _3) => {
-    if (fieldname !== 'type') {
-      return;
-    }
-    type = value;
-  })
-  busboy.on('file', (fieldname, file, _1, _2, _3) => {
-    if (fieldname !== 'file') {
-      // Added if incorrect field 
-      res.sendStatus(422);
-      file.resume();
-      return
-    }
-    file
-      .pipe(split2())
-      .pipe(new Transform({
-        async transform(chunk, _0,cb) {
-          if(isUndefined(type)){
-            await new Promise(r => setTimeout(r, 2000));
-          }
-          const item = JSON.parse(chunk);
-          cb(null,`${JSON.stringify({ 'external-id': item['external-id'] ? item['external-id'] : "missing-id" ,result : validator.validator(type, typesPath, item ) })}\n`)
-        }
-      }))
-      .pipe(res);
-  })
-  busboy.on('finish', () => {
-    console.info("Completed parsing")
-  })
-  req.pipe(busboy);
+  return FileHandler(req,res);
+})
+
+app.post('/api/validate-s3',(req:any,res :any)=>{
+  const {path,accessId,accessSecretKey} = req.body;
+  new S3().getObject()
+
 })

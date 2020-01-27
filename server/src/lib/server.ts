@@ -79,6 +79,7 @@ const typesPath = join(
 
 app.post('/api/validate', (req: any, res: any) => {
   const { type, data } = req.body;
+  if(!type || !data) res.status(400).send({ "message": "Please provide input" });
   res.status(200).send(validator.validator(type, typesPath, data));
 });
 
@@ -86,6 +87,6 @@ app.post('/api/validate-file', (req: any, res: any) => {
   return FileHandler(req, res);
 });
 
-app.get('/api/validate-s3', function(req, res) {
+app.get('/api/validate-s3',(req: any, res:any) => {
   return AWSHandler(req, res);
 });

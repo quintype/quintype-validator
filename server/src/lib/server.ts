@@ -1,44 +1,47 @@
-import bodyParser from "body-parser";
+import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import { join } from 'path';
-import { seoScoreHandler } from "./handlers/seo-score-handler";
-import { validateDomainHandler } from "./handlers/validate-domain-handler";
-import { validateRobotsHandler } from "./handlers/validate-robots-handler";
-import { validateUrlHandler } from "./handlers/validate-url-handler";
+import { seoScoreHandler } from './handlers/seo-score-handler';
+import { validateDomainHandler } from './handlers/validate-domain-handler';
+import { validateRobotsHandler } from './handlers/validate-robots-handler';
+import { validateUrlHandler } from './handlers/validate-url-handler';
 import * as validator from './handlers/validator';
-import S3 from 'aws-sdk/clients/s3'
-import {FileHandler} from "./handlers/file-handlers";
+import { FileHandler } from './handlers/file-handlers';
+import { AWSHandler } from './handlers/validate-s3-handlers';
 
 export const app = express();
 app.use(compression());
-app.use(bodyParser.json({ limit: "1mb" }));
+app.use(bodyParser.json({ limit: '1mb' }));
 
-app.set("view engine", "ejs");
-app.use(express.static("public", { maxAge: 86400000 }));
+app.set('view engine', 'ejs');
+app.use(express.static('public', { maxAge: 86400000 }));
 
 const corsMiddleware = cors({
-  methods: "POST",
+  methods: 'POST',
   origin(origin, callback): void {
     if (!origin) {
       callback(null, true);
       return;
     }
-    if (origin.endsWith("quintype.com") ||
-      (process.env.NODE_ENV !== 'production' && origin.startsWith("http://localhost:"))) {
-      callback(null, true)
+    if (
+      origin.endsWith('quintype.com') ||
+      (process.env.NODE_ENV !== 'production' &&
+        origin.startsWith('http://localhost:'))
+    ) {
+      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error('Not allowed by CORS'));
     }
   }
 });
 
-app.options("/api/validate.json", corsMiddleware);
-app.post("/api/validate.json", corsMiddleware, (req, res) => {
+app.options('/api/validate.json', corsMiddleware);
+app.post('/api/validate.json', corsMiddleware, (req, res) => {
   const url = req.body.url;
 
-  if (url && url.startsWith("http")) {
+  if (url && url.startsWith('http')) {
     return validateUrlHandler(req, res);
   }
 
@@ -46,23 +49,23 @@ app.post("/api/validate.json", corsMiddleware, (req, res) => {
     return validateDomainHandler(req, res);
   }
 
-  return res.status(400).json({ error: { message: "Missing url" } });
+  return res.status(400).json({ error: { message: 'Missing url' } });
 });
 
-app.options("/api/seo-scores", corsMiddleware);
-app.post("/api/seo-scores", corsMiddleware, seoScoreHandler);
+app.options('/api/seo-scores', corsMiddleware);
+app.post('/api/seo-scores', corsMiddleware, seoScoreHandler);
 
-app.get("/validate-robots", validateRobotsHandler);
+app.get('/validate-robots', validateRobotsHandler);
 
-app.get("/", (_, res) => {
-  res.setHeader("Content-Type", "text/html");
-  res.setHeader("Cache-Control", "public,max-age=60");
-  res.redirect(301, "https://developers.quintype.com/quintype-validator");
+app.get('/', (_, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Cache-Control', 'public,max-age=60');
+  res.redirect(301, 'https://developers.quintype.com/quintype-validator');
 });
 
-
-app.get("/ping", (_, res) => res.send("pong"));
-const typesPath = join(__dirname,
+app.get('/ping', (_, res) => res.send('pong'));
+const typesPath = join(
+  __dirname,
   '..',
   '..',
   '..',
@@ -71,19 +74,18 @@ const typesPath = join(__dirname,
   'build',
   'main',
   'lib',
-  'editor-types.d.ts');
+  'editor-types.d.ts'
+);
 
 app.post('/api/validate', (req: any, res: any) => {
   const { type, data } = req.body;
   res.status(200).send(validator.validator(type, typesPath, data));
-})
+});
 
 app.post('/api/validate-file', (req: any, res: any) => {
-  return FileHandler(req,res);
-})
+  return FileHandler(req, res);
+});
 
-app.post('/api/validate-s3',(req:any,res :any)=>{
-  const {path,accessId,accessSecretKey} = req.body;
-  new S3().getObject()
-
-})
+app.get('/api/validate-s3', function(req, res) {
+  return AWSHandler(req, res);
+});

@@ -32,7 +32,7 @@ export async function AWSHandler(req: Request, res: Response) {
     Key: s3key
   };
 
-  if (!type || !s3key || bucketName)
+  if (!type || !s3key || !bucketName)
     res.status(400).send({ message: 'Please provide correct input' });
 
   s3.getObject(options)

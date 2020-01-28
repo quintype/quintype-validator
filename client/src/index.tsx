@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { HomeComponent, Sidebar } from './home-component';
-import { MigratorComponent } from "./migrator";
+import { MigratorComponent } from './migrator';
 
 class Validator extends React.Component {
   render() {

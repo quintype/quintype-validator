@@ -9,6 +9,12 @@
       var url = window.location;
       let host =
         url.protocol + "//" + url.hostname + (url.port ? ":" + url.port : "");
+      let queryString = url.pathname
+        .slice(1)
+        .split("/")
+        .slice(segmentCount)
+        .join("/")
+        .replace(/&/g, "~and~");
       let path = url.pathname
         .split("/")
         .slice(0, 1 + segmentCount)
@@ -17,12 +23,7 @@
         host +
           path +
           "/?p=/" +
-          url.pathname
-            .slice(1)
-            .split("/")
-            .slice(segmentCount)
-            .join("/")
-            .replace(/&/g, "~and~") +
+          queryString +
           (url.search
             ? "&q=" + url.search.slice(1).replace(/&/g, "~and~")
             : "") +

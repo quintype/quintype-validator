@@ -72,9 +72,8 @@ app.post('/api/validate', (request: any, response: any) => {
   });   
 });
 
-// app.post('/api/validate', (req: any, res: any) => {
-//   const { type, filepattern, source, data } = req.body;
-//   // console.log(data);
-//   let result = validator.validator(type, filepattern, source, data);
-//   res.status(200).send(result);
-// })
+app.post('/api/validate', (req: any, res: any) => {
+  const { type, filepattern, source, data } = req.body;
+  let result = validator.validator(type, filepattern, source, data);
+  res.status(200).send(result);
+})

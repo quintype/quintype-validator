@@ -5,11 +5,7 @@ import { Button } from "@quintype/em/components/button";
 import Select from "@quintype/em/components/select";
 import { TextArea } from "@quintype/em/components/text-area";
 import { FileUpload } from "@quintype/em/components/file-upload";
-import { Loader } from "@quintype/em/components/loader";
 import "@quintype/em/global.css";
-import { Link } from "react-router-dom";
-import classnames from "classnames/bind";
-import request from "superagent-bluebird-promise";
 
 const selectOptions = [
   { label: "Story", value: "story" },
@@ -23,7 +19,6 @@ const validateOptions = [
   { label: "S3 Location", value: "S3 Location" }
 ];
 
-const cx = classnames.bind(styles);
 export class Migrator extends Component {
   constructor(props) {
     super(props);
@@ -44,14 +39,8 @@ export class Migrator extends Component {
     this.setState({ selecttype });
   };
 
-  submit(e) {
-    this.props.onSubmit(this.props.url);
-    e.preventDefault();
-  }
-
   handleclick(e) {
     e.preventDefault();
-    this.props.onSubmit(this.props.url);
     this.setState({
       disabled: !this.state.disabled
     });
@@ -78,7 +67,7 @@ export class Migrator extends Component {
                 value={validatetype}
                 onChange={this.validateHandler}
               />
-              <form onSubmit={e => this.submit(e)}>
+              <form>
                 {validatetype && validatetype.value === "Direct text input" ? (
                   <TextArea
                     label="Enter the Markup to validate:"
@@ -118,55 +107,13 @@ export class MigratorComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      url: "",
-      response: null,
-      loading: false,
-      error: null
+      url: ""
     };
   }
-
-  loadRules(url) {
-    request
-      .post(`${process.env.REACT_APP_API_HOST || ""}/api/validate.json`, {
-        url: url
-      })
-      .then(response =>
-        this.setState({
-          response: response.body,
-          loading: false,
-          url: response.body.url
-        })
-      )
-      .catch(e => this.setState({ loading: false, error: e.message }));
-  }
-
-  processUrl(url) {
-    if (this.state.loading) return;
-
-    this.setState(
-      {
-        url: url,
-        loading: true,
-        error: null
-      },
-      () => this.loadRules(url)
-    );
-  }
-
-  import(response) {
-    this.setState({
-      response: response,
-      error: null,
-      loading: false,
-      url: response.url
-    });
-  }
-
   render() {
     return (
       <div>
         <Migrator
-          onSubmit={url => this.processUrl(url)}
           url={this.state.url}
           onChange={url =>
             this.setState({
@@ -174,48 +121,14 @@ export class MigratorComponent extends React.Component {
             })
           }
         />
-        {this.state.error && (
-          <div className="error-message">{this.state.error}</div>
-        )}
-        {this.state.loading && <MigratorResultPage />}
-        {!this.state.loading && this.state.response && <DisplayResults />}
       </div>
-    );
-  }
-}
-
-export function DisplayResults() {
-  return (
-    <div className={styles["migrator"]}>
-      <Heading />
-      <div className={cx("container", "result-section")}>Displayed</div>
-    </div>
-  );
-}
-
-export class MigratorResultPage extends React.Component {
-  render() {
-    return (
-      <React.Fragment>
-        <Heading />
-        <div className={cx("migrator", "result")}>
-          <h2 className={styles["result-heading"]}>Results</h2>
-          <div className={styles["result-loader"]}>
-            <Loader />
-            <div>
-              Please wait, validation is in progress. This can take 5-10
-              minutes. Please don't close the tab.
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
     );
   }
 }
 
 function Heading() {
   return (
-    <section className={styles["migrator"]}>
+    <section className={styles["migrator-heading"]}>
       <h1 className={styles["heading"]}>Migration Data Validator</h1>
       <p className={styles["content"]}>
         Quis blandit turpis cursus in hac habitasse. Scelerisque in dictum non

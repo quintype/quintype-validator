@@ -5,11 +5,13 @@
     <title>Quintype Validator</title>
     <script type="text/javascript">
       var segmentCount = 1;
-      var l = window.location;
-      l.replace(
-        l.href.substr(l.href.lastIndexOf("/") + 1) +
-          (l.search ? "&q=" + l.search.slice(1).replace(/&/g, "~and~") : "") +
-          l.hash
+      var url = window.location;
+      let host = url.protocol + "//" + url.hostname + (url.port ? ":" + url.port : "");
+      let queryString = url.pathname.slice(1).split("/").slice(segmentCount).join("/").replace(/&/g, "~and~");
+      let path = url.pathname.split("/").slice(0, 1 + segmentCount).join("/");
+      url.replace( host + path + "/?p=/" + queryString + (url.search
+            ? "&q=" + url.search.slice(1).replace(/&/g, "~and~")
+            : "") + url.hash
       );
     </script>
   </head>

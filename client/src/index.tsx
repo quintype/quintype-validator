@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import { HomeComponent, Migrator, Sidebar } from './home-component';
+import { HomeComponent, Sidebar } from './home-component';
+import { Migrator } from "./migrator";
 
 class Validator extends React.Component {
   render() {
     return (
       <div>
-        <Router>
+        <Router basename="/quintype-validator">
           <Sidebar />
           <Switch>
             <Redirect exact from="/" to="/website" />

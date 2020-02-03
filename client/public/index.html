@@ -9,24 +9,24 @@
     <meta name="description" content="Tool to Validate Quintype Websites"/>
     <title>Quintype Validator</title>
     <script type="text/javascript">
-      (function(url) {
-        if (url.search) {
-          var query= {};
-          url.search.slice(1).split('&').forEach( value => {
-            var splitUrl = value.split('=');
-            query[splitUrl[0]] = splitUrl.slice(1).join('=').replace(/~and~/g, '&');
-          });
-          if (query.path !== undefined) {
-            let pathName = url.pathname.slice(0, -1) + (query.path || '') ;
-            window.history.replaceState(null, null,
-            pathName +
-              (query.q ? ('?' + query.q) : '') +
-              url.hash
-            );
-          }
-        }
-      }(window.location))
-    </script>
+      (function(location) {
+       if (location.search) {
+         var query = {};
+         var pairs = location.search.slice(1).split('&')
+         pairs.forEach(value => {
+           var splitUrl = value.split('=');
+           query[splitUrl[0]] = splitUrl.slice(1).join('=').replace(/~and~/g, '&');
+         });
+         if (query.p !== undefined) {
+           window.history.replaceState(null, null,
+           location.pathname.slice(0, -1) +   +
+             (query.q ? ('?' + query.q) : '') +
+             location.hash
+           );
+         }
+       }
+     }(window.location))
+   </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

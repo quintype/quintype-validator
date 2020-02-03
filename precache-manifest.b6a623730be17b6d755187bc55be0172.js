@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "c199b2c09deac99fd47534bc09fdc44f",
+    "revision": "7256f7ed8c0e8a0168bee0d679d4ae38",
     "url": "/quintype-validator/index.html"
   },
   {

@@ -8,7 +8,7 @@
           });
           if (query.p !== undefined) {
             window.history.replaceState(null, null,
-            location.pathname.slice(0, -1) + (query.p || '') +
+            location.pathname.slice(0, -1) +   +
               (query.q ? ('?' + query.q) : '') +
               location.hash
             );

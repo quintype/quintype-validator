@@ -5,20 +5,11 @@ import { Button } from "@quintype/em/components/button";
 import { TextArea } from "@quintype/em/components/text-area";
 import "@quintype/em/global.css";
 import { Loader } from "@quintype/em/components/loader";
-import classnames from "classnames/bind";
 
-const cx = classnames.bind(styles);
+const selectOptions = [{ label: "Story", value: "story" }];
 
-const selectOptions = [
-  { label: "Story", value: "story" },
-  { label: "Section", value: "section" },
-  { label: "Authors", value: "authors" },
-  { label: "Story Attributes", value: "story attributes" }
-];
 const validateOptions = [
-  { label: "Direct text input", value: "Direct text input" },
-  { label: "File Upload", value: "File Upload" },
-  { label: "S3 Location", value: "S3 Location" }
+  { label: "Direct text input", value: "Direct text input" }
 ];
 
 export class Migrator extends Component {
@@ -28,7 +19,10 @@ export class Migrator extends Component {
       validatetype: null,
       selecttype: null,
       disabled: true,
-      text: ""
+      text: "",
+      responseData: [],
+      isResponse: false,
+      isLoading: false
     };
     this.validateHandler = this.validateHandler.bind(this);
     this.onChangeSelecthandler = this.onChangeSelecthandler.bind(this);
@@ -43,22 +37,46 @@ export class Migrator extends Component {
     this.setState({ selecttype });
   };
 
+  handleChange = value => {
+    this.setState({ text: value });
+  };
+
   handleclick(e) {
     e.preventDefault();
     this.setState({
       disabled: !this.state.disabled
     });
+    const data = {
+      validate: this.state.validatetype.value,
+      select: this.state.selecttype.value,
+      text: this.state.text.replace(/\r?\n|\r/g, "")
+    };
+    fetch("http://localhost:3000/api/validate", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
+        this.setState({
+          responseData: this.state.responseData.concat(response),
+          isResponse: true,
+          isLoading: true
+        });
+      });
+    setTimeout(() => this.setState({ isLoading: false }), 1000);
   }
-
-  handleChange = value => {
-    this.setState({ text: value });
-  };
-
   render() {
-    const { validatetype, selecttype, text, direct } = this.state;
+    const { validatetype, selecttype, text } = this.state;
+    const submitDisabled = validatetype && selecttype && text;
     return (
       <div className={styles["migrator"]}>
-        {this.state.disabled ? (
+        {this.state.disabled && !this.state.isResponse ? (
           <div>
             <Heading />
             <div className={styles["container"]}>
@@ -66,7 +84,7 @@ export class Migrator extends Component {
                 label="Select Type"
                 options={selectOptions}
                 value={selecttype}
-                onChange={this.onChangeSelecthandler}
+                onChange={e => this.onChangeSelecthandler(e)}
               />
               <Select
                 label="Validate by"
@@ -78,15 +96,15 @@ export class Migrator extends Component {
                 {validatetype && validatetype.value === "Direct text input" ? (
                   <TextArea
                     label="Enter the Markup to validate:"
-                    placeholder="Enter the text"
                     onChange={value => this.handleChange(value)}
                     value={text}
+                    placeholder={"Enter the JSON data"}
                   />
                 ) : null}
                 <Button
                   type="primary"
                   onClick={e => this.handleclick(e)}
-                  disabled={!this.state.text}
+                  disabled={!submitDisabled}
                 >
                   Validate
                 </Button>
@@ -94,31 +112,30 @@ export class Migrator extends Component {
             </div>
           </div>
         ) : (
-          <MigratorResultPage />
+          <div>
+            {this.state.isLoading ? (
+              <ResultsPage />
+            ) : (
+              <p>{JSON.stringify(this.state.responseData[0])}</p>
+            )}
+          </div>
         )}
       </div>
     );
   }
 }
 
-export class MigratorResultPage extends React.Component {
-  render() {
-    return (
-      <React.Fragment>
-        <Heading />
-        <div className={cx("migrator", "result")}>
-          <h2 className={styles["result-heading"]}>Results</h2>
-          <div className={styles["result-loader"]}>
-            <Loader />
-            <div>
-              Please wait, validation is in progress. This can take 5-10
-              minutes. Please don't close the tab.
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
-    );
-  }
+function ResultsPage() {
+  return (
+    <div className={styles["migrator"]}>
+      <Heading />
+      <div className={styles["container"]}>
+        <p>Results</p>
+        <Loader />
+        <p>Please wait, validation is in progress. This can take 5-10 minutes. Please don't close the tab.</p>
+      </div>
+    </div>
+  );
 }
 
 function Heading() {
@@ -133,5 +150,4 @@ function Heading() {
     </section>
   );
 }
-
 export default Heading;

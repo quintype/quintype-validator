@@ -1,15 +1,16 @@
 import express from 'express';
-import {join} from 'path';
+import { join } from 'path';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
-import { seoScoreHandler } from "./handlers/seo-score-handler";
-import { validateDomainHandler } from "./handlers/validate-domain-handler";
-import { validateRobotsHandler } from "./handlers/validate-robots-handler";
-import { validateUrlHandler } from "./handlers/validate-url-handler";
+import { seoScoreHandler } from './handlers/seo-score-handler';
+import { validateDomainHandler } from './handlers/validate-domain-handler';
+import { validateRobotsHandler } from './handlers/validate-robots-handler';
+import { validateUrlHandler } from './handlers/validate-url-handler';
 import * as validator from './handlers/validator';
 
-const typesPath = join(__dirname,
+const typesPath = join(
+  __dirname,
   '..',
   '..',
   '..',
@@ -18,7 +19,8 @@ const typesPath = join(__dirname,
   'build',
   'main',
   'lib',
-  'editor-types.d.ts');
+  'editor-types.d.ts'
+);
 
 export const app = express();
 app.use(compression());
@@ -26,7 +28,6 @@ app.use(bodyParser.json({ limit: '1mb' }));
 
 app.set('view engine', 'ejs');
 app.use(express.static('public', { maxAge: 86400000 }));
-
 
 const corsMiddleware = cors({
   methods: 'POST',
@@ -76,14 +77,10 @@ app.get('/', (_, res) => {
 app.get('/ping', (_, res) => res.send('pong'));
 
 app.post('/api/validate', (request: any, response: any) => {
-  request.body
+  const { type, data } = request.body;
+  const jsonData = JSON.parse(data);
+  let result = validator.validator(type, typesPath, jsonData);
   response.json({
-    status: 'Sucess',
-  });   
+   result
+  });
 });
-
-app.post('/api/validate', (req: any, res: any) => {
-  const { type, data } = req.body;
-  let result = validator.validator(type, typesPath data);
-  res.status(200).send(result);
-})

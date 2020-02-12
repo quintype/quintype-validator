@@ -21,7 +21,6 @@ export async function fetchLighthouse(url: string): Promise<LighthouseResults> {
   }
 }
 
-// tslint:disable: no-class no-this
 class Lighthouse implements LighthouseResults {
   private readonly data: any;
   private readonly url: string;

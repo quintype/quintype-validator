@@ -15,8 +15,8 @@ export class Migrator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      validatetype: null,
-      selecttype: null,
+      validateType: null,
+      selectType: null,
       disabled: true,
       text: "",
       errorMessage: "",
@@ -29,12 +29,12 @@ export class Migrator extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleclick = this.handleclick.bind(this);
   }
-  validateHandler = validatetype => {
-    this.setState({ validatetype });
+  validateHandler =validateType => {
+    this.setState({validateType });
   };
 
-  onChangeSelecthandler = selecttype => {
-    this.setState({ selecttype });
+  onChangeSelecthandler = selectType => {
+    this.setState({ selectType });
   };
 
   handleChange = value => {
@@ -48,10 +48,10 @@ export class Migrator extends Component {
       isLoading: true
     });
     const data = {
-      type: this.state.selecttype.value,
+      type: this.state.selectType.value,
       data: this.state.text
     };
-    fetch("http://localhost:3000/api/validate", {
+    fetch("/api/validate", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -75,8 +75,8 @@ export class Migrator extends Component {
   }
   render() {
     const {
-      validatetype,
-      selecttype,
+   validateType,
+      selectType,
       text,
       isLoading,
       disabled,
@@ -84,7 +84,7 @@ export class Migrator extends Component {
       isResponse,
       responseData
     } = this.state;
-    const submitDisabled = validatetype && selecttype && text;
+    const submitDisabled =validateType && selectType && text;
     return (
       <div className={styles["migrator"]}>
         {disabled && !isResponse ? (
@@ -94,17 +94,17 @@ export class Migrator extends Component {
               <Select
                 label="Select Type"
                 options={selectOptions}
-                value={selecttype}
+                value={selectType}
                 onChange={e => this.onChangeSelecthandler(e)}
               />
               <Select
                 label="Validate by"
                 options={validateOptions}
-                value={validatetype}
+                value={validateType}
                 onChange={e => this.validateHandler(e)}
               />
               <form>
-                {validatetype && validatetype.value === "Direct text input" ? (
+                {validateType &&validateType.value === "Direct text input" ? (
                   <TextArea
                     label="Enter the Markup to validate:"
                     onChange={value => this.handleChange(value)}

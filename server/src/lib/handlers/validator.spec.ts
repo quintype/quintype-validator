@@ -2,10 +2,19 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { generateJsonSchema, validateJson, validator } from './validator';
 
+const editorTestPath= join(__dirname, 
+  '..',
+  '..',
+  '..',
+  'test-data',
+  'editor-test.ts'
+  )
+
 const testSchema =  JSON.parse(readFileSync(join(__dirname,'..','..','..','test-data','test_schema.json'), 'utf8'));
-const authorSchema = generateJsonSchema(join(__dirname, '..','..','..','test-data','editor-test.ts'), 'AuthorTest');
-const sectionSchema = generateJsonSchema(join(__dirname, '..','..','..','test-data','editor-test.ts'), 'SectionTest');
-const storySchema = generateJsonSchema(join(__dirname, '..','..','..','test-data','editor-test.ts'), 'StoryTest');
+const authorSchema = generateJsonSchema(editorTestPath, 'AuthorTest');
+const sectionSchema = generateJsonSchema(editorTestPath, 'SectionTest');
+const storySchema = generateJsonSchema(editorTestPath, 'StoryTest');
+
 
 const typesPath = join(__dirname,
   '..',

@@ -4,8 +4,8 @@ const seoValidations = require("./seo_validations");
 const _ = require("lodash");
 
 const runRules = (field, content, rules, focusKeyword) => {
-  const output = { errors: [], warnings: [], goodies: [] },
-    data = { field, content, focusKeyword };
+  const output = { errors: [], warnings: [], goodies: [] }
+   const data = { field, content, focusKeyword };
   _.forEach(rules, (ruleConfig, ruleName) => {
     seoValidations[ruleName] &&
       seoValidations[ruleName](ruleConfig, output, data);

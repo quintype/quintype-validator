@@ -98,18 +98,18 @@ function validateDom($: CheerioSelector, { selector, contentAttr, errors, warnin
     if (!condition) {
       return;
     }
-    if (condition.presence && elements.length == 0) {
+    if (condition.presence && elements.length === 0) {
       outputList.push(`Could not find an element with selector ${selector}`);
       return;
     }
-    if (condition.count != null && elements.length != condition.count) {
+    if (condition.count != null && elements.length !== condition.count) {
       outputList.push(`Expected to find ${condition.count} elements with selector ${selector}, got ${elements.length}`);
       return;
     }
     elements.each((_, element) => {
       const content = getContent($, element, contentAttr);
       // Reuse this?
-      if ((condition.presence || condition.presence_if_node_exists) && (!content || content == '')) {
+      if ((condition.presence || condition.presence_if_node_exists) && (!content || content === '')) {
         outputList.push(`Found an empty ${selector} (attribute ${contentAttr})`);
         return;
       }
@@ -117,7 +117,7 @@ function validateDom($: CheerioSelector, { selector, contentAttr, errors, warnin
         outputList.push(`Content in ${selector} is longer than ${condition.length_le}`);
         return
       }
-      if (condition.value == 'url' && content != url) {
+      if (condition.value == 'url' && content !== url) {
         outputList.push(`Content in ${selector} should have value ${url} (got ${content})`);
         return
       }
@@ -136,7 +136,6 @@ function validateDom($: CheerioSelector, { selector, contentAttr, errors, warnin
 function validateUrl(url: string, rule: UrlRule, outputLists: OutputLists): void {
   const { errors, warnings } = rule;
   [[errors, outputLists.errors], [warnings, outputLists.warnings]].forEach(pair => {
-    // tslint:disable-next-line: readonly-array
     const [condition, outputList] = pair as [HTTPConditions, string[]];
     if (!condition) {
       return;

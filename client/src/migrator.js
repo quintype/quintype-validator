@@ -6,7 +6,13 @@ import { TextArea } from "@quintype/em/components/text-area";
 import { Loader } from "@quintype/em/components/loader";
 import "@quintype/em/global.css";
 
-const selectOptions = [{ label: "Story", value: "Story" }];
+const selectOptions = [
+  { label: "Story", value: "Story" },
+  { label: "Section", value: "Section" },
+  { label: "Author", value: "Author" },
+  { label: "Entity", value: "Entity" },
+  { label: "Tag", value: "Tag"}
+];
 
 const validateOptions = [
   { label: "Direct text input", value: "Direct text input" }
@@ -51,7 +57,7 @@ export class Migrator extends Component {
       type: this.state.selectType.value,
       data: this.state.text
     };
-    fetch("/api/validate", {
+    fetch(`${process.env.REACT_APP_API_HOST || ""}/api/validate`, {
       method: "POST",
       headers: {
         Accept: "application/json",

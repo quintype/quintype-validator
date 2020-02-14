@@ -71,7 +71,7 @@ app.get('/ping', (_, res) => res.send('pong'));
 
 app.post('/api/validate', (request: any, response: any) => {
   const { type, data } = request.body;
-  const result = validator.validator(type, typesPath, data);
+  const result = validator.validator(type, typesPath, JSON.parse(data));
   response.json({
    result
   });

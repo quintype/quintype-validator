@@ -1,5 +1,5 @@
 import express from 'express';
-import { join } from 'path';
+import path, { join } from 'path';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
@@ -10,14 +10,7 @@ import { validateUrlHandler } from './handlers/validate-url-handler';
 import * as validator from './handlers/validator';
 
 const typesPath = join(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'node_modules',
-  '@quintype/migration-helpers',
-  'build',
-  'main',
+  path.dirname(require.resolve('@quintype/migration-helpers')),
   'lib',
   'editor-types.d.ts'
 );

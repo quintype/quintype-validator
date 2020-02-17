@@ -41,7 +41,8 @@ const corsMiddleware = cors({
   }
 });
 
-app.options('/api/validate.json', corsMiddleware);
+app.options('*', corsMiddleware)
+
 app.post('/api/validate.json', corsMiddleware, (req, res) => {
   const url = req.body.url;
 
@@ -56,7 +57,6 @@ app.post('/api/validate.json', corsMiddleware, (req, res) => {
   return res.status(400).json({ error: { message: 'Missing url' } });
 });
 
-app.options('/api/seo-scores', corsMiddleware);
 app.post('/api/seo-scores', corsMiddleware, seoScoreHandler);
 
 app.get('/validate-robots', validateRobotsHandler);

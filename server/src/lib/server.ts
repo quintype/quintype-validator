@@ -41,7 +41,7 @@ const corsMiddleware = cors({
   }
 });
 
-app.options('*', corsMiddleware)
+app.options('/api/*', corsMiddleware)
 
 app.post('/api/validate.json', corsMiddleware, (req, res) => {
   const url = req.body.url;

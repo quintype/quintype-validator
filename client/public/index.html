@@ -9,6 +9,26 @@
     <meta content="black" name="apple-mobile-web-app-status-bar-style">
     <meta name="description" content="Tool to Validate Quintype Websites"/>
     <title>Quintype Validator</title>
+    <script type="text/javascript">
+      (function(location) {
+        const {search, pathname, hash} = location
+        if (search) {
+          let query = {};
+          const pairs = search.slice(1).split('&')
+          pairs.forEach(value => {
+            const splitUrl = value.split('=');
+            query[splitUrl[0]] = splitUrl[1].replace(/~and~/g, '&');
+          });
+          if (query.p) {
+            window.history.replaceState(null, null,
+              pathname + query.p +
+              (query.q ? ('?' + query.q) : '') +
+              hash
+            );
+          }
+        }
+     }(window.location))
+   </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

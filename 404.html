@@ -4,11 +4,13 @@
     <meta charset="utf-8" />
     <title>Quintype Validator</title>
     <script type="text/javascript">
+      const segmentCount = 1;
       const {origin, pathname, search, hash} = window.location;
-      const [mainPath, subPath] = pathname.slice(1).split('/')
+      const [mainPath] = pathname.split('/').slice(0, 1+ segmentCount).join('/')
+      const [subPath] =  pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~')
       const searchQuery = search ? '&q=' + search.slice(1).replace(/&/g, '~and~') : ''
       window.location.replace(
-        origin + '/' + mainPath + '?p=/' + subPath + searchQuery + hash
+        origin + mainPath + '/?p=/' + subPath + searchQuery + hash
         );    
     </script>
   </head>

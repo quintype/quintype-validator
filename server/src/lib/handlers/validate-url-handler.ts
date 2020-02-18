@@ -29,7 +29,6 @@ export async function validateUrlHandler(req: Request, res: Response): Promise<v
       links
     });
   } catch (error) {
-    // tslint:disable-next-line: no-console
     console.error(error.stack || error);
     res.status(500);
     res.setHeader("Content-Type", "application/json");

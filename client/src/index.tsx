@@ -4,6 +4,7 @@ import './index.scss';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { HomeComponent, Sidebar } from './home-component';
 import { Migrator } from "./migrator";
+import ErrorPage from "./error-404";
 
 class Validator extends React.Component {
   render() {
@@ -15,6 +16,7 @@ class Validator extends React.Component {
             <Redirect exact from="/" to="/website" />
             <Route exact path="/website" component={HomeComponent} />
             <Route exact path="/migrator" component={Migrator} />
+            <Route exact path="" component={ ErrorPage }/>
           </Switch>
         </Router>
       </div>

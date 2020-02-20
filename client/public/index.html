@@ -21,7 +21,7 @@
           });
           if (query.p) {
             window.history.replaceState(null, null,
-              pathname + query.p +
+              pathname.slice(0,-1) + query.p +
               (query.q ? ('?' + query.q) : '') +
               hash
             );

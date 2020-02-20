@@ -8,7 +8,7 @@
       const [mainPath, subPath] = pathname.slice(1).split('/')
       const searchQuery = search ? '&q=' + search.slice(1).replace(/&/g, '~and~') : ''
       window.location.replace(
-        origin + '/' + mainPath + '?p=/' + subPath + searchQuery + hash
+        origin + '/' + mainPath + '/?p=/' + subPath + searchQuery + hash
         );    
     </script>
   </head>

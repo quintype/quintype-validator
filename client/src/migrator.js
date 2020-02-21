@@ -11,7 +11,7 @@ const selectOptions = [
   { label: "Section", value: "Section" },
   { label: "Author", value: "Author" },
   { label: "Entity", value: "Entity" },
-  { label: "Tag", value: "Tag"}
+  { label: "Tag", value: "Tag" }
 ];
 
 const validateOptions = [
@@ -23,35 +23,34 @@ export class Migrator extends Component {
     this.state = {
       validateType: null,
       selectType: null,
-      disabled: true,
+      formEnabled: true,
       text: "",
       errorMessage: "",
       responseData: [],
-      isResponse: false,
-      isLoading: false
+      isResultLoading: false
     };
-    this.validateHandler = this.validateHandler.bind(this);
-    this.onChangeSelecthandler = this.onChangeSelecthandler.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleclick = this.handleclick.bind(this);
+    this.onChangeValidateType = this.onChangeValidateType.bind(this);
+    this.onChangeSelectType = this.onChangeSelectType.bind(this);
+    this.onTextInput = this.onTextInput.bind(this);
+    this.onValidate = this.onValidate.bind(this);
   }
-  validateHandler =validateType => {
-    this.setState({validateType });
+  onChangeValidateType = validateType => {
+    this.setState({ validateType });
   };
 
-  onChangeSelecthandler = selectType => {
+  onChangeSelectType = selectType => {
     this.setState({ selectType });
   };
 
-  handleChange = value => {
+  onTextInput = value => {
     this.setState({ text: value });
   };
 
-  handleclick(e) {
+  onValidate(e) {
     e.preventDefault();
     this.setState({
-      disabled: !this.state.disabled,
-      isLoading: true
+      formEnabled: false,
+      isResultLoading: true
     });
     const data = {
       type: this.state.selectType.value,
@@ -74,26 +73,24 @@ export class Migrator extends Component {
       .then(response => {
         this.setState({
           responseData: this.state.responseData.concat(response),
-          isResponse: true,
-          isLoading: false
+          isResultLoading: false
         });
       });
   }
   render() {
     const {
-   validateType,
+      validateType,
       selectType,
       text,
-      isLoading,
-      disabled,
+      isResultLoading,
+      formEnabled,
       errorMessage,
-      isResponse,
       responseData
     } = this.state;
-    const submitDisabled =validateType && selectType && text;
+    const submitEnabled = validateType && selectType && text;
     return (
       <div className={styles["migrator"]}>
-        {disabled && !isResponse ? (
+        {formEnabled ? (
           <div>
             <Heading />
             <div className={styles["container"]}>
@@ -101,27 +98,27 @@ export class Migrator extends Component {
                 label="Select Type"
                 options={selectOptions}
                 value={selectType}
-                onChange={e => this.onChangeSelecthandler(e)}
+                onChange={e => this.onChangeSelectType(e)}
               />
               <Select
                 label="Validate by"
                 options={validateOptions}
                 value={validateType}
-                onChange={e => this.validateHandler(e)}
+                onChange={e => this.onChangeValidateType(e)}
               />
               <form>
-                {validateType &&validateType.value === "Direct text input" ? (
+                {validateType && validateType.value === "Direct text input" ? (
                   <TextArea
                     label="Enter the Markup to validate:"
-                    onChange={value => this.handleChange(value)}
+                    onChange={value => this.onTextInput(value)}
                     value={text}
                     placeholder={"Enter the JSON data"}
                   />
                 ) : null}
                 <Button
                   type="primary"
-                  onClick={e => this.handleclick(e)}
-                  disabled={!submitDisabled}
+                  onClick={e => this.onValidate(e)}
+                  disabled={!submitEnabled}
                 >
                   Validate
                 </Button>
@@ -130,11 +127,10 @@ export class Migrator extends Component {
           </div>
         ) : (
           <div>
-            {isLoading ? (
-              <ResultsPage />
-            ) : (
-              <pre>{JSON.stringify(responseData[0], null, 2)}</pre>
-            )}
+            <ResultsPage
+              isResultLoading={isResultLoading}
+              responseData={responseData}
+            />
           </div>
         )}
         {errorMessage && <pre> {errorMessage} </pre>}
@@ -143,19 +139,25 @@ export class Migrator extends Component {
   }
 }
 
-function ResultsPage() {
+function ResultsPage(props) {
   return (
-    <div className="migrator">
-      <Heading />
-      <div className={styles["container"]}>
-        <h1>Results</h1>
-        <Loader />
-        <p className={styles["content"]}>
-          Please wait, validation is in progress. This can take 5-10 minutes.
-          Please don't close the tab.
-        </p>
-      </div>
-    </div>
+    <>
+      {props.isResultLoading ? (
+        <div className="migrator">
+          <Heading />
+          <div className={styles["container"]}>
+            <h1>Results</h1>
+            <Loader />
+            <p className={styles["content"]}>
+              Please wait, validation is in progress. This can take 5-10
+              minutes. Please don't close the tab.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <pre>{JSON.stringify(props.responseData[0], null, 2)}</pre>
+      )}
+    </>
   );
 }
 

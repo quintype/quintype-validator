@@ -4,6 +4,7 @@ import Select from "@quintype/em/components/select";
 import { Button } from "@quintype/em/components/button";
 import { TextArea } from "@quintype/em/components/text-area";
 import { Loader } from "@quintype/em/components/loader";
+// import { FileUpload } from "@quitype/em/components/FileUpload"
 import "@quintype/em/global.css";
 
 const selectOptions = [
@@ -15,8 +16,10 @@ const selectOptions = [
 ];
 
 const validateOptions = [
-  { label: "Direct text input", value: "Direct text input" }
+  { label: "Direct text input", value: "Direct text input" },
+  { label: "File Upload", value: "File Upload"}
 ];
+
 export class Migrator extends Component {
   constructor(props) {
     super(props);
@@ -29,10 +32,6 @@ export class Migrator extends Component {
       responseData: [],
       isResultLoading: false
     };
-    this.onChangeValidateType = this.onChangeValidateType.bind(this);
-    this.onChangeSelectType = this.onChangeSelectType.bind(this);
-    this.onTextInput = this.onTextInput.bind(this);
-    this.onValidate = this.onValidate.bind(this);
   }
   onChangeValidateType = validateType => {
     this.setState({ validateType });
@@ -98,15 +97,14 @@ export class Migrator extends Component {
                 label="Select Type"
                 options={selectOptions}
                 value={selectType}
-                onChange={e => this.onChangeSelectType(e)}
+                onChange={this.onChangeSelectType}
               />
               <Select
                 label="Validate by"
                 options={validateOptions}
                 value={validateType}
-                onChange={e => this.onChangeValidateType(e)}
+                onChange={this.onChangeValidateType}
               />
-              <form>
                 {validateType && validateType.value === "Direct text input" ? (
                   <TextArea
                     label="Enter the Markup to validate:"
@@ -114,7 +112,7 @@ export class Migrator extends Component {
                     value={text}
                     placeholder={"Enter the JSON data"}
                   />
-                ) : null}
+                ) : null}             
                 <Button
                   type="primary"
                   onClick={e => this.onValidate(e)}
@@ -122,7 +120,6 @@ export class Migrator extends Component {
                 >
                   Validate
                 </Button>
-              </form>
             </div>
           </div>
         ) : (
@@ -139,10 +136,15 @@ export class Migrator extends Component {
   }
 }
 
-function ResultsPage(props) {
+
+// function ValidationForm ({validateType}) {
+
+// }
+
+function ResultsPage({isResultLoading, responseData}) {
   return (
     <>
-      {props.isResultLoading ? (
+      {isResultLoading ? (
         <div className="migrator">
           <Heading />
           <div className={styles["container"]}>
@@ -155,7 +157,7 @@ function ResultsPage(props) {
           </div>
         </div>
       ) : (
-        <pre>{JSON.stringify(props.responseData[0], null, 2)}</pre>
+        <pre>{JSON.stringify(responseData[0], null, 2)}</pre>
       )}
     </>
   );

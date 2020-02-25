@@ -1,150 +1,46 @@
 import React, { Component } from "react";
 import styles from "./migrator.module.css";
-import Select from "@quintype/em/components/select";
-import { Button } from "@quintype/em/components/button";
-import { TextArea } from "@quintype/em/components/text-area";
 import { Loader } from "@quintype/em/components/loader";
-// import { FileUpload } from "@quitype/em/components/FileUpload"
+import { ValidationForm } from './validation-form'
 import "@quintype/em/global.css";
-
-const selectOptions = [
-  { label: "Story", value: "Story" },
-  { label: "Section", value: "Section" },
-  { label: "Author", value: "Author" },
-  { label: "Entity", value: "Entity" },
-  { label: "Tag", value: "Tag" }
-];
-
-const validateOptions = [
-  { label: "Direct text input", value: "Direct text input" },
-  { label: "File Upload", value: "File Upload"}
-];
 
 export class Migrator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      validateType: null,
-      selectType: null,
       formEnabled: true,
-      text: "",
-      errorMessage: "",
-      responseData: [],
-      isResultLoading: false
+      result: ''
     };
   }
-  onChangeValidateType = validateType => {
-    this.setState({ validateType });
-  };
 
-  onChangeSelectType = selectType => {
-    this.setState({ selectType });
-  };
-
-  onTextInput = value => {
-    this.setState({ text: value });
-  };
-
-  onValidate(e) {
-    e.preventDefault();
-    this.setState({
-      formEnabled: false,
-      isResultLoading: true
-    });
-    const data = {
-      type: this.state.selectType.value,
-      data: this.state.text
-    };
-    fetch(`${process.env.REACT_APP_API_HOST || ""}/api/validate`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    })
-      .then(response => {
-        return response.json();
-      })
-      .catch(err => {
-        this.setState({ errorMessage: err.message });
-      })
-      .then(response => {
-        this.setState({
-          responseData: this.state.responseData.concat(response),
-          isResultLoading: false
-        });
-      });
+  setData = (state) => {
+    this.setState(state)
   }
+
   render() {
     const {
-      validateType,
-      selectType,
-      text,
-      isResultLoading,
       formEnabled,
-      errorMessage,
-      responseData
+      result
     } = this.state;
-    const submitEnabled = validateType && selectType && text;
     return (
       <div className={styles["migrator"]}>
-        {formEnabled ? (
-          <div>
-            <Heading />
-            <div className={styles["container"]}>
-              <Select
-                label="Select Type"
-                options={selectOptions}
-                value={selectType}
-                onChange={this.onChangeSelectType}
-              />
-              <Select
-                label="Validate by"
-                options={validateOptions}
-                value={validateType}
-                onChange={this.onChangeValidateType}
-              />
-                {validateType && validateType.value === "Direct text input" ? (
-                  <TextArea
-                    label="Enter the Markup to validate:"
-                    onChange={value => this.onTextInput(value)}
-                    value={text}
-                    placeholder={"Enter the JSON data"}
-                  />
-                ) : null}             
-                <Button
-                  type="primary"
-                  onClick={e => this.onValidate(e)}
-                  disabled={!submitEnabled}
-                >
-                  Validate
-                </Button>
-            </div>
-          </div>
-        ) : (
-          <div>
+        {formEnabled ? 
+          <ValidationForm
+            sendData={this.setData}
+            /> : (
             <ResultsPage
-              isResultLoading={isResultLoading}
-              responseData={responseData}
+              result={result}
             />
-          </div>
         )}
-        {errorMessage && <pre> {errorMessage} </pre>}
       </div>
     );
   }
 }
 
-
-// function ValidationForm ({validateType}) {
-
-// }
-
-function ResultsPage({isResultLoading, responseData}) {
+function ResultsPage({result}) {
   return (
     <>
-      {isResultLoading ? (
+      {!result ? (
         <div className="migrator">
           <Heading />
           <div className={styles["container"]}>
@@ -157,13 +53,13 @@ function ResultsPage({isResultLoading, responseData}) {
           </div>
         </div>
       ) : (
-        <pre>{JSON.stringify(responseData[0], null, 2)}</pre>
+        <pre>{JSON.stringify(result, null, 2)}</pre>
       )}
     </>
   );
 }
 
-function Heading() {
+export function Heading() {
   return (
     <section className={styles["migrator-heading"]}>
       <h1 className={styles["heading"]}>Migration Validator</h1>

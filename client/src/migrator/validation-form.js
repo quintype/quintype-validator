@@ -3,6 +3,7 @@ import Select from '@quintype/em/components/select'
 import styles from './migrator.module.css'
 import { Button } from '@quintype/em/components/button'
 import { TextArea } from '@quintype/em/components/text-area'
+import { FileUpload } from "@quintype/em/components/file-upload"
 import { Heading } from './migrator'
 
 const selectOptions = [
@@ -25,7 +26,7 @@ export class ValidationForm extends Component {
     this.state = {
       validateType: null,
       selectType: null,
-      text: ''
+      userData: ''
     }
   }
 
@@ -37,8 +38,8 @@ export class ValidationForm extends Component {
     this.setState({ selectType });
   };
 
-  onTextInput = value => {
-    this.setState({ text: value });
+  onInput = userData => {
+    this.setState({ userData });
   };
 
   onValidate = async (e) => {
@@ -49,7 +50,7 @@ export class ValidationForm extends Component {
 
     const data = {
       type: this.state.selectType.value,
-      data: this.state.text
+      data: this.state.userData
     };
    
     try {
@@ -75,12 +76,12 @@ export class ValidationForm extends Component {
     const {
       validateType,
       selectType,
-      text
+      userData
     } = this.state
-    const submitEnabled = validateType && selectType && text
+    const submitEnabled = validateType && selectType && userData
   
     return (
-      <div>
+      <>
       <Heading />
       <div className={styles.container}>
         <Select
@@ -95,14 +96,11 @@ export class ValidationForm extends Component {
           value={validateType}
           onChange={this.onChangeValidateType}
         />
-        {validateType && validateType.value === 'Direct text input' ? (
-          <TextArea
-            label='Enter the Markup to validate:'
-            onChange={this.onTextInput}
-            value={text}
-            placeholder="Enter the JSON data"
+        <InputField
+          userData={userData}
+          validateType={validateType}
+          onInput={this.onInput}
           />
-        ) : null}
         <Button
           type='primary'
           onClick={this.onValidate}
@@ -111,7 +109,35 @@ export class ValidationForm extends Component {
           Validate
         </Button>
       </div>
-    </div>
+    </>
     )
   }
+}
+
+
+function InputField({validateType, onInput, userData}) {
+  return validateType && (
+    <>
+      {(() => {
+        switch(validateType.value) {
+          case 'Direct text input' : 
+            return (
+            <TextArea
+              label='Enter the Markup to validate:'
+              onChange={onInput}
+              value={userData}
+              placeholder='Enter the JSON data'
+            />)
+            case 'File Upload' : 
+            return (
+            <FileUpload
+              fieldLabel='Upload File'
+              placeholder='Choose file'
+              uploadFile={onInput}
+            />)
+          default : return null
+        }
+      })()}
+    </>
+  )
 }

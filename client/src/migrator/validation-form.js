@@ -38,7 +38,8 @@ export class ValidationForm extends Component {
     this.setState({ selectType });
   };
 
-  onInput = userData => {
+  onInput = (_0,_1,_2) => {
+    const userData = _0 || _1 || ''
     this.setState({ userData });
   };
 
@@ -48,23 +49,43 @@ export class ValidationForm extends Component {
       formEnabled: false
     })
 
-    const data = {
-      type: this.state.selectType.value,
-      data: this.state.userData
-    };
-   
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-        }) 
+    let options, requestUrl
+    switch(this.state.validateType.value) {
+      case 'Direct text input':
+        const requestBody = JSON.stringify({
+          type: this.state.selectType.value,
+          data: this.state.userData
+        })
+        requestUrl = '/api/validate'
+        options = {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: requestBody
+        }          
+        break
 
-        const result = await response.json()
-        this.props.sendData({result})
+      case 'File Upload':
+        let requestData = new FormData()
+        requestData.append('file', this.state.userData)
+        requestData.append('type', this.state.selectType.value)
+        requestUrl = '/api/validate-file'
+        options = {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json'
+          },
+          body: requestData
+        }
+        break
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}${requestUrl}`, options) 
+      const result = await response.json()
+      this.props.sendData({result})
       } catch(err) {
         this.props.sendData({
           result: err.message
@@ -130,9 +151,12 @@ function InputField({validateType, onInput, userData}) {
             />)
             case 'File Upload' : 
             return (
+            // pass size and accepts
             <FileUpload
               fieldLabel='Upload File'
               placeholder='Choose file'
+              // accepts='	application/x-gzip'
+              size={100000}
               uploadFile={onInput}
             />)
           default : return null

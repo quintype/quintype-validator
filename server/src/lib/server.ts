@@ -8,6 +8,11 @@ import { validateDomainHandler } from './handlers/validate-domain-handler';
 import { validateRobotsHandler } from './handlers/validate-robots-handler';
 import { validateUrlHandler } from './handlers/validate-url-handler';
 import * as validator from './handlers/validator';
+import multer from 'multer';
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage });
+import { Transform, Duplex } from 'stream';
+
 
 const typesPath = join(
   path.dirname(require.resolve('@quintype/migration-helpers')),
@@ -75,4 +80,24 @@ app.post('/api/validate', corsMiddleware,(request: any, response: any) => {
   response.json({
    result
   });
+});
+
+app.post('/api/validate-file', corsMiddleware, upload.single('file'), (request: any, response: any) => {
+  const { type } = request.body
+ 
+  function bufferToStream(buffer: Buffer) {  
+    let stream = new Duplex();
+    stream.push(buffer);
+    stream.push(null);
+    return stream;
+  }
+  const stream = bufferToStream(request.file.buffer)
+  stream
+  .pipe(new Transform({
+    transform(chunk,_,cb){
+      const item = JSON.parse(chunk)
+      cb(null,JSON.stringify(validator.validator(type, typesPath, item)))
+    }
+  }))
+  .pipe(response)
 });

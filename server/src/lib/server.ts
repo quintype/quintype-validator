@@ -11,7 +11,8 @@ import * as validator from './handlers/validator';
 import multer from 'multer';
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage });
-import { Transform, Duplex } from 'stream';
+import { Duplex } from 'stream';
+import split2 from 'split2'
 
 
 const typesPath = join(
@@ -84,6 +85,7 @@ app.post('/api/validate', corsMiddleware,(request: any, response: any) => {
 
 app.post('/api/validate-file', corsMiddleware, upload.single('file'), (request: any, response: any) => {
   const { type } = request.body
+  let result: any[] = []
  
   function bufferToStream(buffer: Buffer) {  
     let stream = new Duplex();
@@ -93,11 +95,12 @@ app.post('/api/validate-file', corsMiddleware, upload.single('file'), (request: 
   }
   const stream = bufferToStream(request.file.buffer)
   stream
-  .pipe(new Transform({
-    transform(chunk,_,cb){
-      const item = JSON.parse(chunk)
-      cb(null,JSON.stringify(validator.validator(type, typesPath, item)))
-    }
-  }))
-  .pipe(response)
+  .pipe(split2(JSON.parse))
+  .on('data', (obj) => {
+    result.push(validator.validator(type, typesPath, obj))
+  })
+
+  stream.on('end', () => {
+    response.json({result})
+  })
 });

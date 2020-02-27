@@ -155,7 +155,7 @@ function InputField({validateType, onInput, userData}) {
             <FileUpload
               fieldLabel='Upload File'
               placeholder='Choose file'
-              // accepts='	application/x-gzip'
+              accepts='	application/x-gzip'
               size={100000}
               uploadFile={onInput}
             />)

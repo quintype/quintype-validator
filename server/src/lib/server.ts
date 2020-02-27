@@ -8,12 +8,9 @@ import { validateDomainHandler } from './handlers/validate-domain-handler';
 import { validateRobotsHandler } from './handlers/validate-robots-handler';
 import { validateUrlHandler } from './handlers/validate-url-handler';
 import * as validator from './handlers/validator';
-import multer from 'multer';
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage });
-import { Duplex } from 'stream';
 import split2 from 'split2'
-
+import Busboy from 'busboy'
+import zlib from 'zlib'
 
 const typesPath = join(
   path.dirname(require.resolve('@quintype/migration-helpers')),
@@ -83,24 +80,37 @@ app.post('/api/validate', corsMiddleware,(request: any, response: any) => {
   });
 });
 
-app.post('/api/validate-file', corsMiddleware, upload.single('file'), (request: any, response: any) => {
-  const { type } = request.body
+app.post('/api/validate-file', corsMiddleware, (request: any, response: any) => {
   let result: any[] = []
- 
-  function bufferToStream(buffer: Buffer) {  
-    let stream = new Duplex();
-    stream.push(buffer);
-    stream.push(null);
-    return stream;
-  }
-  const stream = bufferToStream(request.file.buffer)
-  stream
-  .pipe(split2(JSON.parse))
-  .on('data', (obj) => {
-    result.push(validator.validator(type, typesPath, obj))
-  })
 
-  stream.on('end', () => {
-    response.json({result})
+  const busboy = new Busboy({ headers: request.headers, limits: { fields: 1, files: 1 } });
+  let type :any = undefined;
+  busboy.on('field', (fieldname, value, _0, _1, _2, _3) => {
+    if (fieldname !== 'type' || !value) {
+      response.json({ result: `Incorrect field name: ${fieldname}`})
+      return
+    }
+    type = value;
   })
+  busboy.on('file', (fieldname, file, _1, _2, mimetype) => {
+    if (fieldname !== 'file') {
+      response.json({ result: `Incorrect field name: ${fieldname}`})
+      return
+    }
+    if (mimetype !== 'application/x-gzip') {
+      response.json({ result: 'Please upload only files in *.txt.gz format'})
+      return
+    }
+    file.resume()
+    file
+    .pipe(zlib.createGunzip())
+    .pipe(split2(/\r?\n+/,JSON.parse))
+    .on('data', (obj) => {
+      result.push(validator.validator(type, typesPath, obj))
+    })
+    .on('end', () => {
+      response.json({result})
+    })
+  })
+  request.pipe(busboy)
 });

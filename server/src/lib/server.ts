@@ -74,7 +74,12 @@ app.get('/ping', (_, res) => res.send('pong'));
 
 app.post('/api/validate', corsMiddleware,(request: any, response: any) => {
   const { type, data } = request.body;
-  const result = validator.validator(type, typesPath, JSON.parse(data));
+  let result: Object = {}
+  try {
+    result = validator.validator(type, typesPath, JSON.parse(data));
+  } catch (error) {
+    result = 'Please provide a single valid JSON input'
+  }
   response.json({
    result
   });

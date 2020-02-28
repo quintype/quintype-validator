@@ -151,12 +151,11 @@ function InputField({validateType, onInput, userData}) {
             />)
             case 'File Upload' : 
             return (
-            // pass size and accepts
             <FileUpload
               fieldLabel='Upload File'
               placeholder='Choose file'
               accepts='	application/x-gzip'
-              size={100000}
+              size={3000000}
               uploadFile={onInput}
             />)
           default : return null

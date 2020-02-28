@@ -90,7 +90,7 @@ app.post('/api/validate-file', corsMiddleware, (request: any, response: any) => 
 
   const busboy = new Busboy({ headers: request.headers, limits: { fields: 1, files: 1 } });
   let type :any = undefined;
-  busboy.on('field', (fieldname, value, _0, _1, _2, _3) => {
+  busboy.on('field', (fieldname, value) => {
     if (fieldname !== 'type' || !value) {
       response.json({ result: `Incorrect field name: ${fieldname}`})
       return

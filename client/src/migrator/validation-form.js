@@ -38,7 +38,7 @@ export class ValidationForm extends Component {
     this.setState({ selectType });
   };
 
-  onInput = (_0,_1,_2) => {
+  onInput = (_0,_1) => {
     const userData = _0 || _1 || ''
     this.setState({ userData });
   };

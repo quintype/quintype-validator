@@ -38,8 +38,8 @@ export class ValidationForm extends Component {
     this.setState({ selectType });
   };
 
-  onInput = (_0,_1) => {
-    const userData = _0 || _1 || ''
+  onInput = (textInput,fileInput) => {
+    const userData = textInput || fileInput || ''
     this.setState({ userData });
   };
 

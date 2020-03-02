@@ -1,6 +1,6 @@
 import ajv from 'ajv';
 import { createGenerator, DEFAULT_CONFIG } from 'ts-json-schema-generator';
-import { errorParser } from '../utils/error-parser';
+import { errorParser } from './error-parser';
 
 const schemas: { [key: string]: object } = {};
 

@@ -10,7 +10,7 @@ import { validateUrlHandler } from './handlers/validate-url-handler';
 import * as validator from './handlers/validator';
 import split2 from 'split2'
 import Busboy from 'busboy'
-// import zlib from 'zlib'
+import zlib from 'zlib'
 
 const typesPath = join(
   path.dirname(require.resolve('@quintype/migration-helpers')),
@@ -90,6 +90,7 @@ app.post('/api/validate-file', corsMiddleware, (request: any, response: any) => 
 
   const busboy = new Busboy({ headers: request.headers, limits: { fields: 1, files: 1 } });
   let type :any = undefined;
+
   busboy.on('field', (fieldname, value) => {
     if (fieldname !== 'type' || !value) {
       response.json({ result: `Incorrect field name: ${fieldname}`})
@@ -97,18 +98,22 @@ app.post('/api/validate-file', corsMiddleware, (request: any, response: any) => 
     }
     type = value;
   })
-  busboy.on('file', (fieldname, file, _1, _2, _3) => {
+  busboy.on('file', (fieldname, file, _1, _2, mimetype) => {
     if (fieldname !== 'file') {
       response.json({ result: `Incorrect field name: ${fieldname}`})
       return
     }
-    // if (mimetype !== 'application/x-gzip') {
-    //   response.json({ result: 'Please upload files only in *.txt.gz format'})
-    //   return
-    // }
+    if (mimetype !== 'application/x-gzip') {
+      response.json({ result: 'Please upload files only in *.txt.gz format'})
+      return
+    }
     file.resume()
     file
-    // .pipe(zlib.createGunzip())
+    .pipe(zlib.createGunzip())
+    .on('error', (err) => {
+      response.json({ result: 'Error :' + err.message })
+      return
+    })
     .pipe(split2(/\r?\n+/,JSON.parse))
     .on('data', (obj) => {
       result.push(validator.validator(type, typesPath, obj))
@@ -119,14 +124,3 @@ app.post('/api/validate-file', corsMiddleware, (request: any, response: any) => 
   })
   request.pipe(busboy)
 });
-
-// function findChecksum(file) {
-//   const hash = crypto.createHash('md5')
-//   const stream = fs.createReadStream(file)
-//   stream.on('data', function(data) {
-//     hash.update(data, 'utf8')
-//   })
-//   stream.on('end', function() {
-//     hash.digest('hex')
-//   })
-// }

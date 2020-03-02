@@ -5,7 +5,6 @@ import { Button } from '@quintype/em/components/button'
 import { TextArea } from '@quintype/em/components/text-area'
 import { FileUpload } from "@quintype/em/components/file-upload"
 import { Heading } from './migrator'
-import crypto from 'crypto'
 
 const selectOptions = [
   { label: 'Story', value: 'Story' },
@@ -19,22 +18,6 @@ const validateOptions = [
   { label: 'Direct text input', value: 'Direct text input' },
   { label: 'File Upload', value: 'File Upload'}
 ]
-
-function findChecksum(file) {
-  return new Promise((resolve, _) => {
-    const fileReader = new FileReader();
-    const hash = crypto.createHash('md5')
-    let checksum
-    fileReader.onload = () => {
-      checksum = hash
-                .update(fileReader.result)
-                .digest('hex')
-      resolve(checksum)
-    }
-    fileReader.readAsText(file)
-  })
-}
-
 
 export class ValidationForm extends Component {
   constructor (props) {
@@ -88,7 +71,6 @@ export class ValidationForm extends Component {
         requestData.append('file', this.state.userData)
         requestData.append('type', this.state.selectType.value)
         requestUrl = '/api/validate-file'
-        const checksumValue = await findChecksum(this.state.userData)
         options = {
           method: 'POST',
           headers: {
@@ -168,12 +150,11 @@ function InputField({validateType, onInput, userData}) {
             />)
             case 'File Upload' : 
             return (
-            // pass size and accepts
             <FileUpload
               fieldLabel='Upload File'
-              placeholder='Choose file'
-              // accepts='	application/x-gzip'
-              size={100000}
+              placeholder='Choose file (only *.txt.gz)'
+              accepts='application/x-gzip'
+              size={3000000}
               uploadFile={onInput}
             />)
           default : return null

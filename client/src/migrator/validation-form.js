@@ -134,7 +134,6 @@ export class ValidationForm extends Component {
   }
 }
 
-
 function InputField({validateType, onInput, userData}) {
   return validateType && (
     <>

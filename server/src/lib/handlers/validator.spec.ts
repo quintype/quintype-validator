@@ -1,31 +1,19 @@
 import { readFileSync } from 'fs';
-import { join } from 'path';
-import { generateJsonSchema, validateJson, validator } from './validator';
+import path, { join } from 'path';
+import { generateJsonSchema, validateJson, validator } from '../utils/validator';
 
-const editorTestPath= join(__dirname, 
-  '..',
-  '..',
-  '..',
-  'test-data',
-  'editor-test.ts'
-  )
+const editorTestPath = join(__dirname, ('../').repeat(3), 'test-data', 'editor-test.ts');
 
-const testSchema =  JSON.parse(readFileSync(join(__dirname,'..','..','..','test-data','test_schema.json'), 'utf8'));
+const typesPath = join(
+  path.dirname(require.resolve('@quintype/migration-helpers')),
+  'lib',
+  'editor-types.d.ts'
+);
+
+const testSchema =  JSON.parse(readFileSync(join(__dirname,('../').repeat(3), 'test-data', 'test_schema.json'), 'utf8'));
 const authorSchema = generateJsonSchema(editorTestPath, 'AuthorTest');
 const sectionSchema = generateJsonSchema(editorTestPath, 'SectionTest');
 const storySchema = generateJsonSchema(editorTestPath, 'StoryTest');
-
-
-const typesPath = join(__dirname,
-  '..',
-  '..',
-  '..',
-  'node_modules',
-  '@quintype/migration-helpers',
-  'build',
-  'main',
-  'lib',
-  'editor-types.d.ts');
 
 function authorJSONSchemaSample(additionalProperties: any): object {
   return {

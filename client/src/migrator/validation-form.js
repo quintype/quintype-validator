@@ -19,7 +19,6 @@ const validateOptions = [
   { label: 'File Upload', value: 'File Upload'}
 ]
 
-
 export class ValidationForm extends Component {
   constructor (props) {
     super(props)
@@ -38,7 +37,7 @@ export class ValidationForm extends Component {
     this.setState({ selectType });
   };
 
-  onInput = (textInput,fileInput) => {
+  onInput = (textInput, fileInput) => {
     const userData = textInput || fileInput || ''
     this.setState({ userData });
   };
@@ -135,7 +134,6 @@ export class ValidationForm extends Component {
   }
 }
 
-
 function InputField({validateType, onInput, userData}) {
   return validateType && (
     <>
@@ -153,8 +151,8 @@ function InputField({validateType, onInput, userData}) {
             return (
             <FileUpload
               fieldLabel='Upload File'
-              placeholder='Choose file'
-              accepts='	application/x-gzip'
+              placeholder='Choose file (only *.txt.gz)'
+              accepts='application/x-gzip'
               size={3000000}
               uploadFile={onInput}
             />)

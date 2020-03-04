@@ -6,7 +6,7 @@ import { seoScoreHandler } from './handlers/seo-score-handler';
 import { validateDomainHandler } from './handlers/validate-domain-handler';
 import { validateRobotsHandler } from './handlers/validate-robots-handler';
 import { validateUrlHandler } from './handlers/validate-url-handler';
-import { fileValidator, textInputValidator } from './handlers/intermediate-file-validator'
+import { fileValidator, textInputValidator, s3keyValidator } from './handlers/intermediate-file-validator'
 
 export const app = express();
 app.use(compression());
@@ -60,3 +60,5 @@ app.get('/ping', (_, res) => res.send('pong'));
 app.post('/api/validate', corsMiddleware, textInputValidator);
 
 app.post('/api/validate-file', corsMiddleware, fileValidator);
+
+app.post('/api/validate-s3', corsMiddleware, s3keyValidator)

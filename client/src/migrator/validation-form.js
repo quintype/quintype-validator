@@ -67,7 +67,7 @@ export class ValidationForm extends Component {
         }          
         break
 
-      case 'File Upload':
+      case 'File upload':
         let requestData = new FormData()
         requestData.append('file', this.state.userData)
         requestData.append('type', this.state.selectType.value)

@@ -51,17 +51,17 @@ export function validator(type: string, typesPath: string, data: any): any {
 
 export function asyncReadStream(file: any, type: string) {
   return new Promise((resolve, reject) => {
-    let result: any = []
+    let result: Array< Array< Object | string >> = []
     file
     .pipe(zlib.createGunzip())
     .pipe(split2(/\r?\n+/,JSON.parse))
-    .on('data', (obj: any) => {
+    .on('data', (obj: Object) => {
       result.push(validator(type, typesPath, obj))
     })
     .on('end', () => {
       resolve(result)
     })
-    .on('error', (e: any) => {
+    .on('error', (e: Error) => {
       reject(e)
     })
   })

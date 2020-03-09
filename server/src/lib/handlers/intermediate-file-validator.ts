@@ -6,11 +6,12 @@ import { AWSCredentials } from '../../config'
 
 export function textInputValidator(req: Request, res: Response): void {
   const { type, data } = req.body;
-  let result: any = {}
+  let result: Array<Object | string> = []
   try {
     result = validator(type, typesPath, JSON.parse(data));
   } catch (error) {
-    result = {Error: 'Please provide a single valid JSON input'}
+    res.json({ result: 'Please provide a single valid JSON input' })
+    return
   }
   res.json({
    result
@@ -18,10 +19,10 @@ export function textInputValidator(req: Request, res: Response): void {
 }
 
 export function fileValidator(req: Request, res: Response): void {
-  let result: any = []
+  let result: Array< Array< Object | string >> | unknown = []
 
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
-  let type :any = undefined;
+  let type :string = '';
 
   busboy.on('field', (fieldname, value) => {
     if (fieldname !== 'type' || !value) {

@@ -1,47 +1,20 @@
 import { Request, Response } from "express";
-import path, { join } from 'path';
-import split2 from 'split2'
 import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
-import zlib from 'zlib'
-import * as validator from '../utils/validator'
-import { AWSCredentials } from "../../config"
-
-const typesPath = join(
-    path.dirname(require.resolve('@quintype/migration-helpers')),
-    'lib',
-    'editor-types.d.ts'
-  );
+import {validator, asyncReadStream, typesPath} from '../utils/validator'
+import { AWSCredentials } from '../../config'
 
 export function textInputValidator(req: Request, res: Response): void {
   const { type, data } = req.body;
   let result: any = {}
   try {
-    result = validator.validator(type, typesPath, JSON.parse(data));
+    result = validator(type, typesPath, JSON.parse(data));
   } catch (error) {
     result = {Error: 'Please provide a single valid JSON input'}
   }
   res.json({
    result
   });
-}
-
-function asyncReadStream(file: any, type: string) {
-  return new Promise((resolve, reject) => {
-    let result: any = []
-    file
-    .pipe(zlib.createGunzip())
-    .pipe(split2(/\r?\n+/,JSON.parse))
-    .on('data', (obj: any) => {
-      result.push(validator.validator(type, typesPath, obj))
-    })
-    .on('end', () => {
-      resolve(result)
-    })
-    .on('error', (e: any) => {
-      reject(e)
-    })
-  })
 }
 
 export function fileValidator(req: Request, res: Response): void {
@@ -89,8 +62,8 @@ async function validateByKey(s3:any, data: any, type: string) {
 export async function s3keyValidator(req: Request, res: Response){
   const { type, path } = req.body
   const s3keyParts = path.split('/')
-  const bucket = s3keyParts[0]
-  const keyPrefix = s3keyParts.slice(1).join('/') + '/' + type.toLowerCase()
+  const bucket = s3keyParts[2]
+  const keyPrefix = s3keyParts.slice(3).join('/') + '/' + type.toLowerCase()
   const s3 = new S3(AWSCredentials)
 
   s3.listObjectsV2({

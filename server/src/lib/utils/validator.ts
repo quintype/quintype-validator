@@ -49,7 +49,7 @@ export function validator(type: string, typesPath: string, data: any): any {
   return 'valid';
 }
 
-export function asyncReadStream(file: any, type: string) {
+export function asyncValidateStream(file: any, type: string) {
   return new Promise((resolve, reject) => {
     let result: Array< Array< Object | string >> = []
     file

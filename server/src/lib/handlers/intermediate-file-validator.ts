@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
-import {validator, asyncReadStream, typesPath} from '../utils/validator'
-import { AWSCredentials } from '../../config'
+import {validator, asyncValidateStream, typesPath} from '../utils/validator'
+import AWSCredentials from '../../../config/migrator.js'
 
 export function textInputValidator(req: Request, res: Response): void {
   const { type, data } = req.body;
@@ -41,7 +41,7 @@ export function fileValidator(req: Request, res: Response): void {
       return
     }
     file.resume()
-    result = await asyncReadStream(file, type)
+    result = await asyncValidateStream(file, type)
     res.json({result})
   })
   req.pipe(busboy)
@@ -56,7 +56,7 @@ async function validateByKey(s3:any, data: any, type: string) {
       Key: key 
     })
     .createReadStream()
-    return asyncReadStream(readableStream, type)
+    return asyncValidateStream(readableStream, type)
   }))
 }
 

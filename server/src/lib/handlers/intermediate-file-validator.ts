@@ -1,23 +1,18 @@
 import { Request, Response } from "express";
-import path, { join } from 'path';
-import split2 from 'split2'
 import Busboy from 'busboy'
-import zlib from 'zlib'
-import * as validator from '../utils/validator';
-
-const typesPath = join(
-    path.dirname(require.resolve('@quintype/migration-helpers')),
-    'lib',
-    'editor-types.d.ts'
-  );
+import S3 from 'aws-sdk/clients/s3'
+import {validator, asyncValidateStream, typesPath} from '../utils/validator'
+import fs from "fs"
+const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 export function textInputValidator(req: Request, res: Response): void {
   const { type, data } = req.body;
-  let result: Object = {}
+  let result: Array<Object | string> = []
   try {
-    result = validator.validator(type, typesPath, JSON.parse(data));
+    result = validator(type, typesPath, JSON.parse(data));
   } catch (error) {
-    result = 'Please provide a single valid JSON input'
+    res.json({ result: 'Please provide a single valid JSON input' })
+    return
   }
   res.json({
    result
@@ -25,10 +20,10 @@ export function textInputValidator(req: Request, res: Response): void {
 }
 
 export function fileValidator(req: Request, res: Response): void {
-    let result: any[] = []
+  let result: Array< Array< Object | string >> | unknown = []
 
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
-  let type :any = undefined;
+  let type :string = '';
 
   busboy.on('field', (fieldname, value) => {
     if (fieldname !== 'type' || !value) {
@@ -37,7 +32,7 @@ export function fileValidator(req: Request, res: Response): void {
     }
     type = value;
   })
-  busboy.on('file', (fieldname, file, _1, _2, mimetype) => {
+  busboy.on('file', async (fieldname, file, _1, _2, mimetype) => {
     if (fieldname !== 'file') {
       res.json({ result: `Incorrect field name: ${fieldname}`})
       return
@@ -47,21 +42,48 @@ export function fileValidator(req: Request, res: Response): void {
       return
     }
     file.resume()
-    file
-    .pipe(zlib.createGunzip())
-    .on('error', (err) => {
-      res.json({ result: 'Error :' + err.message })
-      return
-    })
-    .pipe(split2(/\r?\n+/,JSON.parse))
-    .on('data', (obj) => {
-      result.push(validator.validator(type, typesPath, obj))
-    })
-    .on('end', () => {
-      res.json({result})
-    })
+    result = await asyncValidateStream(file, type)
+    res.json({result})
   })
   req.pipe(busboy)
 }
-  
 
+async function validateByKey(s3:any, data: any, type: string) {
+  const { Name, Contents } = data
+  return Promise.all(Contents.map(async (file: any) => {
+    const key = file.Key
+    const readableStream = s3.getObject({
+      Bucket: Name,
+      Key: key 
+    })
+    .createReadStream()
+    return asyncValidateStream(readableStream, type)
+  }))
+}
+
+export async function s3keyValidator(req: Request, res: Response){
+  const { type, path } = req.body
+  const s3keyParts = path.split('/')
+  const bucket = s3keyParts[2]
+  const keyPrefix = s3keyParts.slice(3).join('/') + '/' + type.toLowerCase()
+  const s3 = new S3({
+    accessKeyId: config['accessKeyId'],
+    secretAccessKey: config['secretAccessKey']
+  })
+
+  s3.listObjectsV2({
+    Bucket: bucket,
+    Prefix: keyPrefix
+  }, async (err, data) => {
+    if(err) {
+      res.json({result: err.message})
+      return
+    }
+    if(data.Contents!.length === 0) {
+      res.json({result: `No files with prefix ${type.toLowerCase()} found in ${s3keyParts.slice(3).join('/')}`})
+      return
+    }
+    const result = await validateByKey(s3, data, type)
+    res.json({result})
+  })
+}

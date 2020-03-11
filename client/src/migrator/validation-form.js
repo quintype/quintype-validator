@@ -16,7 +16,8 @@ const selectOptions = [
   
 const validateOptions = [
   { label: 'Direct text input', value: 'Direct text input' },
-  { label: 'File Upload', value: 'File Upload'}
+  { label: 'File upload', value: 'File upload'},
+  { label: 'S3 path', value: 'S3 path'}
 ]
 
 export class ValidationForm extends Component {
@@ -66,7 +67,7 @@ export class ValidationForm extends Component {
         }          
         break
 
-      case 'File Upload':
+      case 'File upload':
         let requestData = new FormData()
         requestData.append('file', this.state.userData)
         requestData.append('type', this.state.selectType.value)
@@ -77,6 +78,22 @@ export class ValidationForm extends Component {
             Accept: 'application/json'
           },
           body: requestData
+        }
+        break
+      
+        case 'S3 path': 
+        const requests3 = JSON.stringify({
+          type: this.state.selectType.value,
+          path: this.state.userData
+        })
+        requestUrl = '/api/validate-s3'
+        options = {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: requests3,
         }
         break
     }
@@ -147,7 +164,7 @@ function InputField({validateType, onInput, userData}) {
               value={userData}
               placeholder='Enter the JSON data'
             />)
-            case 'File Upload' : 
+            case 'File upload' : 
             return (
             <FileUpload
               fieldLabel='Upload File'
@@ -155,6 +172,14 @@ function InputField({validateType, onInput, userData}) {
               accepts='application/x-gzip'
               size={3000000}
               uploadFile={onInput}
+            />)
+            case 'S3 path' : 
+            return (
+              <TextArea
+              label='Type url here'
+              onChange={onInput}
+              value={userData}
+              placeholder='Enter S3 path'
             />)
           default : return null
         }

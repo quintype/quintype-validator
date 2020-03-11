@@ -80,7 +80,7 @@ export async function s3keyValidator(req: Request, res: Response){
       return
     }
     if(data.Contents!.length === 0) {
-      res.json({result: `No files with prefix ${keyPrefix} found`})
+      res.json({result: `No files with prefix ${type.toLowerCase()} found in ${s3keyParts.slice(3).join('/')}`})
       return
     }
     const result = await validateByKey(s3, data, type)

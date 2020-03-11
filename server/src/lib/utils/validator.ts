@@ -53,8 +53,18 @@ export function asyncValidateStream(file: any, type: string) {
   return new Promise((resolve, reject) => {
     let result: Array< Array< Object | string >> = []
     file
-    .pipe(zlib.createGunzip())
-    .pipe(split2(/\r?\n+/,JSON.parse))
+    .pipe(zlib.createGunzip()).on('error', () => {
+      resolve('Please upload files only in *.txt.gz format')
+      return
+    })
+    .pipe(split2(/\r?\n+/,(obj) => {
+      try {
+        return JSON.parse(obj)
+      } catch(err) {
+        resolve('Please upload files with valid JSONs')
+      return
+      }
+    }))
     .on('data', (obj: Object) => {
       result.push(validator(type, typesPath, obj))
     })

@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
 import {validator, asyncValidateStream, typesPath} from '../utils/validator'
-import AWSCredentials from '../../../config/migrator.js'
+import fs from "fs"
+const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 export function textInputValidator(req: Request, res: Response): void {
   const { type, data } = req.body;
@@ -65,14 +66,21 @@ export async function s3keyValidator(req: Request, res: Response){
   const s3keyParts = path.split('/')
   const bucket = s3keyParts[2]
   const keyPrefix = s3keyParts.slice(3).join('/') + '/' + type.toLowerCase()
-  const s3 = new S3(AWSCredentials)
+  const s3 = new S3({
+    accessKeyId: config['accessKeyId'],
+    secretAccessKey: config['secretAccessKey']
+  })
 
   s3.listObjectsV2({
     Bucket: bucket,
     Prefix: keyPrefix
   }, async (err, data) => {
     if(err) {
-      console.log(err)
+      res.json({result: err.message})
+      return
+    }
+    if(data.Contents!.length === 0) {
+      res.json({result: `No files with prefix ${keyPrefix} found`})
       return
     }
     const result = await validateByKey(s3, data, type)

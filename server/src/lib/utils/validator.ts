@@ -40,18 +40,22 @@ export function validateJson(
   return validate.errors;
 }
 
-export function validator(type: string, typesPath: string, data: any): any {
+export function validator(type: string, typesPath: string, data: any, errorList: {[key: string]: any} = {}): any {
   const directSchema = generateJsonSchema(typesPath, type);
   const error = validateJson(data, directSchema);
   if (error) {
-    return errorParser(error, data['external-id'], type);
+    return errorParser(error, data['external-id'], type, errorList);
   }
-  return 'valid';
+  if(!errorList.valid) {
+    errorList.valid = []
+  }
+  errorList.valid.push(data['external-id'])
+  return errorList
 }
 
 export function asyncValidateStream(file: any, type: string) {
   return new Promise((resolve, reject) => {
-    let result: Array< Array< Object | string >> = []
+    let result: {[key: string]: any} = {}
     file
     .pipe(zlib.createGunzip()).on('error', () => {
       resolve('Please upload files only in *.txt.gz format')
@@ -66,7 +70,7 @@ export function asyncValidateStream(file: any, type: string) {
       }
     }))
     .on('data', (obj: Object) => {
-      result.push(validator(type, typesPath, obj))
+      result = validator(type, typesPath, obj, result)
     })
     .on('end', () => {
       resolve(result)

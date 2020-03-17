@@ -7,7 +7,7 @@ const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 export function textInputValidator(req: Request, res: Response): void {
   const { type, data } = req.body;
-  let result: Array<Object | string> = []
+  let result: Object | string = {}
   try {
     result = validator(type, typesPath, JSON.parse(data));
   } catch (error) {
@@ -20,8 +20,7 @@ export function textInputValidator(req: Request, res: Response): void {
 }
 
 export function fileValidator(req: Request, res: Response): void {
-  let result: Array< Array< Object | string >> | unknown = []
-
+  let result: {[key: string]: any} | unknown = {}
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
 

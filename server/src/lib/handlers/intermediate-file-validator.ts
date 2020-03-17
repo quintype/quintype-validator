@@ -3,6 +3,7 @@ import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
 import {validator, asyncValidateStream, typesPath} from '../utils/validator'
 import fs from "fs"
+import { PassThrough } from 'stream'
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 export function textInputValidator(req: Request, res: Response): void {
@@ -21,6 +22,8 @@ export function textInputValidator(req: Request, res: Response): void {
 
 export function fileValidator(req: Request, res: Response): void {
   let result: {[key: string]: any} | unknown = {}
+  const fileStream = new PassThrough()
+  
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
 
@@ -31,7 +34,7 @@ export function fileValidator(req: Request, res: Response): void {
     }
     type = value;
   })
-  busboy.on('file', async (fieldname, file, _1, _2, mimetype) => {
+  busboy.on('file', (fieldname, file, _1, _2, mimetype) => {
     if (fieldname !== 'file') {
       res.json({ result: `Incorrect field name: ${fieldname}`})
       return
@@ -41,7 +44,11 @@ export function fileValidator(req: Request, res: Response): void {
       return
     }
     file.resume()
-    result = await asyncValidateStream(file, type)
+    file.pipe(fileStream)
+  })
+
+  busboy.on('finish', async () => {
+    result = await asyncValidateStream(fileStream, type)
     res.json({result})
   })
   req.pipe(busboy)
@@ -49,15 +56,17 @@ export function fileValidator(req: Request, res: Response): void {
 
 async function validateByKey(s3:any, data: any, type: string) {
   const { Name, Contents } = data
-  return Promise.all(Contents.map(async (file: any) => {
+  let result: {[key: string]: any} | any = {}
+  for(const file of Contents) {
     const key = file.Key
     const readableStream = s3.getObject({
       Bucket: Name,
       Key: key 
     })
     .createReadStream()
-    return asyncValidateStream(readableStream, type)
-  }))
+    result = await asyncValidateStream(readableStream, type, result)
+  }
+  return result
 }
 
 export async function s3keyValidator(req: Request, res: Response){

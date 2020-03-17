@@ -53,9 +53,8 @@ export function validator(type: string, typesPath: string, data: any, errorList:
   return errorList
 }
 
-export function asyncValidateStream(file: any, type: string) {
+export function asyncValidateStream(file: any, type: string, result: {[key: string]: any} = {}) {
   return new Promise((resolve, reject) => {
-    let result: {[key: string]: any} = {}
     file
     .pipe(zlib.createGunzip()).on('error', () => {
       resolve('Please upload files only in *.txt.gz format')

@@ -41,14 +41,20 @@ export function validateJson(
 }
 
 export function validator(type: string, typesPath: string, data: any, errorList: {[key: string]: any} = {}): any {
+  errorList.total = errorList.total ? errorList.total+1 : 1
+  if(!errorList.successful){
+    errorList.successful = 0
+  } 
   const directSchema = generateJsonSchema(typesPath, type);
   const error = validateJson(data, directSchema);
   if (error) {
+    errorList.failed = errorList.failed ? errorList.failed+1 : 1
     return errorParser(error, data['external-id'], type, errorList);
   }
   if(!errorList.valid) {
     errorList.valid = []
   }
+  errorList.successful = errorList.successful+1
   errorList.valid.push(data['external-id'])
   return errorList
 }

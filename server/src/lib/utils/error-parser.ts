@@ -75,12 +75,6 @@ export function errorParser(errors: ReadonlyArray<any>, identifier: String, sche
         ids: [identifier]
       })
     }
-    // if(!errorList[keyword].some((prop: { [key: string]: any }) => prop.key === errorParam)) {
-    //   errorList[keyword].push({
-    //     key: errorParam,
-    //     ids: [identifier]
-    //   })
-    // }
   });
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(

@@ -1,73 +1,40 @@
-// import ajv from 'ajv';
-
-interface Error{
+interface Obj{
   [key: string]: any
 }
 
-// interface ErrorMessage {
-//   readonly message: string;
-//   readonly logLevel: "warn" | "error";
-//   readonly schema?: object;
-// }
-
-// const getErrorMessageFunction = (keyword: String): (error: ajv.ErrorObject, identifier: String, schema: String) => ErrorMessage => {
-//   switch (keyword) {
-//     case "additionalProperties":
-//       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-//         const params = error.params as ajv.AdditionalPropertiesParams
-//         console.log(error)
-//         return {
-//           "message": `${schema} with id ${identifier} has additional properties ${params.additionalProperty} ${error.dataPath !== '' ? `in ${error.dataPath}` : ''}`,
-//           "logLevel": "warn"
-//         };
-//       }
-//     case "type":
-//       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-//         console.log(error)
-//         return { "message": `${schema} with id ${identifier} has wrong type for ${error.dataPath}. It ${error.message}`, "logLevel": "error" }
-//       }
-//     case "required":
-//       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-//         return { "message": `${schema} with id ${identifier}  ${error.message}${error.dataPath !== '' ? ` in ${error.dataPath}` : ''}`, "logLevel": "error" }
-//       }
-//     case "anyOf":
-//       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-//         return { "message": `${schema} with id ${identifier} - has  wrong schema in ${error.dataPath}`, "logLevel": "error"}
-//       }
-//     case "enum": 
-//     return(error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-//       const params = error.params as  {allowedValues : ReadonlyArray<string>};
-//       return { "message" : `${schema} with id ${identifier}  ${error.message} in ${error.dataPath} [ ${error.params && params.allowedValues.join(' ')} ]`, "logLevel": "error"}
-//     }
-//     default:
-//       return (error: ajv.ErrorObject, identifier: String, schema: String): ErrorMessage => {
-//         console.log(error,identifier,schema);
-//         return { message: error.message || '', "logLevel": "warn" };
-//       }
-//   }
-// }
-
-// export function errorParser(errors: ReadonlyArray<ajv.ErrorObject>, identifier: String, schema: String)
-//   : ReadonlyArray<ErrorMessage> {
-//   return errors.map(error => {
-//     return getErrorMessageFunction(error.keyword)(error, identifier, schema)
-//   });
-// }
-
-function fixErrors(errorList: Error): Error {
+function fixErrors(errorList: Obj): Obj {
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(
       (prop: { [key: string]: string }) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
+    
+    if(!errorList.additionalProperties.length) {
+      delete errorList.additionalProperties
+    }
   }  
 
-  // const required = errorList.required.filter(
-  //   (prop: { [key: string]: string }) => (prop.key === 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
-  // )
+  if(errorList.required) {
+    const requiredProp = errorList.required.filter(
+      (prop: { [key: string]: string }) => (prop.key === 'body' || prop.key === 'story-elements' || prop.key === 'cards'))
+  
+    if(requiredProp.length !== 2 ) {
+      errorList.required.push({
+        key: 'any one of body, story-elements and cards',
+        ids: [... new Set(requiredProp.map((prop: { [key: string]: string }) => prop.ids))]
+      })
+    }
+    errorList.required = errorList.required.filter(
+      (prop: Obj) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
+    
+    if(!errorList.required.length) {
+      delete errorList.required
+    }
+  }
+
   return errorList
 }
 
-export function errorParser(errors: ReadonlyArray<Error>, identifier: string, schema: string, errorList: Error)
-  : Error {
+export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, schema: string, errorList: Obj)
+  : Obj {
   errorList.dataType = schema
   errors.forEach(error => {
     const {keyword} = error
@@ -94,7 +61,7 @@ export function errorParser(errors: ReadonlyArray<Error>, identifier: string, sc
   return fixErrors(errorList)
 }
 
-function getErrorParam(error: Error): string | boolean {
+function getErrorParam(error: Obj): string | boolean {
   switch(error.keyword) {
     case 'required':
       return error.params.missingProperty

@@ -49,14 +49,13 @@ export class ValidationForm extends Component {
       formEnabled: false
     })
 
-    let options, requestUrl
+    let options
     switch(this.state.validateType.value) {
       case 'Direct text input':
         const requestBody = JSON.stringify({
           type: this.state.selectType.value,
           data: this.state.userData
         })
-        requestUrl = '/api/validate'
         options = {
           method: 'POST',
           headers: {
@@ -71,7 +70,6 @@ export class ValidationForm extends Component {
         let requestData = new FormData()
         requestData.append('file', this.state.userData)
         requestData.append('type', this.state.selectType.value)
-        requestUrl = '/api/validate-file'
         options = {
           method: 'POST',
           headers: {
@@ -86,7 +84,6 @@ export class ValidationForm extends Component {
           type: this.state.selectType.value,
           path: this.state.userData
         })
-        requestUrl = '/api/validate-s3'
         options = {
           method: 'POST',
           headers: {
@@ -99,7 +96,7 @@ export class ValidationForm extends Component {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}${requestUrl}`, options) 
+      const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=${this.state.validateType.value.split(' ')[0]}`, options) 
       const result = await response.json()
       this.props.sendData({result})
       } catch(err) {

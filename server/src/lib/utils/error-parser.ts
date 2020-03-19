@@ -1,6 +1,6 @@
 // import ajv from 'ajv';
 
-interface ErrorList{
+interface Error{
   [key: string]: any
 }
 
@@ -54,16 +54,30 @@ interface ErrorList{
 //   });
 // }
 
-export function errorParser(errors: ReadonlyArray<any>, identifier: String, schema: String, errorList: ErrorList)
-  : ErrorList {
+function fixErrors(errorList: Error): Error {
+  if(errorList.additionalProperties) {
+    errorList.additionalProperties = errorList.additionalProperties.filter(
+      (prop: { [key: string]: string }) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
+  }  
+
+  // const required = errorList.required.filter(
+  //   (prop: { [key: string]: string }) => (prop.key === 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
+  // )
+  return errorList
+}
+
+export function errorParser(errors: ReadonlyArray<Error>, identifier: string, schema: string, errorList: Error)
+  : Error {
   errorList.dataType = schema
   errors.forEach(error => {
     const {keyword} = error
+    const errorParam = getErrorParam(error)
+    if(!errorParam) return
+
     if(!errorList[keyword]) {
       errorList[keyword] = []
     }
-    const errorParam = getErrorParam(error)
-    const errorKey = errorList[keyword].find((prop: { [key: string]: any }) => prop.key === errorParam)
+    const errorKey = errorList[keyword].find((prop: { [key: string]: string }) => prop.key === errorParam)
 
     if(errorKey) {
       if(!errorKey.ids.includes(identifier)) {
@@ -76,14 +90,11 @@ export function errorParser(errors: ReadonlyArray<any>, identifier: String, sche
       })
     }
   });
-  if(errorList.additionalProperties) {
-    errorList.additionalProperties = errorList.additionalProperties.filter(
-      (prop: { [key: string]: any }) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
-  }
-  return errorList
+
+  return fixErrors(errorList)
 }
 
-function getErrorParam(error: { [key: string]: any }): any {
+function getErrorParam(error: Error): string | boolean {
   switch(error.keyword) {
     case 'required':
       return error.params.missingProperty
@@ -91,6 +102,7 @@ function getErrorParam(error: { [key: string]: any }): any {
       return error.params.additionalProperty
     case 'type':
       return error.dataPath.slice(1)
+// handle other keyword errors if required
   }
-  return 'test'
+  return false
 } 

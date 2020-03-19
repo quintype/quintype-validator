@@ -1,23 +1,20 @@
 import { Request, Response } from "express";
 import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
-import {validator, asyncValidateStream, typesPath} from '../utils/validator'
+import { validator, asyncValidateStream } from '../utils/validator'
 import fs from "fs"
 import { PassThrough } from 'stream'
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
-export function textInputValidator(req: Request, res: Response): void {
+function textInputValidator(req: Request, res: Response): Response {
   const { type, data } = req.body;
-  let result: Object | string = {}
+  let result: { [key: string]: any } = {}
   try {
-    result = validator(type, typesPath, JSON.parse(data));
+    result = validator(type, JSON.parse(data));
   } catch (error) {
-    res.json({ result: 'Please provide a single valid JSON input' })
-    return
+    return res.json('Please provide a single valid JSON input')
   }
-  res.json({
-   result
-  });
+  return res.json({result})
 }
 
 export function fileValidator(req: Request, res: Response): void {
@@ -27,21 +24,18 @@ export function fileValidator(req: Request, res: Response): void {
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
 
-  busboy.on('field', (fieldname, value) => {
+  busboy.on('field', (fieldname, value): Response | void => {
     if (fieldname !== 'type' || !value) {
-      res.json({ result: `Incorrect field name: ${fieldname}`})
-      return
+      return res.json({ result: `Incorrect field name: ${fieldname}`})
     }
     type = value;
   })
-  busboy.on('file', (fieldname, file, _1, _2, mimetype) => {
+  busboy.on('file', (fieldname, file, _1, _2, mimetype): Response | void => {
     if (fieldname !== 'file') {
-      res.json({ result: `Incorrect field name: ${fieldname}`})
-      return
+      return res.json({ result: `Incorrect field name: ${fieldname}`})
     }
     if (mimetype !== 'application/x-gzip') {
-      res.json({ result: 'Please upload files only in *.txt.gz format'})
-      return
+      return res.json({ result: 'Please upload files only in *.txt.gz format'})
     }
     file.resume()
     file.pipe(fileStream)
@@ -94,4 +88,17 @@ export async function s3keyValidator(req: Request, res: Response){
     const result = await validateByKey(s3, data, type)
     res.json({result})
   })
+}
+
+export function intermediateValidator(req: Request, res: Response): Response | any {
+  const validateType = req.query.source
+
+  switch(validateType) {
+    case 'Direct':
+      return textInputValidator(req, res)
+    case 'File':
+      return fileValidator(req, res)
+    case 'S3':
+      return s3keyValidator(req, res)
+  }
 }

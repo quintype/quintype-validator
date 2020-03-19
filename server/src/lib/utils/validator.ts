@@ -40,7 +40,7 @@ export function validateJson(
   return validate.errors;
 }
 
-export function validator(type: string, typesPath: string, data: any, errorList: {[key: string]: any} = {}): any {
+export function validator(type: string, data: {[key: string]: any}, errorList: {[key: string]: any} = {}): {[key: string]: any} {
   errorList.total = errorList.total ? errorList.total+1 : 1
   if(!errorList.successful){
     errorList.successful = 0
@@ -75,7 +75,7 @@ export function asyncValidateStream(file: any, type: string, result: {[key: stri
       }
     }))
     .on('data', (obj: Object) => {
-      result = validator(type, typesPath, obj, result)
+      result = validator(type, obj, result)
     })
     .on('end', () => {
       resolve(result)

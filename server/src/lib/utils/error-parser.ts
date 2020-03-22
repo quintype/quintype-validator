@@ -58,7 +58,7 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     }
   });
 
-  return fixErrors(errorList)
+  return schema === 'Story' ? fixErrors(errorList) : errorList
 }
 
 function getErrorParam(error: Obj): string | boolean {
@@ -68,7 +68,7 @@ function getErrorParam(error: Obj): string | boolean {
     case 'additionalProperties':
       return error.params.additionalProperty
     case 'type':
-      return error.dataPath.slice(1)
+      return (error.dataPath.slice(1) + ': ' + error.params.type)
 // handle other keyword errors if required
   }
   return false

@@ -68,7 +68,9 @@ function getErrorParam(error: Obj): string | boolean {
     case 'additionalProperties':
       return error.params.additionalProperty
     case 'type':
-      return (error.dataPath.slice(1) + ': ' + error.params.type)
+      return (error.dataPath.slice(1) + ':' + error.params.type)
+    case 'enum':
+      return (error.dataPath.slice(1) + ':' + error.params.allowedValues)
 // handle other keyword errors if required
   }
   return false

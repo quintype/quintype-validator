@@ -15,12 +15,20 @@ function fixErrors(errorList: Obj): Obj {
   if(errorList.required) {
     const requiredProp = errorList.required.filter(
       (prop: { [key: string]: string }) => (prop.key === 'body' || prop.key === 'story-elements' || prop.key === 'cards'))
+    const keyName = 'any one of body, story-elements and cards'
+    const identifier = requiredProp[0].ids[0]
   
     if(requiredProp.length !== 2 ) {
-      errorList.required.push({
-        key: 'any one of body, story-elements and cards',
-        ids: [... new Set(requiredProp.map((prop: { [key: string]: string }) => prop.ids))]
-      })
+      const errorKey = errorList.required.find((prop: Obj) => prop.key === keyName)
+
+      if(errorKey) {
+        errorKey.ids.push(identifier)
+      } else {
+        errorList.required.push({
+          key: keyName,
+          ids: [identifier]
+        })
+      }
     }
     errorList.required = errorList.required.filter(
       (prop: Obj) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
@@ -44,7 +52,7 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     if(!errorList[keyword]) {
       errorList[keyword] = []
     }
-    const errorKey = errorList[keyword].find((prop: { [key: string]: string }) => prop.key === errorParam)
+    const errorKey = errorList[keyword].find((prop: Obj) => prop.key === errorParam)
 
     if(errorKey) {
       if(!errorKey.ids.includes(identifier)) {

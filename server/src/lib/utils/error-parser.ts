@@ -5,7 +5,7 @@ interface Obj{
 function fixErrors(errorList: Obj): Obj {
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(
-      (prop: { [key: string]: string }) => (prop.key !== 'body:story' && prop.key !== 'story-elements:story' && prop.key !== 'cards:story'))
+      (prop: { [key: string]: string }) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
     
     if(!errorList.additionalProperties.length) {
       delete errorList.additionalProperties
@@ -14,7 +14,7 @@ function fixErrors(errorList: Obj): Obj {
 
   if(errorList.required) {
     const requiredProp = errorList.required.filter(
-      (prop: { [key: string]: string }) => (prop.key === 'body:story' || prop.key === 'story-elements:story' || prop.key === 'cards:story'))  
+      (prop: { [key: string]: string }) => (prop.key === 'body:Story' || prop.key === 'story-elements:Story' || prop.key === 'cards:Story'))  
     const keyName = 'any one of body, story-elements and cards'
     const identifier = requiredProp[0].ids[0]
   
@@ -31,7 +31,7 @@ function fixErrors(errorList: Obj): Obj {
       }
     }
     errorList.required = errorList.required.filter(
-      (prop: Obj) => (prop.key !== 'body:story' && prop.key !== 'story-elements:story' && prop.key !== 'cards:story'))
+      (prop: Obj) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
     
     if(!errorList.required.length) {
       delete errorList.required
@@ -46,7 +46,7 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
   errorList.dataType = schema
   errors.forEach(error => {
     const {keyword} = error
-    const errorParam = getErrorParam(error)
+    const errorParam = getErrorParam(error, schema)
     if(!errorParam) return
 
     if(!errorList[keyword]) {
@@ -69,16 +69,20 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
   return schema === 'Story' ? fixErrors(errorList) : errorList
 }
 
-function getErrorParam(error: Obj): string | boolean {
+function getErrorParam(error: Obj, schema: string): string | boolean {
+  let keyPath = error.dataPath.slice(1) || schema
+  keyPath = keyPath.replace('/0', '')
+
   switch(error.keyword) {
     case 'required':
-      return (error.params.missingProperty + ':' + (error.dataPath.split('/')[1] || 'story'))
+      return (error.params.missingProperty + ':' + keyPath)
     case 'additionalProperties':
-      return (error.params.additionalProperty + ':' + (error.dataPath.split('/')[1] || 'story'))
+      return (error.params.additionalProperty + ':' + keyPath)
     case 'type':
-      return (error.dataPath.slice(1) + ':' + error.params.type)
+      return (keyPath + ':' + error.params.type)
     case 'enum':
-      return (error.dataPath.slice(1) + ':' + error.params.allowedValues)
+      return (keyPath + ':' + error.params.allowedValues)
+    // default: console.log(error)
 // handle other keyword errors if required
   }
   return false

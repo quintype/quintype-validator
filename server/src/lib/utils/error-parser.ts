@@ -5,7 +5,7 @@ interface Obj{
 function fixErrors(errorList: Obj): Obj {
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(
-      (prop: { [key: string]: string }) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
+      (prop: { [key: string]: string }) => (prop.key !== 'body:story' && prop.key !== 'story-elements:story' && prop.key !== 'cards:story'))
     
     if(!errorList.additionalProperties.length) {
       delete errorList.additionalProperties
@@ -14,7 +14,7 @@ function fixErrors(errorList: Obj): Obj {
 
   if(errorList.required) {
     const requiredProp = errorList.required.filter(
-      (prop: { [key: string]: string }) => (prop.key === 'body' || prop.key === 'story-elements' || prop.key === 'cards'))
+      (prop: { [key: string]: string }) => (prop.key === 'body:story' || prop.key === 'story-elements:story' || prop.key === 'cards:story'))  
     const keyName = 'any one of body, story-elements and cards'
     const identifier = requiredProp[0].ids[0]
   
@@ -31,7 +31,7 @@ function fixErrors(errorList: Obj): Obj {
       }
     }
     errorList.required = errorList.required.filter(
-      (prop: Obj) => (prop.key !== 'body' && prop.key !== 'story-elements' && prop.key !== 'cards'))
+      (prop: Obj) => (prop.key !== 'body:story' && prop.key !== 'story-elements:story' && prop.key !== 'cards:story'))
     
     if(!errorList.required.length) {
       delete errorList.required
@@ -72,9 +72,9 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
 function getErrorParam(error: Obj): string | boolean {
   switch(error.keyword) {
     case 'required':
-      return error.params.missingProperty
+      return (error.params.missingProperty + ':' + (error.dataPath.split('/')[1] || 'story'))
     case 'additionalProperties':
-      return error.params.additionalProperty
+      return (error.params.additionalProperty + ':' + (error.dataPath.split('/')[1] || 'story'))
     case 'type':
       return (error.dataPath.slice(1) + ':' + error.params.type)
     case 'enum':

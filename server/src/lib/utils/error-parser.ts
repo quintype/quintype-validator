@@ -82,7 +82,6 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + error.params.type)
     case 'enum':
       return (keyPath + ':' + error.params.allowedValues)
-    // default: console.log(error)
 // handle other keyword errors if required
   }
   return false

@@ -48,6 +48,24 @@ describe('authorValidationTest', () => {
     );
   });
 
+  it('should throw "additionalProperties" error if any extra key is provided which is not defined in schema', () => {
+    const Author = {
+      name: 'Foo Bar',
+      username: 'Foo',
+      email: 'author@abc.com',
+      'external-id': 'author-001',
+      role: 'Editor',
+      metadata: {
+        'address': 'Bangalore'
+      },
+      foo: 'bar'
+    };
+    const output = validator('Author', Author, {});
+    expect(output).toEqual( expect.objectContaining(
+      {additionalProperties: [{ key: 'foo:Author', ids: ['author-001'] }]})
+    );
+  });
+
   it('should validate successfully when all required keys with correct datatypes are provided', () => {
     const Author = {
       name: 'Foo Bar',
@@ -98,6 +116,24 @@ describe('sectionValidationTest', () => {
     expect(output).toEqual(
       expect.objectContaining(
         {type: [{ key: 'slug:string', ids: ['section-001'] }]})
+    );
+  });
+
+  it('should throw "additionalProperties" error if any extra key is provided which is not defined in schema', () => {
+    const Section = {
+      name: 'Sports',
+      'display-name': 'sports',
+      slug: 'sports',
+      'external-id': 'section-001',
+      'seo-metadata': {
+        description: 'a section'
+      },
+      foo: 'bar'
+    };
+    const output = validator('Section', Section, {});
+    expect(output).toEqual(
+      expect.objectContaining(
+        {additionalProperties: [{ key: 'foo:Section', ids: ['section-001'] }]})
     );
   });
 
@@ -210,7 +246,7 @@ describe('storyValidationTest', () => {
     );
   });
 
-  it('should throw error with key path if any of the sub parts are incorrect', () => {
+  it('should throw "additionalProperties" error if any extra key is provided which is not defined in schema', () => {
     const Story = {
       'external-id': 'story-001',
       headline: 'A story headline',
@@ -222,14 +258,32 @@ describe('storyValidationTest', () => {
       authors: [{ email: 'author@foobar', 'external-id': 1}],
       sections: [{ slug: 'section-slug', 'external-id': 'section-001',
                   'parent': { slug: 'parent-slug' }}],
-      tags: [{ name: 'tag' }]
+      tags: [{ name: 'tag' }],
+      foo: 'bar'
     };
     const output = validator('Story', Story, {});
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'external-id:sections/parent', ids: ['story-001'] }],
-         type: [{ key: 'authors/external-id:string', ids: ['story-001'] }]})
+        {additionalProperties: [{ key: 'foo:Story', ids: ['story-001'] }] })
     );
+  });
+
+  it('should validate successfully when all required keys with correct data are provided ', () => {
+    const Story = {
+      'external-id': 'story-001',
+      headline: 'A story headline',
+      slug: 'story-slug',
+      'summary': 'Story Summary.',
+      'body': '<p>Some Body</p>',
+      'story-template': 'text',
+      status: 'published',
+      authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
+      sections: [{ slug: 'section-slug', 'external-id': 'section-001',
+                  'parent': { slug: 'parent-slug', 'external-id': 'parent-001' }}],
+      tags: [{ name: 'tag' }]
+    };
+    const output = validator('Story', Story, {});
+    expect(output).toEqual({ 'total': 1, 'successful': 1, 'valid': ['story-001']});
   });
 
   it('should validate successfully when all required keys with correct data are provided ', () => {

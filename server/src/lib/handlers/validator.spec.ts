@@ -87,7 +87,7 @@ describe('sectionValidationTest', () => {
     );
   });
 
-  it('should throw "type" error if any of the keys has wrong type', () => {
+  it('should throw "type" along with expected type error if any of the keys has wrong type', () => {
     const Section = {
       name: 'Sports',
       'display-name': 'sports',
@@ -168,5 +168,85 @@ describe('storyValidationTest', () => {
                     { key: 'authors:Story', ids: ['story-001'] },
                     { key: 'story-template:Story', ids: ['story-001'] }]})
     );
+  });
+
+  it('should throw "type" error along with expected type if any of the keys has wrong type', () => {
+    const Story = {
+      'external-id': 'story-001',
+      headline: 'A story headline',
+      slug: 'story-slug',
+      'summary': 123,
+      'story-template': 'text',
+      'body': '<p>Some Body</p>',
+      status: 'published',
+      authors: 'Foobar',
+      sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
+      tags: [{ name: 'tag' }]
+    };
+    const output = validator('Story', Story, {});
+    expect(output).toEqual(
+      expect.objectContaining(
+        {type: [{ key: 'summary:string', ids: ['story-001'] },
+                { key: 'authors:array', ids: ['story-001'] }]})
+    );
+  });
+
+  it('should throw "enum" error if any one of the keys have values other than allowed values', () => {
+    const Story = {
+      'external-id': 'story-001',
+      headline: 'A story headline',
+      slug: 'story-slug',
+      'story-template': 'graphic',
+      status: 'draft',
+      authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
+      sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
+      tags: [{ name: 'tag' }]
+    };
+    const output = validator('Story', Story, {});
+    expect(output).toEqual(
+      expect.objectContaining(
+        {enum: [{ key: 'status:open,published', ids: ['story-001'] },
+                { key: 'story-template:text,photo,video', ids: ['story-001'] }]})
+    );
+  });
+
+  it('should throw error with key path if any of the sub parts are incorrect', () => {
+    const Story = {
+      'external-id': 'story-001',
+      headline: 'A story headline',
+      slug: 'story-slug',
+      'summary': 'Story Summary.',
+      'body': '<p>Some Body</p>',
+      'story-template': 'text',
+      status: 'published',
+      authors: [{ email: 'author@foobar', 'external-id': 1}],
+      sections: [{ slug: 'section-slug', 'external-id': 'section-001',
+                  'parent': { slug: 'parent-slug' }}],
+      tags: [{ name: 'tag' }]
+    };
+    const output = validator('Story', Story, {});
+    expect(output).toEqual(
+      expect.objectContaining(
+        {required: [{ key: 'external-id:sections/parent', ids: ['story-001'] }],
+         type: [{ key: 'authors/external-id:string', ids: ['story-001'] }]})
+    );
+  });
+
+  it('should validate successfully when all required keys with correct data are provided ', () => {
+    const Story = {
+      'external-id': 'story-001',
+      headline: 'A story headline',
+      slug: 'story-slug',
+      'summary': 'Story Summary.',
+      'body': '<p>Some Body</p>',
+      'story-template': 'text',
+      status: 'published',
+      authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
+      sections: [{ slug: 'section-slug', 'external-id': 'section-001',
+                  'parent': { slug: 'parent-slug', 'external-id': 'parent-001' }}],
+      tags: [{ name: 'tag' }]
+    };
+    const output = validator('Story', Story, {});
+    expect(output).toEqual({ 'total': 1, 'successful': 1, 'valid': ['story-001']});
   });
 })

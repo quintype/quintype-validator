@@ -2,9 +2,8 @@ import React, { Component } from 'react'
 import Select from '@quintype/em/components/select'
 import styles from './migrator.module.css'
 import { Button } from '@quintype/em/components/button'
-import { TextArea } from '@quintype/em/components/text-area'
-import { FileUpload } from "@quintype/em/components/file-upload"
-import { Heading } from './migrator'
+import Heading from './Heading'
+import InputField from './InputField'
 
 const selectOptions = [
   { label: 'Story', value: 'Story' },
@@ -90,9 +89,10 @@ export class ValidationForm extends Component {
             Accept: 'application/json',
             'Content-Type': 'application/json'
           },
-          body: requests3,
+          body: requests3
         }
         break
+        default: console.log('invalid validateType')
     }
 
     try {
@@ -146,41 +146,4 @@ export class ValidationForm extends Component {
     </>
     )
   }
-}
-
-function InputField({validateType, onInput, userData}) {
-  return validateType && (
-    <>
-      {(() => {
-        switch(validateType.value) {
-          case 'Direct text input' : 
-            return (
-            <TextArea
-              label='Enter the Markup to validate:'
-              onChange={onInput}
-              value={userData}
-              placeholder='Enter the JSON data'
-            />)
-            case 'File upload' : 
-            return (
-            <FileUpload
-              fieldLabel='Upload File'
-              placeholder='Choose file (only *.txt.gz)'
-              accepts='application/x-gzip'
-              size={3000000}
-              uploadFile={onInput}
-            />)
-            case 'S3 path' : 
-            return (
-              <TextArea
-              label='Type url here'
-              onChange={onInput}
-              value={userData}
-              placeholder='Enter S3 path'
-            />)
-          default : return null
-        }
-      })()}
-    </>
-  )
 }

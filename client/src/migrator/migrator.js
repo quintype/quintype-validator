@@ -2,10 +2,9 @@ import React, { Component } from "react";
 import Result from './Result'
 import styles from "./migrator.module.css";
 import { ValidationForm } from './ValidationForm'
-import { Provider } from './validatorContext'
 import "@quintype/em/global.css";
 
-export class Migrator extends Component {
+export default class Migrator extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,7 +23,6 @@ export class Migrator extends Component {
       result
     } = this.state;
     return (
-      <Provider >
         <div className={styles["migrator"]}>
         {formEnabled ? 
           <ValidationForm
@@ -35,7 +33,6 @@ export class Migrator extends Component {
             />
         )}
       </div>
-      </Provider>
     );
   }
 }

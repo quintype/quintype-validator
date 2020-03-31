@@ -4,22 +4,9 @@ import styles from './migrator.module.css'
 import { Button } from '@quintype/em/components/button'
 import Heading from './Heading'
 import InputField from './InputField'
+import { selectOptions, validateOptions, createRequest } from './validator-utils'
 
-const selectOptions = [
-  { label: 'Story', value: 'Story' },
-  { label: 'Section', value: 'Section' },
-  { label: 'Author', value: 'Author' },
-  { label: 'Entity', value: 'Entity' },
-  { label: 'Tag', value: 'Tag' }
-]
-  
-const validateOptions = [
-  { label: 'Direct text input', value: 'Direct text input' },
-  { label: 'File upload', value: 'File upload'},
-  { label: 'S3 path', value: 'S3 path'}
-]
-
-export class ValidationForm extends Component {
+export default class ValidationForm extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -48,52 +35,7 @@ export class ValidationForm extends Component {
       formEnabled: false
     })
 
-    let options
-    switch(this.state.validateType.value) {
-      case 'Direct text input':
-        const requestBody = JSON.stringify({
-          type: this.state.selectType.value,
-          data: this.state.userData
-        })
-        options = {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: requestBody
-        }          
-        break
-
-      case 'File upload':
-        let requestData = new FormData()
-        requestData.append('file', this.state.userData)
-        requestData.append('type', this.state.selectType.value)
-        options = {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json'
-          },
-          body: requestData
-        }
-        break
-      
-        case 'S3 path': 
-        const requests3 = JSON.stringify({
-          type: this.state.selectType.value,
-          path: this.state.userData
-        })
-        options = {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: requests3
-        }
-        break
-        default: console.log('invalid validateType')
-    }
+    const options = createRequest(this.state.validateType, this.state.selectType, this.state.userData)
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=${this.state.validateType.value.split(' ')[0]}`, options) 

@@ -56,13 +56,13 @@
 .error-list,
 .warning-list,
 .good-list {
-  list-style: none; /* Remove default bullets */
+  list-style: none;
 }
 
 .error-list li,
 .warning-list li,
 .good-list li{
-  margin-bottom: 1em; /* Remove default bullets */
+  margin-bottom: 1em;
 }
 
 .error-list li::before {

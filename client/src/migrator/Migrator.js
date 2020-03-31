@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Result from './Result'
 import styles from "./migrator.module.css";
-import { ValidationForm } from './ValidationForm'
+import ValidationForm from './ValidationForm'
 import "@quintype/em/global.css";
 
 export default class Migrator extends Component {

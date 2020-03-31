@@ -64,7 +64,7 @@ async function validateByKey(s3:any, data: any, type: string) {
 }
 
 export async function s3keyValidator(req: Request, res: Response){
-  const { type, path } = req.body
+  const { type, data: path } = req.body
   const s3keyParts = path.split('/')
   const bucket = s3keyParts[2]
   const keyPrefix = s3keyParts.slice(3).join('/') + '/' + type.toLowerCase()

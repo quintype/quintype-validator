@@ -15,7 +15,7 @@ export default function Result({result}) {
     <>
       <div className="migrator">
         <Heading />
-        <div className={styles["container"]}>
+        <div className={styles['container']}>
           <p className={styles['result-heading']}>Results</p>
           { !result ?
             <>
@@ -27,9 +27,9 @@ export default function Result({result}) {
             </>
             :
             <>
-              <h4>Total stories validated: 5</h4>
-              <h4>Successful stories : 2</h4>
-              <h4>Failed stories : 2</h4>
+              <p>Total stories validated: 5</p>
+              <p>Successful stories : 2</p>
+              <p>Failed stories : 2</p>
               <ResultList finalResult={parsedResult} />
             </>}
         </div>

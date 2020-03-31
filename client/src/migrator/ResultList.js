@@ -17,7 +17,7 @@ export default function ResultList({finalResult}) {
     <>
       <Accordion>
         <AccordionSection
-          label='Main'
+          label='Errors'
           children={
             <>
               <p>Errors</p>

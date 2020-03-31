@@ -11,40 +11,37 @@
 }
 
 .heading {
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 1;
-  color: #132437;
+  font-size: var(--fs-xxl);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-1);
+  color: var(--mono-5);
   margin: 80px 0 12px 0;
   text-align: left;
 }
 
 .content {
-  font-size: 16px;
-  line-height: 1.38;
-  color: #132437;
+  font-size: var(--fs-m);
+  line-height: var(--lh-3);
+  color: var(--mono-5);
   margin: 0 0 24px 0;
   text-align: left;
 }
 
 .container {
-  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
+  box-shadow: var(--box-shadow-0);
+  background-color: var(--white);
   padding: 30px;
   overflow: visible;
 }
 
 .result-heading {
-  width: 59px;
-  height: 22px;
+  margin: 0;
   font-family: inherit;
-  font-size: 16px;
-  font-weight: bold;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
+  font-size: var(--fs-m);
+  font-weight: var(--fw-semi-bold);
+  line-height: var(--lh-2);
   letter-spacing: normal;
-  color: #132437;
+  color: var(--mono-5);
 }
 
 .error-message {
@@ -69,23 +66,23 @@
 }
 
 .error-list li::before {
-  color: #ff214b;
+  color: var(--danger);
 }
 
 .warning-list li::before {
-  color: #f5a623;
+  color: var(--warning);
 }
 
 .good-list li::before {
-  color: #2fd072;
+  color: var(--success);
 }
 
 .error-list li::before,
 .warning-list li::before,
 .good-list li::before {
-  content: "\2B24";  /* Add content: \2022 is the CSS Code/unicode for a bullet */
-  font-size: x-small;
-  font-weight: bolder; /* If you want it to be bold */
-  display: inline-block; /* Needed to add space between the bullet and the text */
-  margin-left: -1.5em; /* Also needed for space (tweak if needed) */
+  content: "\2B24";
+  font-size: var(--fs-xxs);
+  font-weight: var(--fw-bold);
+  display: inline-block;
+  margin-left: -1.5em;
 }

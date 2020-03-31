@@ -16,11 +16,11 @@ export default function Result({result}) {
       <div className="migrator">
         <Heading />
         <div className={styles["container"]}>
-          <h3>Results</h3>
+          <p className={styles['result-heading']}>Results</p>
           { !result ?
             <>
               <Loader />
-              <p className={styles["content"]}>
+              <p className={styles['content']}>
                 Please wait, validation is in progress. This can take 5-10
                 minutes. Please don't close the tab.
               </p>

@@ -1,5 +1,5 @@
 .migrator {
-  font-family: "Open Sans", sans-serif;
+  font-family: var(--brandType);
   max-width: 960px;
   margin: 0 auto;
 }
@@ -31,4 +31,61 @@
   box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.2);
   background-color: #ffffff;
   padding: 30px;
+  overflow: visible;
+}
+
+.result-heading {
+  width: 59px;
+  height: 22px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.38;
+  letter-spacing: normal;
+  color: #132437;
+}
+
+.error-message {
+  margin-left: 1.25em;
+}
+
+.error-id {
+  margin-left: 1em;
+  display: block;
+}
+
+.error-list,
+.warning-list,
+.good-list {
+  list-style: none; /* Remove default bullets */
+}
+
+.error-list li,
+.warning-list li,
+.good-list li{
+  margin-bottom: 1em; /* Remove default bullets */
+}
+
+.error-list li::before {
+  color: #ff214b;
+}
+
+.warning-list li::before {
+  color: #f5a623;
+}
+
+.good-list li::before {
+  color: #2fd072;
+}
+
+.error-list li::before,
+.warning-list li::before,
+.good-list li::before {
+  content: "\2B24";  /* Add content: \2022 is the CSS Code/unicode for a bullet */
+  font-size: x-small;
+  font-weight: bolder; /* If you want it to be bold */
+  display: inline-block; /* Needed to add space between the bullet and the text */
+  margin-left: -1.5em; /* Also needed for space (tweak if needed) */
 }

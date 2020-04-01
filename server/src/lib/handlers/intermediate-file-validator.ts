@@ -14,7 +14,7 @@ function textInputValidator(req: Request, res: Response): Response {
   } catch (error) {
     return res.json('Please provide a single valid JSON input')
   }
-  return res.json({result})
+  return res.json(result)
 }
 
 export function fileValidator(req: Request, res: Response): void {
@@ -43,7 +43,7 @@ export function fileValidator(req: Request, res: Response): void {
 
   busboy.on('finish', async () => {
     result = await asyncValidateStream(fileStream, type)
-    res.json({result})
+    res.json(result)
   })
   req.pipe(busboy)
 }
@@ -86,7 +86,7 @@ export async function s3keyValidator(req: Request, res: Response){
       return
     }
     const result = await validateByKey(s3, data, type)
-    res.json({result})
+    res.json(result)
   })
 }
 

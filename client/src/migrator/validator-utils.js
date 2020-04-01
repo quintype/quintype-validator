@@ -36,8 +36,21 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
   return options
 }
 
-function parseResult () {
+function parseResult (result) {
+  let finalResult = {}
+  const { dataType, total, failed, successful, additionalProperties, type, required, enum: wrongValue } = result
+  finalResult.total = total
+  finalResult.failed = failed
+  finalResult.successful = successful
+  finalResult.errors = []
 
+  required.forEach(error => {
+    finalResult.errors.push({
+      message: dataType + ' should have required property ' + error.key
+    })
+  });
+
+  return finalResult
 }
 
 export { selectOptions, validateOptions, createRequest, parseResult }

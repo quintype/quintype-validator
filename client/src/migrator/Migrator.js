@@ -23,7 +23,7 @@ export default class Migrator extends Component {
       result
     } = this.state;
     return (
-        <div className={styles["migrator"]}>
+        <div className={styles['migrator']}>
         {formEnabled ? 
           <ValidationForm
             sendData={this.setData}

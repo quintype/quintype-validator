@@ -44,13 +44,18 @@
   color: var(--mono-5);
 }
 
-.message {
+.error-message {
   margin-left: 1.25em;
 }
 
-.error-id {
+.error-metadata {
   margin-left: 1em;
-  display: block;
+  margin-bottom: 0.25em;
+  margin-top: 0.25em;
+}
+
+.error-level{
+  font-weight: var(--fw-semi-bold);
 }
 
 .error-list,
@@ -62,7 +67,7 @@
 .error-list li,
 .warning-list li,
 .success-list li{
-  margin-bottom: 1em;
+  margin-bottom: 1.5em;
 }
 
 .error-list li::before {

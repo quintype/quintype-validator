@@ -9,9 +9,9 @@ export default function ResultList({finalResult}) {
   const errorItems = finalResult && finalResult.errors.map((error) => {
     return (
       <li>
-        <span className={styles['message']}>{error.message}</span>
+        <span className={styles['error-message']}>{error.message}</span>
         {Object.values(error.metadata).map((item) => {
-          return (<p className={styles['message']}>{item}</p>)
+          return (<p className={styles['error-metadata']}>{item}</p>)
         })}
       </li>
     )
@@ -20,9 +20,9 @@ export default function ResultList({finalResult}) {
   const warningItems = finalResult && finalResult.warnings.map((warning) => {
     return (
       <li>
-        <span className={styles['message']}>{warning.message}</span>
+        <span className={styles['error-message']}>{warning.message}</span>
         {Object.values(warning.metadata).map((item) => {
-          return (<p className={styles['message']}>{item}</p>)
+          return (<p className={styles['error-metadata']}>{item}</p>)
         })}
       </li>
     )
@@ -31,9 +31,9 @@ export default function ResultList({finalResult}) {
   const successItems = finalResult && finalResult.successful.map((success) => {
     return (
       <li>
-        <span className={styles['message']}>{success.message}</span>
+        <span className={styles['error-message']}>{success.message}</span>
         {Object.values(success.metadata).map((item) => {
-          return (<p className={styles['message']}>{item}</p>)
+          return (<p className={styles['error-metadata']}>{item}</p>)
         })}
       </li>
     )
@@ -55,11 +55,11 @@ export default function ResultList({finalResult}) {
         label='View more'
         children={
           <>
-            <p>Errors</p>
+            <p className={styles['error-level']}>Errors</p>
             <ul className={styles['error-list']}>{errorItems}</ul>
-            <p>Warnings</p>
+            <p className={styles['error-level']}>Warnings</p>
             <ul className={styles["warning-list"]}>{warningItems}</ul>
-            <p>Looking good</p>
+            <p className={styles['error-level']}>Looking good</p>
             <ul className={styles["success-list"]}>{successItems}</ul>
           </>
         } />

@@ -1,3 +1,4 @@
+import React from "react";
 const selectOptions = [
   { label: 'Story', value: 'Story' },
   { label: 'Section', value: 'Section' },
@@ -38,31 +39,68 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongValue } = result
-  finalResult.stats = {
-    total,
-    successful,
-    valid
-  }
+  const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongEnumValue } = result
+
+  const link = 'data:text/plain;charset=utf-8,'
   finalResult.failed = failed
   finalResult.errors = []
   finalResult.warnings = []
-  let key = ''
-  let subPath = ''
+  finalResult.successful = []
 
-  required.forEach(error => {
-    [ key, subPath ] = error.key.split(':')
-    subPath = (subPath === dataType) ? '' : ' in ' + subPath
+  valid && finalResult.successful.push({
+    message: `${successful} out of ${total} ${dataType.toLowerCase()}s are valid.`,
+    metadata: <a href={link + encodeURIComponent(valid.join(','))} download="valid-external-ids.txt">Valid externals ids</a>
+  })
+
+  required && required.forEach(error => {
+    let [ key, subPath ] = error.key.split(':')
+    subPath = (subPath === dataType) ? '' : ` in ${subPath}`
     finalResult.errors.push({
-      message: dataType + ' should have required property ' + key + subPath
+      message: `${dataType} should have required property ${key} ${subPath}`,
+      metadata: {
+        affectedCount: `Affected ${dataType.toLowerCase()} count: ${error.ids.length}`,
+        example: `Example: ${error.ids[0]}`,
+        affected: <a href={link + encodeURIComponent(error.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
+      }
     })
   })
 
-//   additionalProperties.forEach(warning => {
-//     finalResult.warnings.push({
-//       message: dataType + ' should have required property ' + key + subPath
-//     })
-//   })
+  additionalProperties && additionalProperties.forEach(warning => {
+    let [ key, subPath ] = warning.key.split(':')
+    subPath = (subPath === dataType) ? '' : ` in ${subPath}`
+    finalResult.warnings.push({
+      message: `${dataType} has additional property ${key} ${subPath}`,
+      metadata: {
+        affectedCount: `Affected ${dataType.toLowerCase()} count: ${warning.ids.length}`,
+        example: `Example: ${warning.ids[0]}`,
+        affected: <a href={link + encodeURIComponent(warning.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
+      }
+    })
+  })
+
+  type && type.forEach(error => {
+    const [ key, expectedType ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${dataType} has wrong type for property ${key}. Expected ${expectedType}`,
+      metadata: {
+        affectedCount: `Affected ${dataType.toLowerCase()} count: ${error.ids.length}`,
+        example: `Example: ${error.ids[0]}`,
+        affected: <a href={link + encodeURIComponent(error.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
+      }
+    })
+  })
+
+  wrongEnumValue && wrongEnumValue.forEach(error => {
+    const [ key, expectedValue ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${dataType} has incorrect value for property ${key}. Allowed values are ${expectedValue.split(',').join(', ')}`,
+      metadata: {
+        affectedCount: `Affected ${dataType.toLowerCase()} count: ${error.ids.length}`,
+        example: `Example: ${error.ids[0]}`,
+        affected: <a href={link + encodeURIComponent(error.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
+      }
+    })
+  })
 
   return finalResult
 }

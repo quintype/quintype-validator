@@ -151,7 +151,7 @@ describe('sectionValidationTest', () => {
 
 /* Story validation tests */
 describe('storyValidationTest', () => {
-  it('should throw "requiredProperty" error if any one of body, cards or story-elements is not provided', () => {
+  it('should throw "requiredProperty" error if body or publish dates are not provided', () => {
     const Story = {
       'external-id': 'story-001',
       headline: 'A story headline',
@@ -165,7 +165,10 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {});
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'any one of body, story-elements and cards', ids: ['story-001'] }]})
+        {required: [{ key: 'body:Story', ids: ['story-001'] },
+                    { key: 'first-published-at:Story', ids: ['story-001'] },
+                    { key: 'last-published-at:Story', ids: ['story-001'] },
+                    { key: 'published-at:Story', ids: ['story-001'] }]})
     );
   });
 
@@ -174,6 +177,9 @@ describe('storyValidationTest', () => {
       'summary': 'Story Summary.',
       'body': '<p>Some Body</p>',
       'story-template': 'text',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
       status: 'published',
       authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
       sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
@@ -195,6 +201,9 @@ describe('storyValidationTest', () => {
       slug: 'story-slug',
       'summary': 'Story Summary.',
       'body': '<p>Some Body</p>',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
       status: 'published'
     };
     const output = validator('Story', Story, {});
@@ -214,6 +223,9 @@ describe('storyValidationTest', () => {
       'summary': 123,
       'story-template': 'text',
       'body': '<p>Some Body</p>',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
       status: 'published',
       authors: 'Foobar',
       sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
@@ -233,6 +245,9 @@ describe('storyValidationTest', () => {
       headline: 'A story headline',
       slug: 'story-slug',
       'story-template': 'graphic',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
       status: 'draft',
       authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
       sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
@@ -242,7 +257,7 @@ describe('storyValidationTest', () => {
     expect(output).toEqual(
       expect.objectContaining(
         {enum: [{ key: 'status:open,published', ids: ['story-001'] },
-                { key: 'story-template:text,photo,video', ids: ['story-001'] }]})
+                { key: 'story-template:text,photo,video,poll,live-blog', ids: ['story-001'] }]})
     );
   });
 
@@ -254,6 +269,9 @@ describe('storyValidationTest', () => {
       'summary': 'Story Summary.',
       'body': '<p>Some Body</p>',
       'story-template': 'text',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
       status: 'published',
       authors: [{ email: 'author@foobar', 'external-id': 1}],
       sections: [{ slug: 'section-slug', 'external-id': 'section-001',
@@ -276,24 +294,9 @@ describe('storyValidationTest', () => {
       'summary': 'Story Summary.',
       'body': '<p>Some Body</p>',
       'story-template': 'text',
-      status: 'published',
-      authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
-      sections: [{ slug: 'section-slug', 'external-id': 'section-001',
-                  'parent': { slug: 'parent-slug', 'external-id': 'parent-001' }}],
-      tags: [{ name: 'tag' }]
-    };
-    const output = validator('Story', Story, {});
-    expect(output).toEqual({ 'total': 1, 'successful': 1, 'valid': ['story-001']});
-  });
-
-  it('should validate successfully when all required keys with correct data are provided ', () => {
-    const Story = {
-      'external-id': 'story-001',
-      headline: 'A story headline',
-      slug: 'story-slug',
-      'summary': 'Story Summary.',
-      'body': '<p>Some Body</p>',
-      'story-template': 'text',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
       status: 'published',
       authors: [{ email: 'author@foobar', 'external-id': 'author-001'}],
       sections: [{ slug: 'section-slug', 'external-id': 'section-001',

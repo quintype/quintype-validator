@@ -6,7 +6,7 @@ import { parseResult } from './validator-utils'
 
 export default function Result({result}) {
 
-  let finalResult = result && parseResult(result)
+  const finalResult = result && parseResult(result)
 
   return (
     <>
@@ -15,7 +15,7 @@ export default function Result({result}) {
         <div className={styles['container']}>
           <>
           <p className={styles['result-heading']}>Results</p>
-          <ResultList finalResult={finalResult.errors} />
+          <ResultList finalResult={finalResult} />
           </>
         </div>
       </div>

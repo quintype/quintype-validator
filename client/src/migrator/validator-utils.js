@@ -38,17 +38,31 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, failed, successful, additionalProperties, type, required, enum: wrongValue } = result
-  finalResult.total = total
+  const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongValue } = result
+  finalResult.stats = {
+    total,
+    successful,
+    valid
+  }
   finalResult.failed = failed
-  finalResult.successful = successful
   finalResult.errors = []
+  finalResult.warnings = []
+  let key = ''
+  let subPath = ''
 
   required.forEach(error => {
+    [ key, subPath ] = error.key.split(':')
+    subPath = (subPath === dataType) ? '' : ' in ' + subPath
     finalResult.errors.push({
-      message: dataType + ' should have required property ' + error.key
+      message: dataType + ' should have required property ' + key + subPath
     })
-  });
+  })
+
+//   additionalProperties.forEach(warning => {
+//     finalResult.warnings.push({
+//       message: dataType + ' should have required property ' + key + subPath
+//     })
+//   })
 
   return finalResult
 }

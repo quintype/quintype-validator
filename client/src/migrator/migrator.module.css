@@ -44,7 +44,7 @@
   color: var(--mono-5);
 }
 
-.error-message {
+.message {
   margin-left: 1.25em;
 }
 
@@ -55,13 +55,13 @@
 
 .error-list,
 .warning-list,
-.good-list {
+.success-list {
   list-style: none;
 }
 
 .error-list li,
 .warning-list li,
-.good-list li{
+.success-list li{
   margin-bottom: 1em;
 }
 
@@ -73,13 +73,13 @@
   color: var(--warning);
 }
 
-.good-list li::before {
+.success-list li::before {
   color: var(--success);
 }
 
 .error-list li::before,
 .warning-list li::before,
-.good-list li::before {
+.success-list li::before {
   content: "\2B24";
   font-size: var(--fs-xxs);
   font-weight: var(--fw-bold);

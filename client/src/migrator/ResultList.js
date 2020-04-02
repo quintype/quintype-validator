@@ -5,10 +5,11 @@ import styles from './migrator.module.css';
 
 export default function ResultList({finalResult}) {
   //add props for accordion labels
-  let errItems = finalResult && finalResult.map((error) => {
+
+  const errorItems = finalResult && finalResult.errors.map((error) => {
     return (
       <li>
-        <span className={styles["error-message"]}>{error.message}</span>
+        <span className={styles['message']}>{error.message}</span>
         {/* <span className={styles["error-id"]}>{ids}</span> */}
       </li>
     )
@@ -31,11 +32,11 @@ export default function ResultList({finalResult}) {
         children={
           <>
             <p>Errors</p>
-            <ul className={styles["error-list"]}>{errItems}</ul>
+            <ul className={styles['error-list']}>{errorItems}</ul>
             <p>Warnings</p>
-            <ul className={styles["warning-list"]}>{errItems}</ul>
+            <ul className={styles["warning-list"]}>{errorItems}</ul>
             <p>Looking good</p>
-            <ul className={styles["good-list"]}>{errItems}</ul>
+            <ul className={styles["success-list"]}>{errorItems}</ul>
           </>
         } />
       </Accordion>

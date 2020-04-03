@@ -1,4 +1,5 @@
 import React from "react";
+
 const selectOptions = [
   { label: 'Story', value: 'Story' },
   { label: 'Section', value: 'Section' },
@@ -37,68 +38,68 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
   return options
 }
 
+function formErrorMetadata (dataType, affectedData, effect = 'Affected') {
+  let metadata = {}
+  const link = 'data:text/plain;charset=utf-8,'
+
+  if(dataType) {
+    metadata.affectedCount = `Affected ${dataType.toLowerCase()} count: ${affectedData.length}.`
+    metadata.example = `Example: ${affectedData[0]}`
+  }
+
+  metadata.affected = <a href={link + encodeURIComponent(affectedData.join(','))} download='external-ids.txt'>{effect} externals ids</a>
+
+  return metadata
+}
+
 function parseResult (result) {
   let finalResult = {}
   const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongEnumValue } = result
 
-  const link = 'data:text/plain;charset=utf-8,'
-  finalResult.failed = failed
+  const pluralKey =  dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
+  finalResult.failed = `${failed} ${pluralKey} failed.`
   finalResult.errors = []
   finalResult.warnings = []
   finalResult.successful = []
 
-  valid && finalResult.successful.push({
-    message: `${successful} out of ${total} ${dataType.toLowerCase()}s are valid.`,
-    metadata: <a href={link + encodeURIComponent(valid.join(','))} download="valid-external-ids.txt">Valid externals ids</a>
-  })
+  if(valid) {
+    finalResult.successful.push({
+      message: `${successful} out of ${total} ${pluralKey} are valid.`,
+      metadata: formErrorMetadata('', valid, 'Valid')
+    })
+  }
 
   required && required.forEach(error => {
     let [ key, subPath ] = error.key.split(':')
-    subPath = (subPath === dataType) ? '' : ` in ${subPath}`
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
     finalResult.errors.push({
-      message: `${dataType} should have required property ${key} ${subPath}`,
-      metadata: {
-        affectedCount: `Affected ${dataType.toLowerCase()} count: ${error.ids.length}`,
-        example: `Example: ${error.ids[0]}`,
-        affected: <a href={link + encodeURIComponent(error.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
-      }
+      message: `${dataType} should have required property '${key}' ${subPath}`,
+      metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 
   additionalProperties && additionalProperties.forEach(warning => {
     let [ key, subPath ] = warning.key.split(':')
-    subPath = (subPath === dataType) ? '' : ` in ${subPath}`
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
     finalResult.warnings.push({
-      message: `${dataType} has additional property ${key} ${subPath}`,
-      metadata: {
-        affectedCount: `Affected ${dataType.toLowerCase()} count: ${warning.ids.length}`,
-        example: `Example: ${warning.ids[0]}`,
-        affected: <a href={link + encodeURIComponent(warning.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
-      }
+      message: `${dataType} has additional property '${key}' ${subPath}`,
+      metadata: formErrorMetadata(dataType, warning.ids)
     })
   })
 
   type && type.forEach(error => {
     const [ key, expectedType ] = error.key.split(':')
     finalResult.errors.push({
-      message: `${dataType} has wrong type for property ${key}. Expected ${expectedType}`,
-      metadata: {
-        affectedCount: `Affected ${dataType.toLowerCase()} count: ${error.ids.length}`,
-        example: `Example: ${error.ids[0]}`,
-        affected: <a href={link + encodeURIComponent(error.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
-      }
+      message: `${dataType} has wrong type for property '${key}'. Expected '${expectedType}'.`,
+      metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 
   wrongEnumValue && wrongEnumValue.forEach(error => {
     const [ key, expectedValue ] = error.key.split(':')
     finalResult.errors.push({
-      message: `${dataType} has incorrect value for property ${key}. Allowed values are ${expectedValue.split(',').join(', ')}`,
-      metadata: {
-        affectedCount: `Affected ${dataType.toLowerCase()} count: ${error.ids.length}`,
-        example: `Example: ${error.ids[0]}`,
-        affected: <a href={link + encodeURIComponent(error.ids.join(','))} download="affected-external-ids.txt">Affected external ids</a>
-      }
+      message: `${dataType} has incorrect value for property '${key}'. Allowed values are '${expectedValue.split(',').join(', ')}'.`,
+      metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 

@@ -46,16 +46,21 @@
 
 .error-message {
   margin-left: 1.25em;
+  font-family: inherit;
+  font-size: var(--fs-s);
 }
 
 .error-metadata {
   margin-left: 1em;
   margin-bottom: 0.25em;
   margin-top: 0.25em;
+  font-family: inherit;
+  font-size: var(--fs-s);
 }
 
 .error-level{
   font-weight: var(--fw-semi-bold);
+  font-size: var(--fs-s);
 }
 
 .error-list,

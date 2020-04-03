@@ -15,6 +15,7 @@ export default function Result({result}) {
         <div className={styles['container']}>
           <>
           <p className={styles['result-heading']}>Results</p>
+          <p>{finalResult.failed}</p>
           <ResultList finalResult={finalResult} />
           </>
         </div>

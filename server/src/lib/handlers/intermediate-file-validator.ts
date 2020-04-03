@@ -12,7 +12,7 @@ function textInputValidator(req: Request, res: Response): Response {
   try {
     result = validator(type, JSON.parse(data));
   } catch (error) {
-    return res.json('Please provide a single valid JSON input')
+    return res.json({error: 'Please provide a single valid JSON input'})
   }
   return res.json(result)
 }
@@ -20,22 +20,22 @@ function textInputValidator(req: Request, res: Response): Response {
 export function fileValidator(req: Request, res: Response): void {
   let result: {[key: string]: any} | unknown = {}
   const fileStream = new PassThrough()
-  
+
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
 
   busboy.on('field', (fieldname, value): Response | void => {
     if (fieldname !== 'type' || !value) {
-      return res.json({ result: `Incorrect field name: ${fieldname}`})
+      return res.json({ error: `Incorrect field name: ${fieldname}`})
     }
     type = value;
   })
   busboy.on('file', (fieldname, file, _1, _2, mimetype): Response | void => {
     if (fieldname !== 'file') {
-      return res.json({ result: `Incorrect field name: ${fieldname}`})
+      return res.json({ error: `Incorrect field name: ${fieldname}`})
     }
     if (mimetype !== 'application/x-gzip') {
-      return res.json({ result: 'Please upload files only in *.txt.gz format'})
+      return res.json({ error: 'Please upload files only in *.txt.gz format'})
     }
     file.resume()
     file.pipe(fileStream)
@@ -82,7 +82,7 @@ export async function s3keyValidator(req: Request, res: Response){
       return
     }
     if(data.Contents!.length === 0) {
-      res.json({result: `No files with prefix ${type.toLowerCase()} found in ${s3keyParts.slice(3).join('/')}`})
+      res.json({error: `No files with prefix ${type.toLowerCase()} found in ${s3keyParts.slice(3).join('/')}`})
       return
     }
     const result = await validateByKey(s3, data, type)

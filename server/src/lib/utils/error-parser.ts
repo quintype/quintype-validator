@@ -2,9 +2,47 @@ interface Obj{
   [key: string]: any
 }
 
+function fixErrors(errorList: Obj): Obj {
+  if(errorList.additionalProperties) {
+    errorList.additionalProperties = errorList.additionalProperties.filter(
+      (prop: { [key: string]: string }) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
+
+    if(!errorList.additionalProperties.length) {
+      delete errorList.additionalProperties
+    }
+  }  
+
+  if(errorList.required) {
+    const requiredProp = errorList.required.filter(
+      (prop: { [key: string]: string }) => (prop.key === 'body:Story' || prop.key === 'story-elements:Story' || prop.key === 'cards:Story'))  
+    const keyName = 'any one of body, story-elements and cards'
+    const identifier = requiredProp[0].ids[0]
+
+    if(requiredProp.length !== 2 ) {
+      const errorKey = errorList.required.find((prop: Obj) => prop.key === keyName)
+
+      if(errorKey) {
+        errorKey.ids.push(identifier)
+      } else {
+        errorList.required.push({
+          key: keyName,
+          ids: [identifier]
+        })
+      }
+    }
+    errorList.required = errorList.required.filter(
+      (prop: Obj) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
+
+    if(!errorList.required.length) {
+      delete errorList.required
+    }
+  }
+
+  return errorList
+}
+
 export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, schema: string, errorList: Obj)
   : Obj {
-  errorList.dataType = schema
   errors.forEach(error => {
     const {keyword} = error
     const errorParam = getErrorParam(error, schema)
@@ -27,7 +65,7 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     }
   });
 
-  return errorList
+  return schema === 'StoryInternal' ? fixErrors(errorList) : errorList
 }
 
 function getErrorParam(error: Obj, schema: string): string | boolean {

@@ -45,7 +45,7 @@ export function validator(type: string, data: {[key: string]: any}, errorList: {
   if(!errorList.dataType) {
     errorList.dataType = type
   }
-  if(!errorList.successful){
+  if(errorList.successful === undefined){
     errorList.successful = 0
     errorList.failed = 0
   } 
@@ -67,14 +67,16 @@ export function asyncValidateStream(file: any, type: string, result: {[key: stri
   return new Promise((resolve, reject) => {
     file
     .pipe(zlib.createGunzip()).on('error', () => {
-      resolve({error: 'Please upload files only in *.txt.gz format'})
+      resolve({ error: 'Please upload files only in *.txt.gz format',
+                dataType: type})
       return
     })
     .pipe(split2(/\r?\n+/,(obj) => {
       try {
         return JSON.parse(obj)
       } catch(err) {
-        resolve({error: 'Please upload files with valid JSONs'})
+        resolve({ error: 'Please upload files with valid JSONs',
+                  dataType: type})
       return
       }
     }))

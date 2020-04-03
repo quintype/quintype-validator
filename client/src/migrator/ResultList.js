@@ -10,7 +10,7 @@ export default function ResultList({finalResult}) {
     return (
       <li>
         <span className={styles['error-message']}>{error.message}</span>
-        {Object.values(error.metadata).map((item) => {
+        {error.metadata && Object.values(error.metadata).map((item) => {
           return (<p className={styles['error-metadata']}>{item}</p>)
         })}
       </li>
@@ -21,7 +21,7 @@ export default function ResultList({finalResult}) {
     return (
       <li>
         <span className={styles['error-message']}>{warning.message}</span>
-        {Object.values(warning.metadata).map((item) => {
+        {warning.metadata && Object.values(warning.metadata).map((item) => {
           return (<p className={styles['error-metadata']}>{item}</p>)
         })}
       </li>
@@ -32,7 +32,7 @@ export default function ResultList({finalResult}) {
     return (
       <li>
         <span className={styles['error-message']}>{success.message}</span>
-        {Object.values(success.metadata).map((item) => {
+        {success.metadata && Object.values(success.metadata).map((item) => {
           return (<p className={styles['error-metadata']}>{item}</p>)
         })}
       </li>

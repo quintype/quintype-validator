@@ -30,8 +30,8 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
     })
   } else {
     requestData = new FormData()
-    requestData.append('file', userData)
     requestData.append('type', selectType)
+    requestData.append('file', userData)
   }
 
   options.body = requestData

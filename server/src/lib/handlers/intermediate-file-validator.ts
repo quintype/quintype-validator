@@ -3,7 +3,6 @@ import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
 import { validator, asyncValidateStream } from '../utils/validator'
 import fs from "fs"
-import { PassThrough } from 'stream'
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 function textInputValidator(req: Request, res: Response): Response {
@@ -20,35 +19,39 @@ function textInputValidator(req: Request, res: Response): Response {
 
 export function fileValidator(req: Request, res: Response): void {
   let result: {[key: string]: any} | unknown = {}
-  const fileStream = new PassThrough()
 
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
 
   busboy.on('field', (fieldname, value): Response | void => {
     if (fieldname !== 'type' || !value) {
-      return res.json({ error: `Incorrect field name: ${fieldname}`,
-                        dataType: type})
+      res.json({
+        error: `Incorrect field name: ${fieldname}`,
+        dataType: type})
+      return
     }
     type = value;
   })
-  busboy.on('file', (fieldname, file, _1, _2, mimetype): Response | void => {
+  busboy.on('file', async(fieldname, file, _1, _2, mimetype) => {
     if (fieldname !== 'file') {
-      return res.json({ error: `Incorrect field name: ${fieldname}`,
-                        dataType: type})
+      res.json({
+        error: `Incorrect field name: ${fieldname}`,
+        dataType: type
+      })
+      return
     }
     if (mimetype !== 'application/x-gzip') {
-      return res.json({ error: 'Please upload files only in *.txt.gz format',
-                        dataType: type})
+      res.json({
+        error: 'Please upload files only in *.txt.gz format',
+        dataType: type
+      })
+      return
     }
-    file.resume()
-    file.pipe(fileStream)
-  })
 
-  busboy.on('finish', async () => {
-    result = await asyncValidateStream(fileStream, type)
+    result = await asyncValidateStream(file, type)
     res.json(result)
   })
+
   req.pipe(busboy)
 }
 

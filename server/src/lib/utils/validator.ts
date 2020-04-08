@@ -42,7 +42,7 @@ export function validateJson(
 
 export function validator(type: string, data: {[key: string]: any}, errorList: {[key: string]: any} = {}): {[key: string]: any} {
   errorList.total = errorList.total ? errorList.total+1 : 1
-  if(!errorList.dataType) {
+  if(errorList.dataType === undefined) {
     errorList.dataType = type
   }
   if(errorList.successful === undefined){

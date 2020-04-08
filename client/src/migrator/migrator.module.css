@@ -23,13 +23,14 @@
   font-size: var(--fs-m);
   line-height: var(--lh-3);
   color: var(--mono-5);
-  margin: 0 0 24px 0;
+  margin: 12px 0 0 0;
   text-align: left;
 }
 
 .container {
   box-shadow: var(--box-shadow-0);
   background-color: var(--white);
+  margin-top: 24px;
   padding: 30px;
   overflow: visible;
 }

@@ -54,19 +54,19 @@ function formErrorMetadata (dataType, affectedData, effect = 'Affected') {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongEnumValue, error } = result
+  const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongEnumValue, error, errorKeys } = result
 
   finalResult.errors = []
   const pluralKey =  dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
-  finalResult.failed = (failed === undefined ? `Validation of ${pluralKey}`: `${failed} ${pluralKey}`) + ' failed.'
+  finalResult.failed = failed === undefined ? `Validation of ${pluralKey} failed.` : 'Validation complete. Click on View more for details.'
+  finalResult.total =  `Total ${pluralKey} read: ${total}`
 
   if(error) {
-    console.log(error.filename)
     const errorObject = {
       message: error
     }
-    if(error.filename) {
-      errorObject.metadata = error.filename
+    if(errorKeys) {
+      errorObject.metadata = {example: errorKeys.join(', ')}
     }
     finalResult.errors.push(errorObject)
   }

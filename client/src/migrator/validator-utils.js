@@ -43,8 +43,7 @@ function formErrorMetadata (dataType, affectedData, effect = 'Affected') {
   const link = 'data:text/plain;charset=utf-8,'
 
   if(dataType) {
-    metadata.affectedCount = `Affected ${dataType.toLowerCase()} count: ${affectedData.length}.`
-    metadata.example = `Example: ${affectedData[0]}`
+    metadata.info = `Affected count: ${affectedData.length}. Refer ${dataType.toLowerCase()} with external-id '${affectedData[0]}'.`
   }
 
   metadata.affected = <a href={link + encodeURIComponent(affectedData.join(','))} download='external-ids.txt'>{effect} externals ids</a>
@@ -54,12 +53,14 @@ function formErrorMetadata (dataType, affectedData, effect = 'Affected') {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, failed, successful, valid, additionalProperties, type, required, enum: wrongEnumValue, error, errorKeys } = result
+  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, error, errorKeys } = result
 
   finalResult.errors = []
+  finalResult.warnings = []
+  finalResult.successful = []
   const pluralKey =  dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
-  finalResult.failed = failed === undefined ? `Validation of ${pluralKey} failed.` : 'Validation complete. Click on View more for details.'
-  finalResult.total =  `Total ${pluralKey} read: ${total}`
+  finalResult.total =  `Total ${pluralKey} read: ${total || 0}`
+  finalResult.successful = `${successful || 0} out of ${total || 0} ${pluralKey} are valid.`
 
   if(error) {
     const errorObject = {
@@ -69,16 +70,6 @@ function parseResult (result) {
       errorObject.metadata = {example: errorKeys.join(', ')}
     }
     finalResult.errors.push(errorObject)
-  }
-
-  finalResult.warnings = []
-  finalResult.successful = []
-
-  if(valid) {
-    finalResult.successful.push({
-      message: `${successful} out of ${total} ${pluralKey} are valid.`,
-      metadata: formErrorMetadata('', valid, 'Valid')
-    })
   }
 
   required && required.forEach(error => {

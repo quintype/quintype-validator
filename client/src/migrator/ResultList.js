@@ -28,19 +28,9 @@ export default function ResultList({finalResult}) {
     )
   })
 
-  const successItems = finalResult && finalResult.successful.map((success) => {
-    return (
-      <li>
-        <span className={styles['error-message']}>{success.message}</span>
-        {success.metadata && Object.values(success.metadata).map((item) => {
-          return (<p className={styles['error-metadata']}>{item}</p>)
-        })}
-      </li>
-    )
-  })
-
   return (
     <>
+    <p className={styles['result-heading']}>Results</p>
     {!finalResult ?
       <>
       <Loader />
@@ -52,15 +42,18 @@ export default function ResultList({finalResult}) {
       :
       <Accordion>
       <AccordionSection
-        label='View more'
+        label='Statistics'>
+        <p>{finalResult.total}</p>
+        <p>{finalResult.successful}</p>
+      </AccordionSection>
+      <AccordionSection
+        label='Details'
         children={
           <>
             <p className={styles['error-level']}>Errors</p>
             <ul className={styles['error-list']}>{errorItems}</ul>
             <p className={styles['error-level']}>Warnings</p>
             <ul className={styles["warning-list"]}>{warningItems}</ul>
-            <p className={styles['error-level']}>Looking good</p>
-            <ul className={styles["success-list"]}>{successItems}</ul>
           </>
         } />
       </Accordion>

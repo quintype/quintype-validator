@@ -6,7 +6,10 @@ export interface SectionTest {
 
 /** Author Definition */
 export interface AuthorTest {
-  /** Name of Author */
+  /** Name of Author 
+   * @minLength 1
+   * @maxLength 10
+  */
   readonly name: string;
 }
 

@@ -1,11 +1,74 @@
+import { readFileSync } from 'fs';
 import path, { join } from 'path';
-import { validator } from '../utils/validator';
+import { generateJsonSchema, validator, validateJson } from '../utils/validator';
 
 export const typesPath = join(
   path.dirname(require.resolve('@quintype/migration-helpers')),
   'lib',
   'editor-types.d.ts'
 );
+
+const testSchema = JSON.parse(readFileSync(path.resolve(__dirname,'..', '..', '..', 'test-data', 'test_schema.json'), 'utf8'));
+const authorSchema = generateJsonSchema(path.resolve(__dirname, '..', '..', '..', 'test-data', 'editor-test.ts'), 'AuthorTest');
+
+describe('generateJsonSchema', () => {
+  it('just returns the schema of author test', () => {
+    expect(authorSchema).toEqual(testSchema.definitions.AuthorTest);
+  });
+});
+
+describe('validateJsonTest', () => {
+  it('should validate json', () => {
+    const Author1 = {
+      name: ''
+    };
+    const Author2 = {
+      name: 'Author2 name'
+    };
+    const Author3 = {
+      name: 'Foobar'
+    };
+    expect(validateJson(Author1, authorSchema)).toEqual(
+      expect.arrayContaining([expect.objectContaining({"message": "should NOT be shorter than 1 characters"})]));
+    expect(validateJson(Author2, authorSchema)).toEqual(
+      expect.arrayContaining([expect.objectContaining({"message": "should NOT be longer than 10 characters"})]));
+    expect(validateJson(Author3, authorSchema)).toBeNull();
+  });
+});
+
+/* Tag validation tests */
+describe('tagValidationTest', () => {
+  it('should throw "minLength" error if name has less that 3 characters', () => {
+    const Tag1 = {
+      name: ''
+    };
+    const output = validator('Tag', Tag1, {});
+    expect(output).toEqual(
+      expect.objectContaining(
+        {minLength: [{ key: 'name:3', ids: [undefined] }]})
+    );
+  });
+
+  it('should throw "maxLength" error if name has more that 100 characters', () => {
+    const Tag1 = {
+      name: 'snsvjhdsjkhdchbcjdhcjsbdjvkjsdjvhskjdhklsjhkjhdkjbcjbdcbsjdcksjcdjkscnksjdnjncksjdnckjnslkcjndjsndbvjdcjbdjfvdnk'
+    };
+    const output = validator('Tag', Tag1, {});
+    expect(output).toEqual(
+      expect.objectContaining(
+        {maxLength: [{ key: 'name:100', ids: [undefined] }]})
+    );
+  });
+
+  it('should throw "minLength" error if name has less that 3 characters', () => {
+    const Tag1 = {
+      name: 'testTag'
+    };
+    const output = validator('Tag', Tag1, {});
+    expect(output).toEqual(expect.objectContaining({ successful: 1}))
+  });
+});
+
 
 /* Author validation tests */
 describe('authorValidationTest', () => {

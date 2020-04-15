@@ -16,7 +16,9 @@ export interface AuthorTest {
 export interface StoryTest {
   /** Name of story */
   readonly name: string;
-  /** List of sections story belongs to */
+  /** List of sections story belongs to 
+   * @minItems 1
+  */
   readonly sections: ReadonlyArray<SectionTest>;
 
   /** List of story authors */

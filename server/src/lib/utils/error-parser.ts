@@ -81,6 +81,12 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + error.params.type)
     case 'enum':
       return (keyPath + ':' + error.params.allowedValues)
+    case 'maxLength':
+      return (keyPath + ':' + error.params.limit)
+    case 'minLength':
+      return (keyPath + ':' + error.params.limit)
+    case 'minItems':
+      return (keyPath + ':' + error.params.limit)
 // handle other keyword errors if required
   }
   return false

@@ -6,14 +6,19 @@ export interface SectionTest {
 
 /** Author Definition */
 export interface AuthorTest {
-  /** Name of Author */
+  /** Name of Author 
+   * @minLength 1
+   * @maxLength 10
+  */
   readonly name: string;
 }
 
 export interface StoryTest {
   /** Name of story */
   readonly name: string;
-  /** List of sections story belongs to */
+  /** List of sections story belongs to 
+   * @minItems 1
+  */
   readonly sections: ReadonlyArray<SectionTest>;
 
   /** List of story authors */

@@ -53,7 +53,7 @@ function formErrorMetadata (dataType, affectedData, effect = 'Affected') {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, error, errorKeys } = result
+  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, error, errorKeys, minItems } = result
 
   finalResult.errors = []
   finalResult.warnings = []
@@ -72,11 +72,35 @@ function parseResult (result) {
     finalResult.errors.push(errorObject)
   }
 
+  maxLength && maxLength.forEach(error => {
+    let [ key, subPath ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${dataType} should have maximum of ${subPath} characters for property '${key}'.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  minLength && minLength.forEach(error => {
+    let [ key, limit ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${dataType} should have minimum of ${limit} character${limit > 1 ? 's' : ''} for property '${key}'.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  minItems && minItems.forEach(error => {
+    let [ key, limit ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${dataType} should have minimum of ${limit} ${limit > 1 ? key : key.slice(0, key.length-1 )}.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
   required && required.forEach(error => {
     let [ key, subPath ] = error.key.split(':')
     subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
     finalResult.errors.push({
-      message: `${dataType} should have required property '${key}' ${subPath}`,
+      message: `${dataType} should have required property '${key}' ${subPath}.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
@@ -85,7 +109,7 @@ function parseResult (result) {
     let [ key, subPath ] = warning.key.split(':')
     subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
     finalResult.warnings.push({
-      message: `${dataType} has additional property '${key}' ${subPath}`,
+      message: `${dataType} has additional property '${key}' ${subPath}.`,
       metadata: formErrorMetadata(dataType, warning.ids)
     })
   })

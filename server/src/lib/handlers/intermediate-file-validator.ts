@@ -5,11 +5,11 @@ import { validator, asyncValidateStream } from '../utils/validator'
 import fs from "fs"
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
-function textInputValidator(req: Request, res: Response): Response {
+function textInputValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Response {
   const { type, data } = req.body;
   let result: { [key: string]: any } = {}
   try {
-    result = validator(type, JSON.parse(data));
+    result = validator(type, JSON.parse(data), result, uniqueSlugs);
   } catch (error) {
     return res.json({ 
       error: 'Please provide a single valid JSON input',
@@ -18,8 +18,8 @@ function textInputValidator(req: Request, res: Response): Response {
   return res.json(result)
 }
 
-export function fileValidator(req: Request, res: Response): Response | void {
-  let result: {[key: string]: any} | unknown = {}
+export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Response | void {
+  let result: {[key: string]: any} | any = {}
 
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
@@ -47,7 +47,7 @@ export function fileValidator(req: Request, res: Response): Response | void {
     }
 
     try {
-      result = await asyncValidateStream(file, type)
+      result = await asyncValidateStream(file, type, result, uniqueSlugs)
     } catch(error) {
       return res.json({
         error,
@@ -60,7 +60,7 @@ export function fileValidator(req: Request, res: Response): Response | void {
   req.pipe(busboy)
 }
 
-async function validateByKey(s3:any, data: any, type: string) {
+async function validateByKey(s3:any, data: any, type: string, uniqueSlugs: Set<string>) {
   const { Name, Contents } = data
   let result: {[key: string]: any} | any = {}
   for(const file of Contents) {
@@ -71,7 +71,7 @@ async function validateByKey(s3:any, data: any, type: string) {
       Key: key 
     })
     .createReadStream()
-    result = await asyncValidateStream(readableStream, type, result)
+    result = await asyncValidateStream(readableStream, type, result, uniqueSlugs)
     } catch(error) {
       result.error = error
       if(!result.errorKeys) {
@@ -83,7 +83,7 @@ async function validateByKey(s3:any, data: any, type: string) {
   return result
 }
 
-export async function s3keyValidator(req: Request, res: Response): Promise<Response | void> {
+export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Promise<Response | void> {
   const { type, data: path } = req.body
   const s3keyParts = path.split('/')
   const bucket = s3keyParts[2]
@@ -108,20 +108,21 @@ export async function s3keyValidator(req: Request, res: Response): Promise<Respo
         error: `No files with prefix ${type.toLowerCase()} found in ${s3keyParts.slice(3).join('/')}`,
         dataType: type})
     }
-    const result = await validateByKey(s3, data, type)
+    const result = await validateByKey(s3, data, type, uniqueSlugs)
     return res.json(result)
   })
 }
 
 export function intermediateValidator(req: Request, res: Response): Response | any {
   const validateType = req.query.source
+  const uniqueSlugs: Set<string> = new Set();
 
   switch(validateType) {
     case 'Direct':
-      return textInputValidator(req, res)
+      return textInputValidator(req, res, uniqueSlugs)
     case 'File':
-      return fileValidator(req, res)
+      return fileValidator(req, res, uniqueSlugs)
     case 'S3':
-      return s3keyValidator(req, res)
+      return s3keyValidator(req, res, uniqueSlugs)
   }
 }

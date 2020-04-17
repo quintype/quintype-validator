@@ -13,6 +13,12 @@ export const typesPath = join(
   'editor-types.d.ts'
 );
 
+function isUniqueSlug(data: {slug: string}, uniqueSlugs: Set<string>) {
+  if(uniqueSlugs.has(data.slug)) return false
+  uniqueSlugs.add(data.slug)
+  return true
+}
+
 export function generateJsonSchema(
   filePath: string,
   interfaceName: string
@@ -31,16 +37,33 @@ export function generateJsonSchema(
 }
 
 export function validateJson(
-  data: object,
-  schema: object
+  data: {[key: string]: any},
+  schema: object,
+  uniqueSlugs: Set<string>
 ): ReadonlyArray<ajv.ErrorObject> | null | undefined {
   const ajvt = new ajv({ verbose: true, jsonPointers: true, allErrors: true });
   const validate = ajvt.compile(schema);
   validate(data);
+  if(data.slug) {
+    const isUnique = isUniqueSlug(data as {slug: string}, uniqueSlugs)
+    if(!isUnique) {
+      if(!validate.errors) {
+        validate.errors = []
+      }
+      validate.errors.push({
+        keyword: 'uniqueKey',
+        dataPath: '/slug',
+        schemaPath: '',
+        params: {
+          value: data.slug
+        }
+      })
+    }
+  }
   return validate.errors;
 }
 
-export function validator(type: string, data: {[key: string]: any}, errorList: {[key: string]: any} = {}): {[key: string]: any} {
+export function validator(type: string, data: {[key: string]: any}, errorList: {[key: string]: any}, uniqueSlugs: Set<string>): {[key: string]: any} {
   errorList.total = errorList.total ? errorList.total+1 : 1
 
   if(errorList.dataType === undefined) {
@@ -51,7 +74,7 @@ export function validator(type: string, data: {[key: string]: any}, errorList: {
     errorList.failed = 0
   } 
   const directSchema = generateJsonSchema(typesPath, type);
-  const error = validateJson(data, directSchema);
+  const error = validateJson(data, directSchema, uniqueSlugs);
   if (error) {
     errorList.failed = errorList.failed + 1
     return errorParser(error, data['external-id'], type, errorList);
@@ -64,7 +87,7 @@ export function validator(type: string, data: {[key: string]: any}, errorList: {
   return errorList
 }
 
-export function asyncValidateStream(file: any, type: string, result: {[key: string]: any} = {}) {
+export function asyncValidateStream(file: any, type: string, result: {[key: string]: any}, uniqueSlugs: Set<string>) {
   return new Promise((resolve, reject) => {
     file
     .pipe(zlib.createGunzip()).on('error', () => {
@@ -80,7 +103,7 @@ export function asyncValidateStream(file: any, type: string, result: {[key: stri
       }
     }))
     .on('data', (obj: Object) => {
-      result = validator(type, obj, result)
+      result = validator(type, obj, result, uniqueSlugs)
     })
     .on('end', () => {
       resolve(result)

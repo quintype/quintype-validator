@@ -33,11 +33,11 @@ describe('validateJsonTest', () => {
     const Author3 = {
       name: 'Foobar'
     };
-    expect(validateJson(Author1, authorSchema)).toEqual(
+    expect(validateJson(Author1, authorSchema, new Set())).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be shorter than 1 characters"})]));
-    expect(validateJson(Author2, authorSchema)).toEqual(
+    expect(validateJson(Author2, authorSchema, new Set())).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be longer than 10 characters"})]));
-    expect(validateJson(Author3, authorSchema)).toBeNull();
+    expect(validateJson(Author3, authorSchema, new Set())).toBeNull();
   });
 
   it('should validate json', () => {
@@ -54,13 +54,33 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar'}]
     };
-    expect(validateJson(Story1, storySchema)).toEqual(
+    expect(validateJson(Story1, storySchema, new Set())).toEqual(
       expect.arrayContaining(
         [expect.objectContaining({"message": "should have required property 'sections'"}),
          expect.objectContaining({"message": "should have required property 'authors'"})]));
-    expect(validateJson(Story2, storySchema)).toEqual(
+    expect(validateJson(Story2, storySchema, new Set())).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT have fewer than 1 items"})]));
-    expect(validateJson(Story3, storySchema)).toBeNull();
+    expect(validateJson(Story3, storySchema, new Set())).toBeNull();
+  });
+
+  it('should throw "uniqueKey" error if story has duplicate slug', () => {
+    const uniqueSlugs = new Set<string>()
+    const Story1 = {
+      name: 'Foobar',
+      slug: 'foobar',
+      sections: [{ name: 'sec1'}],
+      authors: [{ name: 'foobar'}]
+    };
+    const Story2 = {
+      name: 'Foobar',
+      slug: 'foobar',
+      sections: [{ name: 'sec1'}],
+      authors: [{ name: 'foobar'}]
+    };
+    expect(validateJson(Story1, storySchema, uniqueSlugs)).toBeNull();
+    expect(validateJson(Story2, storySchema, uniqueSlugs)).toEqual(
+      expect.arrayContaining([expect.objectContaining({"keyword": "uniqueKey", "params": {"value": "foobar"}})])
+    );
   });
 });
 
@@ -70,7 +90,7 @@ describe('tagValidationTest', () => {
     const Tag1 = {
       name: ''
     };
-    const output = validator('Tag', Tag1, {});
+    const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {minLength: [{ key: 'name:3', ids: [undefined] }]})
@@ -81,7 +101,7 @@ describe('tagValidationTest', () => {
     const Tag1 = {
       name: 'snsvjhdsjkhdchbcjdhcjsbdjvkjsdjvhskjdhklsjhkjhdkjbcjbdcbsjdcksjcdjkscnksjdnjncksjdnckjnslkcjndjsndbvjdcjbdjfvdnk'
     };
-    const output = validator('Tag', Tag1, {});
+    const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {maxLength: [{ key: 'name:100', ids: [undefined] }]})
@@ -92,7 +112,7 @@ describe('tagValidationTest', () => {
     const Tag1 = {
       name: 'testTag'
     };
-    const output = validator('Tag', Tag1, {});
+    const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(expect.objectContaining({ successful: 1}))
   });
 });
@@ -105,7 +125,7 @@ describe('authorValidationTest', () => {
       name: 'Foo Bar',
       email: 'author@abc.com'
     };
-    const output = validator('Author', Author, {});
+    const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'external-id:Author', ids: [undefined] }, { key: 'username:Author', ids: [undefined] }]})
@@ -117,7 +137,7 @@ describe('authorValidationTest', () => {
       username: 'Foo',
       'external-id': 'author-001'
     };
-    const output = validator('Author', Author, {});
+    const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'name:Author', ids: ['author-001'] }, { key: 'email:Author', ids: ['author-001'] }]})
@@ -132,7 +152,7 @@ describe('authorValidationTest', () => {
       'external-id': 123,
       role: 14
     };
-    const output = validator('Author', Author, {});
+    const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {type: [{ key: 'external-id:string', ids: [123] }, { key: 'role:string', ids: [123] }]})
@@ -151,7 +171,7 @@ describe('authorValidationTest', () => {
       },
       foo: 'bar'
     };
-    const output = validator('Author', Author, {});
+    const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual( expect.objectContaining(
       {additionalProperties: [{ key: 'foo:Author', ids: ['author-001'] }]})
     );
@@ -165,7 +185,7 @@ describe('authorValidationTest', () => {
       'external-id': 'author-001',
       role: 'Editor'
     };
-    const output = validator('Author', Author, {});
+    const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual({ 'dataType': 'Author', 'total': 1, 'failed': 0, 'successful': 1, 'valid': ['author-001']});
   });
 })
@@ -177,7 +197,7 @@ describe('sectionValidationTest', () => {
       name: 'Sports',
       'display-name': 'sports'
     };
-    const output = validator('Section', Section, {});
+    const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'external-id:Section', ids: [undefined] }, { key: 'slug:Section', ids: [undefined] }]})
@@ -189,7 +209,7 @@ describe('sectionValidationTest', () => {
       slug: 'sports',
       'external-id': 'section-001'
     };
-    const output = validator('Section', Section, {});
+    const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'name:Section', ids: ['section-001'] }]})
@@ -203,7 +223,7 @@ describe('sectionValidationTest', () => {
       slug: 123,
       'external-id': 'section-001'
     };
-    const output = validator('Section', Section, {});
+    const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {type: [{ key: 'slug:string', ids: ['section-001'] }]})
@@ -221,7 +241,7 @@ describe('sectionValidationTest', () => {
       },
       foo: 'bar'
     };
-    const output = validator('Section', Section, {});
+    const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {additionalProperties: [{ key: 'foo:Section', ids: ['section-001'] }]})
@@ -235,7 +255,7 @@ describe('sectionValidationTest', () => {
       slug: 'sports',
       'external-id': 'section-001'
     };
-    const output = validator('Section', Section, {});
+    const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual({ 'dataType': 'Section', 'total': 1, 'failed': 0, 'successful': 1, 'valid': ['section-001']});
   });
 })
@@ -253,7 +273,7 @@ describe('storyValidationTest', () => {
       sections: [{ name:'Foo', slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'body:Story', ids: ['story-001'] },
@@ -276,7 +296,7 @@ describe('storyValidationTest', () => {
       sections: [{ name:'Foo', slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'external-id:Story', ids: [undefined] },
@@ -297,7 +317,7 @@ describe('storyValidationTest', () => {
       'body': '<p>Some Body</p>',
       status: 'published'
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {required: [{ key: 'sections:Story', ids: ['story-001'] },
@@ -322,7 +342,7 @@ describe('storyValidationTest', () => {
       sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {type: [{ key: 'summary:string', ids: ['story-001'] },
@@ -345,7 +365,7 @@ describe('storyValidationTest', () => {
       sections: [{ name:'Foo', slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {enum: [{ key: 'status:open,published', ids: ['story-001'] },
@@ -371,7 +391,7 @@ describe('storyValidationTest', () => {
       tags: [{ name: 'tag' }],
       foo: 'bar'
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {additionalProperties: [{ key: 'foo:Story', ids: ['story-001'] }] })
@@ -394,7 +414,7 @@ describe('storyValidationTest', () => {
       sections: [],
       tags: [{ name: 'tag' }]
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
         {minItems: [{ key: 'sections:1', ids: ['story-001'] },
@@ -419,7 +439,7 @@ describe('storyValidationTest', () => {
                   'parent': { name:'Foo2', slug: 'parent-slug', 'external-id': 'parent-001' }}],
       tags: [{ name: 'tag' }]
     };
-    const output = validator('Story', Story, {});
+    const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual({ 'dataType': 'Story', 'total': 1, 'failed': 0, 'successful': 1, 'valid': ['story-001']});
   });
 })

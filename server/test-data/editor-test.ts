@@ -21,6 +21,9 @@ export interface StoryTest {
   */
   readonly sections: ReadonlyArray<SectionTest>;
 
+  /** Slug of story */
+  readonly slug?: string;
+
   /** List of story authors */
   readonly authors: ReadonlyArray<AuthorTest>;
 }

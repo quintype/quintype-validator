@@ -53,7 +53,7 @@ function formErrorMetadata (dataType, affectedData, effect = 'Affected') {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, error, errorKeys, minItems } = result
+  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, error, errorKeys, minItems, uniqueKey } = result
 
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,6 +92,14 @@ function parseResult (result) {
     let [ key, limit ] = error.key.split(':')
     finalResult.errors.push({
       message: `${dataType} should have minimum of ${limit} ${limit > 1 ? key : key.slice(0, key.length-1 )}.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  uniqueKey && uniqueKey.forEach(error => {
+    let [ key, value ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${key} '${value}' is not unique.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

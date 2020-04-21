@@ -63,43 +63,42 @@ export function validateJson(
   return validate.errors;
 }
 
-export function validator(type: string, data: {[key: string]: any}, errorList: {[key: string]: any}, uniqueSlugs: Set<string>): {[key: string]: any} {
-  errorList.total = errorList.total ? errorList.total+1 : 1
+export function validator(type: string, data: {[key: string]: any}, result: {[key: string]: any}, uniqueSlugs: Set<string>): {[key: string]: any} {
+  result.total = result.total ? result.total+1 : 1
 
-  if(errorList.dataType === undefined) {
-    errorList.dataType = type
+  if(result.dataType === undefined) {
+    result.dataType = type
   }
-  if(errorList.successful === undefined){
-    errorList.successful = 0
-    errorList.failed = 0
-  } 
+  if(result.successful === undefined){
+    result.successful = 0
+    result.failed = 0
+  }
   const directSchema = generateJsonSchema(typesPath, type);
   const error = validateJson(data, directSchema, uniqueSlugs);
   if (error) {
-    errorList.failed = errorList.failed + 1
-    return errorParser(error, data['external-id'], type, errorList);
+    result.failed = result.failed + 1
+    return errorParser(error, data['external-id'], type, result);
   }
-  if(!errorList.valid) {
-    errorList.valid = []
+  if(!result.valid) {
+    result.valid = []
   }
-  errorList.successful = errorList.successful + 1
-  errorList.valid.push(data['external-id'])
-  return errorList
+  result.successful = result.successful + 1
+  result.valid.push(data['external-id'])
+  return result
 }
 
 export function asyncValidateStream(file: any, type: string, result: {[key: string]: any}, uniqueSlugs: Set<string>) {
+  result.dataType = type
   return new Promise((resolve, reject) => {
     file
     .pipe(zlib.createGunzip()).on('error', () => {
-      reject('Please upload files only in *.txt.gz format')
-      return
+      reject('invalidGzip')
     })
     .pipe(split2(/\r?\n+/,(obj) => {
       try {
         return JSON.parse(obj)
       } catch(err) {
-        reject('Please upload files with valid JSONs')
-      return
+        reject('invalidJSON')
       }
     }))
     .on('data', (obj: Object) => {

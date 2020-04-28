@@ -4,6 +4,8 @@ import { errorParser } from './error-parser';
 import zlib from 'zlib'
 import split2 from 'split2'
 import path, { join } from 'path';
+import { parse, HTMLElement } from 'node-html-parser'
+import { URL } from 'url';
 
 const schemas: { [key: string]: object } = {};
 
@@ -36,6 +38,52 @@ export function generateJsonSchema(
   return schemas[interfaceName];
 }
 
+function isValidUrl(url: string) {
+  try {
+    new URL(url)
+    return false
+  } catch {
+    return url
+  }
+}
+
+function checkUrl(htmlTree: any): boolean | string {
+  if(htmlTree.tagName === 'img') {
+    return isValidUrl(htmlTree.rawAttributes.src)
+  }  
+
+  const images = htmlTree.childNodes.filter((element: HTMLElement) => element.tagName === 'img');
+  if(images.length > 0) {
+    images.forEach((image: HTMLElement) => {
+      const url = image.rawAttributes.src
+      try {
+        new URL(url)
+        return false
+      } catch {
+        return {
+          'invalid-url': url
+        }
+      }
+    });
+  }
+
+  let result: boolean | string = false
+  for(let child of htmlTree.childNodes) {
+    result = checkUrl(child)
+    if(result) {
+      return result
+    }
+  }
+  return result
+}
+
+function validateBody(body: string, errors: Array<ajv.ErrorObject> | undefined | null): ReadonlyArray<ajv.ErrorObject> | undefined | null{
+  const htmlTree = parse(body);
+  const result = checkUrl(htmlTree)
+  console.log(result)
+  return errors
+}
+
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
@@ -60,6 +108,7 @@ export function validateJson(
       })
     }
   }
+  validateBody(data.body, validate.errors);
   return validate.errors;
 }
 

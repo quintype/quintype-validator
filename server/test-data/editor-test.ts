@@ -21,6 +21,10 @@ export interface StoryTest {
   */
   readonly sections: ReadonlyArray<SectionTest>;
 
+  /** Url of image
+   * @format uri
+   */
+  readonly 'image-url'?: string;
   /** Slug of story */
   readonly slug?: string;
 

@@ -82,9 +82,9 @@ function formErrorFile(errorAggregations) {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey } = result
+  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
 
-  const errorFileLink = formErrorFile({exceptions, additionalProperties, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey})
+  const errorFileLink = formErrorFile({exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties})
   finalResult.errorFile = errorFileLink
   finalResult.errors = []
   finalResult.warnings = []
@@ -128,9 +128,17 @@ function parseResult (result) {
   })
 
   uniqueKey && uniqueKey.forEach(error => {
-    let [ key, value ] = error.key.split(':')
+    const [ key, value ] = error.key.split(':')
     finalResult.errors.push({
       message: `${key} '${value}' is not unique.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  invalidURL && invalidURL.forEach(error => {
+    const [ key, value ] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${key} has invalid url '${value}'`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

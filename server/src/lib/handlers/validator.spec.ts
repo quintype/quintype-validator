@@ -441,7 +441,7 @@ describe('storyValidationTest', () => {
     };
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(expect.objectContaining(
-      { 'Invalid URL': [{ key: 'body: /foo/bar', ids: ['story-001'] }] }));
+      { 'invalidURL': [{ key: 'body: /foo/bar', ids: ['story-001'] }] }));
   });
 
   it('should validate successfully when all required keys with correct data are provided ', () => {

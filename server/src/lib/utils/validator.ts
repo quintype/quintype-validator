@@ -52,9 +52,9 @@ function validateBody(body: string, errors: Array<ajv.ErrorObject>) {
   try{
     checkUrl(htmlTree)
   } catch(e) {
-    const [keyword, value] = e.message.split(':')
+    const value = e.message.split(':')[1]
     const invalidURL = {
-      keyword,
+      keyword: 'invalidURL',
       dataPath: '/body',
       schemaPath: '',
       params: {

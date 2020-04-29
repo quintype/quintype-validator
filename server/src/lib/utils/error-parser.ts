@@ -89,6 +89,8 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + error.params.limit)
     case 'uniqueKey':
       return (keyPath + ':' + error.params.value)
+    case 'Invalid URL':
+      return (keyPath + ':' + error.params.value)
 // handle other keyword errors if required
   }
   return false

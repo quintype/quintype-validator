@@ -45,6 +45,7 @@ export default function ResultList({finalResult}) {
         label='Statistics'>
         <p>{finalResult.total}</p>
         <p>{finalResult.successful}</p>
+        <p>{finalResult.errorFile}</p>
       </AccordionSection>
       <AccordionSection
         label='Details'

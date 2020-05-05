@@ -5,21 +5,21 @@ import { validator, asyncValidateStream } from '../utils/validator'
 import fs from "fs"
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
-function textInputValidator(req: Request, res: Response): Response {
+function textInputValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Response {
   const { type, data } = req.body;
   let result: { [key: string]: any } = {}
   try {
-    result = validator(type, JSON.parse(data));
+    result = validator(type, JSON.parse(data), result, uniqueSlugs);
   } catch (error) {
-    return res.json({ 
-      error: 'Please provide a single valid JSON input',
+    return res.json({
+      exceptions: [{key: 'invalidJSON'}],
       dataType: type})
   }
   return res.json(result)
 }
 
-export function fileValidator(req: Request, res: Response): Response | void {
-  let result: {[key: string]: any} | unknown = {}
+export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Response | void {
+  let result: {[key: string]: any} | any = {}
 
   const busboy = new Busboy({ headers: req.headers, limits: { fields: 1, files: 1 } });
   let type :string = '';
@@ -27,7 +27,7 @@ export function fileValidator(req: Request, res: Response): Response | void {
   busboy.on('field', (fieldname, value): Response | void => {
     if (fieldname !== 'type' || !value) {
       return res.json({
-        error: `Incorrect field name: ${fieldname}`,
+        exceptions: [{key: `IncorrectFieldName: ${fieldname}`}],
         dataType: type})
     }
     type = value;
@@ -35,22 +35,21 @@ export function fileValidator(req: Request, res: Response): Response | void {
   busboy.on('file', async(fieldname, file, _1, _2, mimetype): Promise<Response> => {
     if (fieldname !== 'file') {
       return res.json({
-        error: `Incorrect field name: ${fieldname}`,
-        dataType: type
-      })
+        exceptions: [{key: `IncorrectFieldName: ${fieldname}`}],
+        dataType: type})
     }
     if (mimetype !== 'application/x-gzip') {
       return res.json({
-        error: 'Please upload files only in *.txt.gz format',
+        exceptions: [{key: 'invalidGzip'}],
         dataType: type
       })
     }
 
     try {
-      result = await asyncValidateStream(file, type)
+      result = await asyncValidateStream(file, type, result, uniqueSlugs)
     } catch(error) {
       return res.json({
-        error,
+        exceptions: [{key: error}],
         dataType: type
       })
     }
@@ -60,9 +59,9 @@ export function fileValidator(req: Request, res: Response): Response | void {
   req.pipe(busboy)
 }
 
-async function validateByKey(s3:any, data: any, type: string) {
+async function validateByKey(s3:any, data: any, type: string, uniqueSlugs: Set<string>) {
   const { Name, Contents } = data
-  let result: {[key: string]: any} | any = {}
+  let result: {[key: string]: any} | any = { exceptions: [] }
   for(const file of Contents) {
     const key = file.Key
     try {
@@ -71,19 +70,23 @@ async function validateByKey(s3:any, data: any, type: string) {
       Key: key 
     })
     .createReadStream()
-    result = await asyncValidateStream(readableStream, type, result)
+    result = await asyncValidateStream(readableStream, type, result, uniqueSlugs)
     } catch(error) {
-      result.error = error
-      if(!result.errorKeys) {
-        result.errorKeys = []
+      const errorKey = result.exceptions.find((err: { key: string; }) => err.key === error)
+
+      if(!errorKey){
+        result.exceptions.push({
+          key: error,
+          ids: [key]
+        })
+      } else {
+        errorKey.ids.push(key)
       }
-      result.errorKeys.push(key.split('/').pop())
     }
   }
   return result
 }
-
-export async function s3keyValidator(req: Request, res: Response): Promise<Response | void> {
+export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Promise<Response | void> {
   const { type, data: path } = req.body
   const s3keyParts = path.split('/')
   const bucket = s3keyParts[2]
@@ -104,24 +107,27 @@ export async function s3keyValidator(req: Request, res: Response): Promise<Respo
         })
     }
     if(data.Contents!.length === 0) {
-      return res.json({ 
-        error: `No files with prefix ${type.toLowerCase()} found in ${s3keyParts.slice(3).join('/')}`,
+      return res.json({
+        exceptions: [{
+          key: `FilePrefixNotFound:${type.toLowerCase()}`
+        }],
         dataType: type})
     }
-    const result = await validateByKey(s3, data, type)
+    const result = await validateByKey(s3, data, type, uniqueSlugs)
     return res.json(result)
   })
 }
 
 export function intermediateValidator(req: Request, res: Response): Response | any {
   const validateType = req.query.source
+  const uniqueSlugs: Set<string> = new Set();
 
   switch(validateType) {
     case 'Direct':
-      return textInputValidator(req, res)
+      return textInputValidator(req, res, uniqueSlugs)
     case 'File':
-      return fileValidator(req, res)
+      return fileValidator(req, res, uniqueSlugs)
     case 'S3':
-      return s3keyValidator(req, res)
+      return s3keyValidator(req, res, uniqueSlugs)
   }
 }

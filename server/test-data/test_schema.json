@@ -10,7 +10,9 @@
           "properties": {
             "name": {
               "description": "Name of Author",
-              "type": "string"
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 10
             }
           },
           "required": ["name"],
@@ -50,8 +52,13 @@
               "type": "string",
               "description": "Name of story"
             },
+            "slug": {
+              "type": "string",
+              "description": "Slug of story"
+            },
             "sections": {
               "type": "array",
+              "minItems": 1,
               "items": {
                 "$ref": "#/definitions/SectionTest"
               },
@@ -91,6 +98,8 @@
           "properties": {
             "name": {
               "description": "Name of Author",
+              "minLength": 1,
+              "maxLength": 10,
               "type": "string"
             }
           },

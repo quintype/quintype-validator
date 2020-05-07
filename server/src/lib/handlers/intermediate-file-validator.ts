@@ -3,6 +3,8 @@ import Busboy from 'busboy'
 import S3 from 'aws-sdk/clients/s3'
 import { validator, asyncValidateStream } from '../utils/validator'
 import fs from "fs"
+import { WorkerThreadPool } from "../utils/worker-thread-pool";
+import { validateS3Files } from "../runners/validate-s3-files";
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 function textInputValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Response {
@@ -59,34 +61,7 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
   req.pipe(busboy)
 }
 
-async function validateByKey(s3:any, data: any, type: string, uniqueSlugs: Set<string>) {
-  const { Name, Contents } = data
-  let result: {[key: string]: any} | any = { exceptions: [] }
-  for(const file of Contents) {
-    const key = file.Key
-    try {
-      const readableStream = s3.getObject({
-      Bucket: Name,
-      Key: key 
-    })
-    .createReadStream()
-    result = await asyncValidateStream(readableStream, type, result, uniqueSlugs)
-    } catch(error) {
-      const errorKey = result.exceptions.find((err: { key: string; }) => err.key === error)
-
-      if(!errorKey){
-        result.exceptions.push({
-          key: error,
-          ids: [key]
-        })
-      } else {
-        errorKey.ids.push(key)
-      }
-    }
-  }
-  return result
-}
-export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: Set<string>): Promise<Response | void> {
+export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: Set<string>,workerPool:WorkerThreadPool): Promise<Response | void> {
   const { type, data: path } = req.body
   const s3keyParts = path.split('/')
   const bucket = s3keyParts[2]
@@ -113,12 +88,12 @@ export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: S
         }],
         dataType: type})
     }
-    const result = await validateByKey(s3, data, type, uniqueSlugs)
+    const result = await validateS3Files(data, type, uniqueSlugs,workerPool);
     return res.json(result)
   })
 }
 
-export function intermediateValidator(req: Request, res: Response): Response | any {
+export function intermediateValidator(req: Request, res: Response,workerPool: WorkerThreadPool): Response | any {
   const validateType = req.query.source
   const uniqueSlugs: Set<string> = new Set();
 
@@ -128,6 +103,6 @@ export function intermediateValidator(req: Request, res: Response): Response | a
     case 'File':
       return fileValidator(req, res, uniqueSlugs)
     case 'S3':
-      return s3keyValidator(req, res, uniqueSlugs)
+      return s3keyValidator(req, res, uniqueSlugs,workerPool)
   }
 }

@@ -2,13 +2,19 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
+import path from 'path';
 import { seoScoreHandler } from './handlers/seo-score-handler';
 import { validateDomainHandler } from './handlers/validate-domain-handler';
 import { validateRobotsHandler } from './handlers/validate-robots-handler';
 import { validateUrlHandler } from './handlers/validate-url-handler';
 import { intermediateValidator } from './handlers/intermediate-file-validator'
+import { WorkerThreadPool } from './utils/worker-thread-pool';
 
 export const app = express();
+
+//creating thread poll with s3 validator file
+const workerPool = new WorkerThreadPool(path.join(__dirname,'runners/validate-s3-files.js'),4);
+
 app.use(compression());
 app.use(bodyParser.json({ limit: '1mb' }));
 
@@ -57,5 +63,5 @@ app.get('/validate-robots', validateRobotsHandler);
 
 app.get('/ping', (_, res) => res.send('pong'));
 
-app.post('/api/validate', corsMiddleware, intermediateValidator);
+app.post('/api/validate', corsMiddleware, (request,response)=> intermediateValidator(request,response,workerPool));
 

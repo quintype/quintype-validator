@@ -1,5 +1,6 @@
 import S3 from 'aws-sdk/clients/s3'
 import fs from "fs"
+import _ from 'lodash';
 import { asyncValidateStream } from "../utils/validator"
 import { WorkerThreadPool } from "../utils/worker-thread-pool"
 import { parentPort } from "worker_threads"
@@ -43,8 +44,8 @@ async function validateByKey(data: any, type: string, uniqueSlugs: Set<string>) 
 export async function validateS3Files(data: any, type: string, uniqueSlugs: Set<string>, workerPool: WorkerThreadPool) {
   const workerPromises = [];
   let {Name,Contents}=data;
-  for(const file of Contents){
-    let data = {Name,Contents:[file]}
+  for(const Files of _.chunk(Contents,10)){
+    let data = {Name,Contents:Files}
     workerPromises.push(new Promise((resolve, reject) => {
       workerPool.runTask({data, type, uniqueSlugs }, (error: any, result: any) => {
         if (error) {
@@ -56,7 +57,7 @@ export async function validateS3Files(data: any, type: string, uniqueSlugs: Set<
         return err
     }))
   } 
-  const resultArr = await Promise.all(workerPromises);
+  let resultArr = await Promise.all(workerPromises);
   console.log("result>>>>>>>>>>",resultArr)
   return resultArr;
 }

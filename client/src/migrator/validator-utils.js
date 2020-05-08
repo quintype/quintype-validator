@@ -82,13 +82,20 @@ function formErrorFile(errorAggregations) {
 
 function parseResult (result) {
   let finalResult = {}
+  finalResult.errors = []
+  finalResult.warnings = []
+  finalResult.successful = []
+  if (result.clientException) {
+    finalResult.successful = 'Validation could not be completed.'
+    finalResult.errors.push({
+      message: `Exception:${result.clientException}`
+    })
+    return finalResult
+  }
   const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey } = result
 
   const errorFileLink = formErrorFile({exceptions, additionalProperties, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey})
   finalResult.errorFile = errorFileLink
-  finalResult.errors = []
-  finalResult.warnings = []
-  finalResult.successful = []
   const pluralKey =  dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.total =  `Total ${pluralKey} read: ${total || 0}`
   finalResult.successful = `${successful || 0} out of ${total || 0} ${pluralKey} are valid.`
@@ -98,7 +105,7 @@ function parseResult (result) {
       message: error.key
     }
     if(error.ids) {
-      errorObj.metadata = { example: error.ids.join(', ')}
+      errorObj.metadata = { info: error.ids.join(', ')}
     }
     finalResult.errors.push(errorObj)
   })

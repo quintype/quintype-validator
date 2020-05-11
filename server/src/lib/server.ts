@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
 import path from 'path';
+// import fs from "fs"
+// const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 import { seoScoreHandler } from './handlers/seo-score-handler';
 import { validateDomainHandler } from './handlers/validate-domain-handler';
 import { validateRobotsHandler } from './handlers/validate-robots-handler';
@@ -13,7 +15,8 @@ import { WorkerThreadPool } from './utils/worker-thread-pool';
 export const app = express();
 
 //creating thread poll with s3 validator file
-const workerPool = new WorkerThreadPool(path.join(__dirname,'runners/validate-s3-files.js'),4);
+const workerPool = new WorkerThreadPool(path.join(__dirname,'runners/validate-s3-files.js'), 10);
+workerPool.setMaxListeners(500);
 
 app.use(compression());
 app.use(bodyParser.json({ limit: '1mb' }));

@@ -57,9 +57,13 @@ export async function validateS3Files(data: any, type: string, uniqueSlugs: Set<
         return err
     }))
   } 
-  let resultArr = await Promise.all(workerPromises);
-  console.log("result>>>>>>>>>>",resultArr)
-  return resultArr;
+  let resultArr = await Promise.all(workerPromises) as ReadonlyArray<Object>;
+  let resultObj = {};
+  for(const result of resultArr){
+    resultObj= {resultObj,...result};
+  }
+  console.log("result>>>>>>>>>>",resultObj)
+  return resultObj;
 }
 
 

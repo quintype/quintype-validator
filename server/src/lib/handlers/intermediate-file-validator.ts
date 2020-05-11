@@ -62,35 +62,10 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
 }
 
 export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: Set<string>,workerPool:WorkerThreadPool): Promise<Response | void> {
-  const { type, data: path } = req.body
-  const s3keyParts = path.split('/')
-  const bucket = s3keyParts[2]
-  const keyPrefix = s3keyParts.slice(3).join('/') + '/' + type.toLowerCase()
-  const s3 = new S3({
-    accessKeyId: config['accessKeyId'],
-    secretAccessKey: config['secretAccessKey']
-  })
-
-  s3.listObjectsV2({
-    Bucket: bucket,
-    Prefix: keyPrefix
-  }, async (err, data) => {
-    if(err) {
-      return res.json({
-        error: err.message,
-        dataType: type
-        })
-    }
-    if(data.Contents!.length === 0) {
-      return res.json({
-        exceptions: [{
-          key: `FilePrefixNotFound:${type.toLowerCase()}`
-        }],
-        dataType: type})
-    }
-    const result = await validateS3Files(data, type, uniqueSlugs,workerPool);
-    return res.json(result)
-  })
+  const { type, data } = req.body
+  const result = await validateS3Files(data, type, uniqueSlugs,workerPool);
+  res.json(result)
+  return
 }
 
 export function getFiles(req: Request, res: Response){

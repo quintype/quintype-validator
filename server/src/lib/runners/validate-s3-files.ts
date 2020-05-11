@@ -9,14 +9,13 @@ const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
 
 async function validateByKey(data: any, type: string, uniqueSlugs: Set<string>) {
-  const { Name, Contents } = data
+  const { Name, files } = data
   let result: { [key: string]: any } | any = { exceptions: [] }
   const s3 = new S3({
     accessKeyId: config['accessKeyId'],
     secretAccessKey: config['secretAccessKey']
   })
-  for (const file of Contents) {
-    const key = file.Key
+  for (const key of files) {
     try {
       const readableStream = s3.getObject({
         Bucket: Name,
@@ -40,30 +39,25 @@ async function validateByKey(data: any, type: string, uniqueSlugs: Set<string>) 
   return result
 }
 
-
-export async function validateS3Files(data: any, type: string, uniqueSlugs: Set<string>, workerPool: WorkerThreadPool) {
-  const workerPromises = [];
-  let {Name,Contents}=data;
-  for(const Files of _.chunk(Contents,10)){
-    let data = {Name,Contents:Files}
-    workerPromises.push(new Promise((resolve, reject) => {
-      workerPool.runTask({data, type, uniqueSlugs }, (error: any, result: any) => {
-        if (error) {
-          reject(error);
-          return;
-        } resolve(result)
-      })
-    }).catch((err)=>{
-        return err
-    }))
-  } 
-  let resultArr = await Promise.all(workerPromises) as ReadonlyArray<Object>;
-  let resultObj = {};
-  for(const result of resultArr){
-    resultObj= {resultObj,...result};
+export async function validateS3Files(s3Data: any, type: string, uniqueSlugs: Set<string>, workerPool: WorkerThreadPool) {
+  let { path, files } = s3Data;
+  const bucket = path.split('/')[2]
+  const data = {
+    Name: bucket,
+    files
   }
-  console.log("result>>>>>>>>>>",resultObj)
-  return resultObj;
+  let resultArr = await new Promise((resolve, reject) => {
+    workerPool.runTask({data, type, uniqueSlugs }, (error: any, result: any) => {
+      if (error) {
+        reject(error);
+        return;
+      } resolve(result)
+    })
+  }).catch((err)=>{
+      return err
+  })
+
+  return resultArr;
 }
 
 

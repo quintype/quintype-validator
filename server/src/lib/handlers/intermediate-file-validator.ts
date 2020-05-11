@@ -93,6 +93,40 @@ export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: S
   })
 }
 
+export function getFiles(req: Request, res: Response){
+  const { type, data: path } = req.body
+  const s3keyParts = path.split('/')
+  const s3 = new S3({
+    accessKeyId: config['accessKeyId'],
+    secretAccessKey: config['secretAccessKey']
+  })
+  const bucket = s3keyParts[2]
+  const keyPrefix = s3keyParts.slice(3).join('/') + '/' + type.toLowerCase()
+  s3.listObjectsV2({
+    Bucket: bucket,
+    Prefix: keyPrefix
+  },(err, data)=>{
+    if(err){
+      res.json({
+        error: err.message,
+        dataType: type
+        })
+      return;
+    }
+    const {Contents} = data;
+    if(Contents!.length === 0) {
+      res.json({
+        exceptions: [{
+          key: `FilePrefixNotFound:${type.toLowerCase()}`
+        }],
+        dataType: type})
+      return;
+    }
+    
+    res.json(Contents!.map(content=>content.Key));
+  })
+}
+
 export function intermediateValidator(req: Request, res: Response,workerPool: WorkerThreadPool): Response | any {
   const validateType = req.query.source
   const uniqueSlugs: Set<string> = new Set();

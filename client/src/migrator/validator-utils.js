@@ -18,8 +18,9 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
   let options = {
     method: 'POST',
     headers: {
-      Accept: 'application/json'
-    }
+      Accept: 'application/json',
+      keepalive:true
+    },
   }
   let requestData
   if(validateType === 'Direct text input' || validateType === 'S3 path') {

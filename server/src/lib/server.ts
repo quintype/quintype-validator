@@ -9,7 +9,7 @@ import { seoScoreHandler } from './handlers/seo-score-handler';
 import { validateDomainHandler } from './handlers/validate-domain-handler';
 import { validateRobotsHandler } from './handlers/validate-robots-handler';
 import { validateUrlHandler } from './handlers/validate-url-handler';
-import { intermediateValidator } from './handlers/intermediate-file-validator'
+import { getFiles, intermediateValidator } from './handlers/intermediate-file-validator'
 import { WorkerThreadPool } from './utils/worker-thread-pool';
 
 export const app = express();
@@ -65,6 +65,8 @@ app.post('/api/seo-scores', corsMiddleware, seoScoreHandler);
 app.get('/validate-robots', validateRobotsHandler);
 
 app.get('/ping', (_, res) => res.send('pong'));
+
+app.post('/api/get-s3-files',corsMiddleware,getFiles);
 
 app.post('/api/validate', corsMiddleware, (request,response)=> intermediateValidator(request,response,workerPool));
 

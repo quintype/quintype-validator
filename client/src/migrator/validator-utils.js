@@ -58,7 +58,6 @@ function createFileErrorMessage(errorType) {
 }
 
 function formErrorFile(errorAggregations) {
-  console.log(errorAggregations)
   let fileString = 'data:application/octet-stream,error-type%2Cpath%2Clog-level%2Cexternal-id%0A'
 
   for(let errorType in errorAggregations) {

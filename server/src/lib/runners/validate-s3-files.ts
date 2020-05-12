@@ -40,7 +40,7 @@ async function validateByKey(data: any, type: string, uniqueSlugs: Set<string>) 
 }
 
 export async function validateS3Files(s3Data: any, type: string, uniqueSlugs: Set<string>, workerPool: WorkerThreadPool) {
-  let { path, files } = s3Data;
+  let { path, files } = s3Data
   const bucket = path.split('/')[2]
   const data = {
     Name: bucket,
@@ -67,7 +67,7 @@ parentPort && parentPort.on('message', async (task: { s3: any, data: any, type: 
     const result = await validateByKey(data, type, uniqueSlugs);
     parentPort && parentPort.postMessage(result)
   }
-  catch{
+  catch (err) {
     parentPort && parentPort.emit('error', "worker errored out")
   }
 })

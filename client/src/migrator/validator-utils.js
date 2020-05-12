@@ -82,9 +82,9 @@ function formErrorFile(errorAggregations) {
 
 function parseResult (result) {
   let finalResult = {}
-  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey } = result
+  const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey } = result;
 
-  const errorFileLink = formErrorFile({exceptions, additionalProperties, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey})
+  const errorFileLink = formErrorFile({exceptions, additionalProperties, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey});
   finalResult.errorFile = errorFileLink
   finalResult.errors = []
   finalResult.warnings = []

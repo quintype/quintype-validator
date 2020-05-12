@@ -30,52 +30,55 @@ export default class ValidationForm extends Component {
     this.setState({ userData });
   };
 
-  resultReducer = (accumulator,result) => {
-    for(const key in result){
-      if(accumulator[key]) {
-        if(Array.isArray(result[key])){
-          accumulator[key] = accumulator[key].concat(result[key]) 
-          // ids cannot be concated just like that. in the array, we have to check for the key in the object and then concat for each key. so i am just concating the elements for now.
-        }
-        if(+result[key]) {
-          accumulator[key] = accumulator[key] + result[key]
-          // this is supposed to aggregate the total, failed and succesful keys, i.e. add the numbers.
-        }
+  mergeError = (accumulatedErrors, currentErrors) => {
+    // console.log("cuurent>>>>>>>>>>>>", currentErrors)
+    for (const currentError of currentErrors) {
+      let accumulatedError = accumulatedErrors.find(err => err.key === currentError.key)
+      if (accumulatedError) {
+        // console.log("accum>>",accumulatedError,currentError)
+        accumulatedError.ids.concat(currentError.ids)
+      } else {
+        accumulatedErrors.push(currentError)
       }
-      accumulator[key] = result[key]
+    }
+    return accumulatedErrors
+  }
+
+  resultReducer = (accumulator, result) => {
+    for (const key in result) {
+      if (Array.isArray(result[key])) {
+        accumulator[key] = accumulator[key] ? this.mergeError(accumulator[key], result[key]):result[key];
+      }
+      else if (typeof result[key] === 'number'){
+        console.log(key,accumulator[key],result[key],key)
+        accumulator[key] = accumulator[key]? accumulator[key] + result[key] : result[key]
+      }else{
+        accumulator[key]=result[key]
+      }
     }
     return accumulator
   }
 
   validateFromS3 = async (requestOptions) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/get-s3-files`, requestOptions) 
+      const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/get-s3-files`, requestOptions)
       const fileList = await response.json()
       const validationPromises = [];
-      for(const files of chunk(fileList, 2)) {
-        const s3FileListOption = createRequest(this.state.validateType,this.state.selectType,{
+      for (const files of chunk(fileList, 2)) {
+        const s3FileListOption = createRequest(this.state.validateType, this.state.selectType, {
           path: this.state.userData,
           files
         })
         validationPromises.push(
-          (await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=S3`, s3FileListOption)).json()
-          // .then(response=>response.json())
-          // .then(response=>{console.log('>>>', response); return response;})
+          fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=S3`, s3FileListOption)
+            .then(response => response.json())
         )
       }
       let result = (await Promise.all(validationPromises))
-
-      // This is a sample reducer function just for testing
-      // let test = (acc, cur) => {
-      //   acc.total = acc.total+ cur.total
-      //   return acc
-      // }
-      // console.log(result.reduce(test))
-
       result = result.reduce(this.resultReducer, {})
-      this.props.sendData({result})
+      this.props.sendData({ result })
       return
-    } catch(err) {
+    } catch (err) {
       this.props.sendData({
         result: err.message
       })
@@ -94,14 +97,14 @@ export default class ValidationForm extends Component {
       this.validateFromS3(options)
     } else {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=${this.state.validateType.value.split(' ')[0]}`, options) 
+        const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=${this.state.validateType.value.split(' ')[0]}`, options)
         const result = await response.json()
-        this.props.sendData({result})
-        } catch(err) {
-          this.props.sendData({
-            result: err.message
-          })
-        }
+        this.props.sendData({ result })
+      } catch (err) {
+        this.props.sendData({
+          result: err.message
+        })
+      }
     }
   }
 

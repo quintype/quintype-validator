@@ -6,9 +6,12 @@ import Heading from './Heading'
 import InputField from './InputField'
 import { selectOptions, validateOptions, createRequest } from './validator-utils'
 import { chunk } from 'lodash'
+import { PromiseQueue } from './promise-concurrent-queue'
 
+const promiseQueue = new PromiseQueue(5);
 export default class ValidationForm extends Component {
-  constructor (props) {
+
+  constructor(props) {
     super(props)
     this.state = {
       validateType: null,
@@ -31,11 +34,9 @@ export default class ValidationForm extends Component {
   };
 
   mergeError = (accumulatedErrors, currentErrors) => {
-    // console.log("cuurent>>>>>>>>>>>>", currentErrors)
     for (const currentError of currentErrors) {
       let accumulatedError = accumulatedErrors.find(err => err.key === currentError.key)
       if (accumulatedError) {
-        // console.log("accum>>",accumulatedError,currentError)
         accumulatedError.ids.concat(currentError.ids)
       } else {
         accumulatedErrors.push(currentError)
@@ -47,13 +48,12 @@ export default class ValidationForm extends Component {
   resultReducer = (accumulator, result) => {
     for (const key in result) {
       if (Array.isArray(result[key])) {
-        accumulator[key] = accumulator[key] ? this.mergeError(accumulator[key], result[key]):result[key];
+        accumulator[key] = accumulator[key] ? this.mergeError(accumulator[key], result[key]) : result[key];
       }
-      else if (typeof result[key] === 'number'){
-        console.log(key,accumulator[key],result[key],key)
-        accumulator[key] = accumulator[key]? accumulator[key] + result[key] : result[key]
-      }else{
-        accumulator[key]=result[key]
+      else if (typeof result[key] === 'number') {
+        accumulator[key] = accumulator[key] ? accumulator[key] + result[key] : result[key]
+      } else {
+        accumulator[key] = result[key]
       }
     }
     return accumulator
@@ -64,21 +64,23 @@ export default class ValidationForm extends Component {
       const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/get-s3-files`, requestOptions)
       const fileList = await response.json()
       const validationPromises = [];
-      for (const files of chunk(fileList, 2)) {
+      for (const files of chunk(fileList, 5)) {
         const s3FileListOption = createRequest(this.state.validateType, this.state.selectType, {
           path: this.state.userData,
           files
         })
         validationPromises.push(
-          fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=S3`, s3FileListOption)
+          promiseQueue.addPromise(
+            fetch ,`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=S3`, s3FileListOption)
             .then(response => response.json())
         )
       }
-      let result = (await Promise.all(validationPromises))
+      let result = await Promise.all(validationPromises);
       result = result.reduce(this.resultReducer, {})
       this.props.sendData({ result })
       return
     } catch (err) {
+      console.log(err);
       this.props.sendData({
         result: err.message
       })
@@ -115,37 +117,37 @@ export default class ValidationForm extends Component {
       userData
     } = this.state
     const submitEnabled = validateType && selectType && userData
-  
+
     return (
       <>
-      <Heading />
-      <div className={styles.container}>
-        <Select
-          label='Select Type'
-          options={selectOptions}
-          value={selectType}
-          onChange={this.onChangeSelectType}
-        />
-        <Select
-          label='Validate by'
-          options={validateOptions}
-          value={validateType}
-          onChange={this.onChangeValidateType}
-        />
-        <InputField
-          userData={userData}
-          validateType={validateType}
-          onInput={this.onInput}
+        <Heading />
+        <div className={styles.container}>
+          <Select
+            label='Select Type'
+            options={selectOptions}
+            value={selectType}
+            onChange={this.onChangeSelectType}
           />
-        <Button
-          type='primary'
-          onClick={this.onValidate}
-          disabled={!submitEnabled}
-        >
-          Validate
+          <Select
+            label='Validate by'
+            options={validateOptions}
+            value={validateType}
+            onChange={this.onChangeValidateType}
+          />
+          <InputField
+            userData={userData}
+            validateType={validateType}
+            onInput={this.onInput}
+          />
+          <Button
+            type='primary'
+            onClick={this.onValidate}
+            disabled={!submitEnabled}
+          >
+            Validate
         </Button>
-      </div>
-    </>
+        </div>
+      </>
     )
   }
 }

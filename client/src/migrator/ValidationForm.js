@@ -72,7 +72,13 @@ export default class ValidationForm extends Component {
         validationPromises.push(
           promiseQueue.addPromise(
             fetch ,`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=S3`, s3FileListOption)
-            .then(response => response.json())
+            .then((response,rejection )=> {
+              if(rejection){
+                console.error(rejection);
+                throw(rejection);
+              }
+              return response.json()              
+            })
         )
       }
       let result = await Promise.all(validationPromises);
@@ -103,8 +109,9 @@ export default class ValidationForm extends Component {
         const result = await response.json()
         this.props.sendData({ result })
       } catch (err) {
+        console.error(err);
         this.props.sendData({
-          result: err.message
+          result: {error:err}
         })
       }
     }

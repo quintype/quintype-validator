@@ -22,12 +22,11 @@ export class PromiseQueue extends EventEmitter {
     if (this.runningPromises === this.concurrentPromises || this.promiseQueue.length === 0) {
       return;
     }
+    let item;
     try {
       this.runningPromises++;
-      const item = this.promiseQueue.shift();
-      console.log(item);
-      // console.log(f)
-      // console.log(fn,);
+      item = this.promiseQueue.shift();
+      console.info(item)
       item.f.apply(null,item.args)
         .then((result, error) => {
           if (error) {
@@ -41,6 +40,7 @@ export class PromiseQueue extends EventEmitter {
         })
     } catch (err) {
       console.info(err);
+      item.reject(err)
     }
 
   }

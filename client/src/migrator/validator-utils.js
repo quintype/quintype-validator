@@ -81,6 +81,9 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
+  if(result.error){
+    return {"errorMessage":"Failed please retry after some time"}
+  }
   let finalResult = {}
   const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey } = result;
 

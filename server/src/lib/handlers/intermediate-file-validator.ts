@@ -61,7 +61,8 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
 
 async function validateByKey(s3:any, data: any, type: string, uniqueSlugs: Set<string>) {
   const { Name, Contents } = data
-  let result: {[key: string]: any} | any = { exceptions: [] }
+  let result: {[key: string]: any} | any = { exceptions: [], dataType: type}
+
   for(const file of Contents) {
     const key = file.Key
     try {
@@ -102,7 +103,9 @@ export async function s3keyValidator(req: Request, res: Response, uniqueSlugs: S
   }, async (err, data) => {
     if(err) {
       return res.json({
-        error: err.message,
+        exceptions: [{
+          key: err.message
+        }],
         dataType: type
         })
     }

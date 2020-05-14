@@ -43,7 +43,7 @@ export default class ValidationForm extends Component {
       this.props.sendData({result})
       } catch(err) {
         this.props.sendData({
-          result: err.message
+          result: {clientException: err.message}
         })
       }
   }

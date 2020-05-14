@@ -82,13 +82,20 @@ function formErrorFile(errorAggregations) {
 
 function parseResult (result) {
   let finalResult = {}
+  finalResult.errors = []
+  finalResult.warnings = []
+  finalResult.successful = []
+  if (result.clientException) {
+    finalResult.successful = 'Validation could not be completed.'
+    finalResult.errors.push({
+      message: `Exception:${result.clientException}`
+    })
+    return finalResult
+  }
   const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
 
   const errorFileLink = formErrorFile({exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties})
   finalResult.errorFile = errorFileLink
-  finalResult.errors = []
-  finalResult.warnings = []
-  finalResult.successful = []
   const pluralKey =  dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.total =  `Total ${pluralKey} read: ${total || 0}`
   finalResult.successful = `${successful || 0} out of ${total || 0} ${pluralKey} are valid.`
@@ -98,13 +105,13 @@ function parseResult (result) {
       message: error.key
     }
     if(error.ids) {
-      errorObj.metadata = { example: error.ids.join(', ')}
+      errorObj.metadata = { info: error.ids.join(', ')}
     }
     finalResult.errors.push(errorObj)
   })
 
   maxLength && maxLength.forEach(error => {
-    let [ key, subPath ] = error.key.split(':')
+    const [ key, subPath ] = error.key.split(':')
     finalResult.errors.push({
       message: `${dataType} should have maximum of ${subPath} characters for property '${key}'.`,
       metadata: formErrorMetadata(dataType, error.ids)
@@ -112,7 +119,7 @@ function parseResult (result) {
   })
 
   minLength && minLength.forEach(error => {
-    let [ key, limit ] = error.key.split(':')
+    const [ key, limit ] = error.key.split(':')
     finalResult.errors.push({
       message: `${dataType} should have minimum of ${limit} character${limit > 1 ? 's' : ''} for property '${key}'.`,
       metadata: formErrorMetadata(dataType, error.ids)
@@ -120,7 +127,7 @@ function parseResult (result) {
   })
 
   minItems && minItems.forEach(error => {
-    let [ key, limit ] = error.key.split(':')
+    const [ key, limit ] = error.key.split(':')
     finalResult.errors.push({
       message: `${dataType} should have minimum of ${limit} ${limit > 1 ? key : key.slice(0, key.length-1 )}.`,
       metadata: formErrorMetadata(dataType, error.ids)

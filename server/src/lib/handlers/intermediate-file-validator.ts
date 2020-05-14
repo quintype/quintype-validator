@@ -38,7 +38,7 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
         exceptions: [{key: `IncorrectFieldName: ${fieldname}`}],
         dataType: type})
     }
-    if (mimetype !== 'application/x-gzip') {
+    if (mimetype !== 'application/x-gzip' && mimetype !== 'application/gzip') {
       return res.json({
         exceptions: [{key: 'invalidGzip'}],
         dataType: type
@@ -62,6 +62,7 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
 async function validateByKey(s3:any, data: any, type: string, uniqueSlugs: Set<string>) {
   const { Name, Contents } = data
   let result: {[key: string]: any} | any = { exceptions: [], dataType: type}
+
   for(const file of Contents) {
     const key = file.Key
     try {

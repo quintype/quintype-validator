@@ -25,6 +25,7 @@ export interface StoryTest {
    * @format uri
    */
   readonly 'image-url'?: string;
+
   /** Slug of story */
   readonly slug?: string;
 

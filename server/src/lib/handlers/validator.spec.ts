@@ -77,6 +77,7 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar'}]
     };
+
     expect(validateJson(Story1, storySchema, uniqueSlugs)).toEqual([]);
     expect(validateJson(Story2, storySchema, uniqueSlugs)).toEqual(
       expect.arrayContaining([expect.objectContaining({"keyword": "uniqueKey", "params": {"value": "foobar"}})])

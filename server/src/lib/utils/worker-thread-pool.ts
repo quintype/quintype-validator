@@ -10,37 +10,40 @@ export class WorkerThreadPool extends EventEmitter{
     super();
     this.filename = filename;
     this.poolSize = poolSize
-    this.workers = new Array(poolSize);
+    this.workers = [];
     for(let i = 0; i < poolSize;i++){
       this.addNewWorker(filename)
     }
   }
 
   private addNewWorker(filename:string){
+    if(this.workers.length === this.poolSize)
+      return;
     this.workers.push(new Worker(filename))
   }
 
   runTask(task:Object,callback:Function){
-    if(this.workers.length == 0){
+    if(this.workers.length === 0){
       this.once('freedworker',()=>{
-        console.log("worker freed")
         this.runTask(task,callback);
       })
       return;
     }
-    const worker=this.workers.pop() as Worker
+    const worker=this.workers.shift() as Worker
     worker.postMessage(task);
-    worker.on('message',(result)=>{
-      this.emit('freedworker')
-      callback(undefined,result)
-      this.workers.push(worker)
+    worker.once('message',(result)=>{
+      this.emit('freedworker');
+      callback(undefined,result);
+      this.workers.push(worker);
     })
-    worker.on('error',(error)=>{
+    worker.once('error',(error)=>{
       callback(error,undefined);
+      console.error(`worker ${worker.threadId} errored`,error);
+      this.workers.push(worker);
     })
-    worker.on('exit',(exitCode)=>{
-      console.log("exit",exitCode);
-      this.addNewWorker(this.filename);
+    worker.once('exit',(exitCode)=>{
+      console.error(`worker ${worker.threadId} exited with exit code ${exitCode}`);
+      this.workers.push(worker);
     })
   }
 

@@ -64,7 +64,28 @@ export default class ValidationForm extends Component {
       const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/get-s3-files`, requestOptions)
       const fileList = await response.json()
       const validationPromises = [];
-      for (const files of chunk(fileList, 5)) {
+      const smallFileList =  fileList.filter(file=>file.size<=1024*1024*2)
+      const largeFileList =  fileList.filter(file=>file.size>1024*1024*2)
+      for (let files of chunk(smallFileList, 2)) {
+        files=files.map(file=>file.key)
+        const s3FileListOption = createRequest(this.state.validateType, this.state.selectType, {
+          path: this.state.userData,
+          files
+        })
+        validationPromises.push(
+          promiseQueue.addPromise(
+            fetch ,`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=S3`, s3FileListOption)
+            .then((response,rejection )=> {
+              if(rejection){
+                console.error(rejection);
+                throw(rejection);
+              }
+              return response.json()              
+            })
+        )
+      }
+      for (let files of chunk(largeFileList, 1)) {
+        files=files.map(file=>file.key)
         const s3FileListOption = createRequest(this.state.validateType, this.state.selectType, {
           path: this.state.userData,
           files

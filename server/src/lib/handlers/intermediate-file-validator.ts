@@ -98,7 +98,7 @@ export function getFiles(req: Request, res: Response){
       return;
     }
     
-    res.json(Contents!.map(content=>content.Key));
+    res.json(Contents!.map(content=>({key:content.Key,size:content.Size})));
   })
 }
 

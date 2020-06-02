@@ -58,8 +58,6 @@ export default class ValidationForm extends Component {
   
     return (
       <>
-      <Heading />
-      <div className={styles.container}>
         <Select
           label='Select Type'
           options={selectOptions}
@@ -84,8 +82,7 @@ export default class ValidationForm extends Component {
         >
           Validate
         </Button>
-      </div>
-    </>
+      </>
     )
   }
 }

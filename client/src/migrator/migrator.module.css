@@ -31,18 +31,91 @@
   box-shadow: var(--box-shadow-0);
   background-color: var(--white);
   margin-top: 24px;
-  padding: 30px;
+  padding: 3rem 5rem 5rem 5rem;
   overflow: visible;
 }
 
 .result-heading {
-  margin: 0 0 24px 0;
   font-family: inherit;
-  font-size: var(--fs-m);
-  font-weight: var(--fw-semi-bold);
-  line-height: var(--lh-2);
-  letter-spacing: normal;
+  font-weight: var(--fw-bold);
   color: var(--mono-5);
+  margin: 0 0 1rem 0;
+}
+
+.result-heading div {
+  display: inline-block;
+  width: 50%;;
+}
+
+.result-heading #heading {
+  font-size: var(--fs-l);
+}
+
+.result-heading #download {
+  text-align: right;
+}
+
+.result-heading a {
+  text-decoration: none;
+  color: var(--brand-3);
+  font-size: var(--fs-s);
+  cursor: pointer;
+}
+
+.result-heading a:active {
+  text-shadow: 1px 1px 2px var(--mono-3);
+}
+
+.result-heading a:focus {
+  outline: none;
+  border: none;
+  outline-style: none;
+  -moz-outline-style: none;
+}
+
+
+.result-statistics {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--mono-3);
+  padding: 1rem 0 2rem 0;
+}
+
+.result-statistics > div {
+  width: 30%;
+  flex: 0 1 auto;
+}
+
+.statistic-heading {
+  color: var(--mono-4);
+  font-size: var(--fs-s);
+}
+
+.statistic-reading {
+  color: var(--mono-5);
+  font-weight: var(--fw-bold);
+  font-size: 32px;
+}
+
+#success-reading, #fail-reading {
+  height: 12px;
+  width: 12px;
+  display: inline-block;
+  margin: 0 0 5px 10px;
+  border-radius: 12px;
+}
+
+#success-reading {
+  background-color: var(--success);
+}
+
+#fail-reading {
+  background-color: var(--danger);
+}
+
+.result-messages  {
+  width: 70%;
 }
 
 .error-message {
@@ -68,6 +141,7 @@
 .warning-list,
 .success-list {
   list-style: none;
+  color: var(--mono-4);
 }
 
 .error-list li,

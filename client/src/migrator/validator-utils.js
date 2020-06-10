@@ -79,25 +79,24 @@ function formErrorFile (errorAggregations) {
 }
 
 function parseResult (result) {
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
   finalResult.successful = []
+  finalResult.total = total || 0
+  finalResult.successful = successful || 0
+  finalResult.failed = failed || 0
   if (result.clientException) {
-    finalResult.successful = 'Validation could not be completed.'
     finalResult.errors.push({
       message: `Exception:${result.clientException}`
     })
     return finalResult
   }
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
 
   const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
-  finalResult.total = total || 0
-  finalResult.successful = successful || 0
-  finalResult.failed = failed || 0
   finalResult.dataType = pluralKey
 
   exceptions && exceptions.forEach(error => {

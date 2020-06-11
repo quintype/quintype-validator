@@ -20,5 +20,10 @@ export class Validator{
   clickValidateButton(){
     cy.get(this.validateButton).click();
   }
+
+  verifyComponentsInResultsPage(){
+    cy.wait(3000);
+    cy.contains("Results");
+  }
 }
 export default Validator;

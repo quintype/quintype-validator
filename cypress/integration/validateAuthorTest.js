@@ -9,5 +9,6 @@ describe("Validate Author", function() {
       validateAuthor.selectValidateByDirectInput();
       validateAuthor.enterAuthorJsonData();
       validateAuthor.clickValidateButton();
+      validateAuthor.verifyComponentsInResultsPage();
     });
 });

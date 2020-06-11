@@ -40,7 +40,7 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
         exceptions: [{key: `IncorrectFieldName: ${fieldname}`}],
         dataType: type})
     }
-    if (mimetype !== 'application/x-gzip') {
+    if (mimetype !== 'application/x-gzip' && mimetype !== 'application/gzip') {
       return res.json({
         exceptions: [{key: 'invalidGzip'}],
         dataType: type

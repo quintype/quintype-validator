@@ -37,7 +37,7 @@ describe('validateJsonTest', () => {
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be shorter than 1 characters"})]));
     expect(validateJson(Author2, authorSchema, new Set())).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be longer than 10 characters"})]));
-    expect(validateJson(Author3, authorSchema, new Set())).toBeNull();
+    expect(validateJson(Author3, authorSchema, new Set())).toEqual([]);
   });
 
   it('should validate json', () => {
@@ -60,7 +60,7 @@ describe('validateJsonTest', () => {
          expect.objectContaining({"message": "should have required property 'authors'"})]));
     expect(validateJson(Story2, storySchema, new Set())).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT have fewer than 1 items"})]));
-    expect(validateJson(Story3, storySchema, new Set())).toBeNull();
+    expect(validateJson(Story3, storySchema, new Set())).toEqual([]);
   });
 
   it('should throw "uniqueKey" error if story has duplicate slug', () => {
@@ -77,7 +77,8 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar'}]
     };
-    expect(validateJson(Story1, storySchema, uniqueSlugs)).toBeNull();
+
+    expect(validateJson(Story1, storySchema, uniqueSlugs)).toEqual([]);
     expect(validateJson(Story2, storySchema, uniqueSlugs)).toEqual(
       expect.arrayContaining([expect.objectContaining({"keyword": "uniqueKey", "params": {"value": "foobar"}})])
     );
@@ -420,6 +421,28 @@ describe('storyValidationTest', () => {
         {minItems: [{ key: 'sections:1', ids: ['story-001'] },
                     { key: 'authors:1', ids: ['story-001']}]})
     );
+  });
+
+  it('should throw "Invalid URL" error if incorrect url inside body is present', () => {
+    const Story = {
+      'external-id': 'story-001',
+      headline: 'A story headline',
+      slug: 'story-slug',
+      'summary': 'Story Summary.',
+      'body': '<div><p>Some Body</p><img src="/foo/bar"></div>',
+      'story-template': 'text',
+      status: 'published',
+      'first-published-at': 1020,
+      'last-published-at': 1020,
+      'published-at': 1020,
+      authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
+      sections: [{ name:'Foo1', slug: 'section-slug', 'external-id': 'section-001',
+                  'parent': { name:'Foo2', slug: 'parent-slug', 'external-id': 'parent-001' }}],
+      tags: [{ name: 'tag' }]
+    };
+    const output = validator('Story', Story, {}, new Set());
+    expect(output).toEqual(expect.objectContaining(
+      { 'invalidURL': [{ key: 'body: /foo/bar', ids: ['story-001'] }] }));
   });
 
   it('should validate successfully when all required keys with correct data are provided ', () => {

@@ -130,9 +130,8 @@ export default class ValidationForm extends Component {
         const result = await response.json()
         this.props.sendData({ result })
       } catch (err) {
-        console.error(err);
         this.props.sendData({
-          result: {error:err}
+          result: {error:err.message}
         })
       }
     }

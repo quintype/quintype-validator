@@ -52,6 +52,11 @@
               "type": "string",
               "description": "Name of story"
             },
+            "image-url": {
+              "type": "string",
+              "description": "Url of image",
+              "format": "uri"
+            },
             "slug": {
               "type": "string",
               "description": "Slug of story"

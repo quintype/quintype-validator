@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import Select from '@quintype/em/components/select'
-import styles from './migrator.module.css'
 import { Button } from '@quintype/em/components/button'
-import Heading from './Heading'
 import InputField from './InputField'
 import { selectOptions, validateOptions, createRequest } from './validator-utils'
 import { chunk } from 'lodash'

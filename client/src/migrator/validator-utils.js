@@ -1,5 +1,3 @@
-import React from 'react';
-
 const selectOptions = [
   { label: 'Story', value: 'Story' },
   { label: 'Section', value: 'Section' },
@@ -101,7 +99,7 @@ function parseResult (result) {
 
   exceptions && exceptions.forEach(error => {
     const errorObj = {
-      message: error.key
+      message: `Error:${error.key}`
     }
     if (error.ids) {
       errorObj.metadata = { info: error.ids.join(', ') }

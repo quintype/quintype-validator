@@ -63,6 +63,10 @@ export default class ValidationForm extends Component {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/get-s3-files`, requestOptions)
       const fileList = await response.json()
+      if (fileList.error) {
+        this.props.sendData({ result: fileList })
+        return
+      }
       const validationPromises = [];
       const smallFileList =  fileList.filter(file=>file.size<=1024*1024*2)
       const largeFileList =  fileList.filter(file=>file.size>1024*1024*2)
@@ -109,7 +113,7 @@ export default class ValidationForm extends Component {
     } catch (err) {
       console.log(err);
       this.props.sendData({
-        result: err.message
+        result: {error: err.message}
       })
       return
     }
@@ -130,6 +134,7 @@ export default class ValidationForm extends Component {
         const result = await response.json()
         this.props.sendData({ result })
       } catch (err) {
+        console.log(err);
         this.props.sendData({
           result: {error:err.message}
         })

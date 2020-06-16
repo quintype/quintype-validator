@@ -18,7 +18,8 @@ function createRequest ({value: validateType}, {value: selectType}, userData) {
   let options = {
     method: 'POST',
     headers: {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      keepalive:true
     }
   }
   let requestData
@@ -57,7 +58,6 @@ function createFileErrorMessage(errorType) {
 }
 
 function formErrorFile(errorAggregations) {
-  console.log(errorAggregations)
   let fileString = 'data:application/octet-stream,error-type%2Cpath%2Clog-level%2Cexternal-id%0A'
 
   for(let errorType in errorAggregations) {
@@ -81,17 +81,14 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
+  if(result.error){
+    return {errorMessage: result.error}
+  }
   let finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
   finalResult.successful = []
-  if (result.clientException) {
-    finalResult.successful = 'Validation could not be completed.'
-    finalResult.errors.push({
-      message: `Exception:${result.clientException}`
-    })
-    return finalResult
-  }
+
   const { dataType, total, successful, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
 
   const errorFileLink = formErrorFile({exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties})

@@ -13,7 +13,10 @@ export default function Result({result}) {
       <div className={styles['migrator']}>
         <Heading />
         <div className={styles['container']}>
-          <ResultList finalResult={finalResult} />
+          {
+            finalResult.errorMessage? <p>{finalResult.errorMessage}</p> : <ResultList finalResult={finalResult} />
+          }
+          
         </div>
       </div>
     </>

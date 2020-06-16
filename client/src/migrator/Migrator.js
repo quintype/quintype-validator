@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Heading from './Heading'
 import Result from './Result'
 import styles from "./migrator.module.css";
 import ValidationForm from './ValidationForm'
@@ -23,15 +24,18 @@ export default class Migrator extends Component {
       result
     } = this.state;
     return (
-        <div className={styles['migrator']}>
-        {formEnabled ? 
-          <ValidationForm
-            sendData={this.setData}
-            /> : (
-            <Result
-              result={result}
-            />
-        )}
+        <div className={styles.migrator}>
+        <Heading />
+        <div className={styles.container}>
+          {formEnabled ? 
+            <ValidationForm
+              sendData={this.setData}
+              /> : (
+              <Result
+                result={result}
+              />
+          )}
+        </div>
       </div>
     );
   }

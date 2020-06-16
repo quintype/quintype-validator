@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import Select from '@quintype/em/components/select'
-import styles from './migrator.module.css'
 import { Button } from '@quintype/em/components/button'
-import Heading from './Heading'
 import InputField from './InputField'
 import { selectOptions, validateOptions, createRequest } from './validator-utils'
 import { chunk } from 'lodash'
@@ -152,24 +150,22 @@ export default class ValidationForm extends Component {
 
     return (
       <>
-        <Heading />
-        <div className={styles.container}>
-          <Select
-            label='Select Type'
-            options={selectOptions}
-            value={selectType}
-            onChange={this.onChangeSelectType}
-          />
-          <Select
-            label='Validate by'
-            options={validateOptions}
-            value={validateType}
-            onChange={this.onChangeValidateType}
-          />
-          <InputField
-            userData={userData}
-            validateType={validateType}
-            onInput={this.onInput}
+        <Select
+          label='Select Type'
+          options={selectOptions}
+          value={selectType}
+          onChange={this.onChangeSelectType}
+        />
+        <Select
+          label='Validate by'
+          options={validateOptions}
+          value={validateType}
+          onChange={this.onChangeValidateType}
+        />
+        <InputField
+          userData={userData}
+          validateType={validateType}
+          onInput={this.onInput}
           />
           <Button
             type='primary'
@@ -178,7 +174,6 @@ export default class ValidationForm extends Component {
           >
             Validate
         </Button>
-        </div>
       </>
     )
   }

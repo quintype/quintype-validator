@@ -18,7 +18,8 @@ function createRequest ({ value: validateType }, { value: selectType }, userData
   const options = {
     method: 'POST',
     headers: {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      keepalive:true
     }
   }
   let requestData
@@ -56,8 +57,7 @@ function createFileErrorMessage (errorType) {
   }
 }
 
-function formErrorFile (errorAggregations) {
-  console.log(errorAggregations)
+function formErrorFile(errorAggregations) {
   let fileString = 'data:application/octet-stream,error-type%2Cpath%2Clog-level%2Cexternal-id%0A'
 
   for (const errorType in errorAggregations) {
@@ -87,9 +87,9 @@ function parseResult (result) {
   finalResult.total = total || 0
   finalResult.successful = successful || 0
   finalResult.failed = failed || 0
-  if (result.clientException) {
+  if (result.error) {
     finalResult.errors.push({
-      message: `Exception:${result.clientException}`
+      message: `Error:${result.error}`
     })
     return finalResult
   }

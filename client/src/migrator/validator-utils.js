@@ -142,14 +142,14 @@ function parseResult (result) {
   invalidURL && invalidURL.forEach(error => {
     const [key, value] = error.key.split(':')
     finalResult.errors.push({
-      message: `${key} has invalid url '${value}'`,
+      message: `${key} has invalid url '${value}'.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 
   required && required.forEach(error => {
     let [key, subPath] = error.key.split(':')
-    subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.errors.push({
       message: `${dataType} should have required property '${key}' ${subPath}.`,
       metadata: formErrorMetadata(dataType, error.ids)
@@ -158,7 +158,7 @@ function parseResult (result) {
 
   additionalProperties && additionalProperties.forEach(warning => {
     let [key, subPath] = warning.key.split(':')
-    subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.warnings.push({
       message: `${dataType} has additional property '${key}' ${subPath}.`,
       metadata: formErrorMetadata(dataType, warning.ids)

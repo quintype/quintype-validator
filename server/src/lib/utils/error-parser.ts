@@ -91,6 +91,8 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + error.params.value)
     case 'invalidURL':
       return (keyPath + ':' + error.params.value)
+    case 'invalidSlug':
+      return (keyPath + ':' + error.params.value)
 // handle other keyword errors if required
   }
   return false

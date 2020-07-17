@@ -65,7 +65,22 @@ function validateBody(body: string, errors: Array<ajv.ErrorObject>) {
   return errors
 }
 
+function isValidSlug(slug: string) {
+  let slugRegex = /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/;
+  return slugRegex.test(slug);
+}
+
 function validateSlug(slug: string, uniqueSlugs: Set<string>, errors: Array<ajv.ErrorObject>) {
+  if(!isValidSlug(slug)) {
+    errors.push({
+      keyword: 'invalidSlug',
+      dataPath: '/slug',
+      schemaPath: '',
+      params: {
+        value: slug
+      }
+    });
+  }
   if(!isUniqueSlug(slug,uniqueSlugs)) {
     errors.push({
       keyword: 'uniqueKey',
@@ -92,7 +107,7 @@ export function validateJson(
     finalErrors = validateSlug(data.slug,uniqueSlugs,validate.errors || [])
   }
   if(data.body) {
-    finalErrors = validateBody(data.body, validate.errors || [])
+    finalErrors = finalErrors.concat(validateBody(data.body, validate.errors || []));
   }
   return finalErrors.concat(validate.errors || []);
 }

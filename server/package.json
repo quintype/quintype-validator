@@ -94,7 +94,7 @@
     "@types/nodemailer": "^6.2.2",
     "@types/request-promise": "^4.1.44",
     "ava": "2.2.0",
-    "codecov": "^3.5.0",
+    "codecov": "^3.7.1",
     "cz-conventional-changelog": "^2.1.0",
     "gh-pages": "^2.0.1",
     "jest": "^24.9.0",

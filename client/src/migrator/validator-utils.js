@@ -77,7 +77,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug } = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,7 +92,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties })
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -177,6 +177,14 @@ function parseResult (result) {
     const [key, expectedValue] = error.key.split(':')
     finalResult.errors.push({
       message: `${dataType} has incorrect value for property '${key}'. Allowed values are '${expectedValue.split(',').join(', ')}'.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  invalidSlug && invalidSlug.forEach(error => {
+    const [key, value] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${key} '${value}' is invalid.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

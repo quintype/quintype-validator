@@ -41,17 +41,26 @@ class ValidateStoryPage{
     verifyTotalStoryCount(count){
         cy.wait(5000);
         const totalCount = cy.get(':nth-child(1) > .migrator_statistic-reading__2H8Z4')
-        totalCount.contains(count);
+        totalCount.eq(0).contains(count);
       }
     verifyValidStoryCount(count){
         const validStoryCount = cy.get(':nth-child(2) > .migrator_statistic-reading__2H8Z4');
         validStoryCount.contains(count);
       }
-      fillInValidStorySlugJson(){
+    verifyInvalidStoryCount(count){
+        const invalidStoryCount = cy.get(':nth-child(3) > .migrator_statistic-reading__2H8Z4')
+        invalidStoryCount.contains(count);
+    }
+    fillInValidStorySlugJson(){
         const markUpTextArea= '[data-test-id="text-area-wrapper"] textarea';
         utils.copyJson('storyWithInValidSlug.json',markUpTextArea);
         return this;
       }
+    clickAccordian(){
+        const arrowAccordian = cy.get('.accordion-section_accordion-arrow__3AFqH > svg');
+        arrowAccordian.click();
+    }
+
 }
 
 export default ValidateStoryPage;

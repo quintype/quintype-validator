@@ -22,7 +22,7 @@ export class Validator{
   }
 
   verifyComponentsInResultsPage(){
-    cy.wait(3000);
+    cy.wait(4000);
     cy.contains("Results");
   }
 }

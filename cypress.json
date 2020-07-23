@@ -1,2 +1,9 @@
 {
-    "baseUrl": "https://developers.quintype.com/quintype-validator"}
+    "baseUrl": "https://developers.quintype.com/quintype-validator",
+    "reporter": "mochawesome",
+    "reporterOptions": {
+    "overwrite": false,
+    "html": false,
+    "json": true
+    }
+}

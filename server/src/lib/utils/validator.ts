@@ -6,6 +6,7 @@ import split2 from 'split2'
 import path, { join } from 'path';
 import { parse, HTMLElement } from 'node-html-parser'
 import { URL } from 'url';
+import { isNotEmail } from 'sane-email-validation';
 
 const schemas: { [key: string]: object } = {};
 
@@ -94,6 +95,33 @@ function validateSlug(slug: string, uniqueSlugs: Set<string>, errors: Array<ajv.
   return errors
 }
 
+function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
+  authors.map((author: any) => {
+    if((author && !author.email) || isNotEmail(author.email)) {
+      errors.push({
+        keyword: 'invalidEmail',
+        dataPath: '/email',
+        schemaPath: '',
+        params: {
+          value: author.email
+        }
+      })
+    }
+    if(author.username !== author.name) {
+      errors.push({
+        keyword: 'authorNamesMismatch',
+        dataPath: '/author',
+        schemaPath: '',
+        data: author,
+        params: {
+          value: author.username
+        }
+      })
+    }
+  })
+  return errors
+}
+
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
@@ -108,6 +136,9 @@ export function validateJson(
   }
   if(data.body) {
     finalErrors = finalErrors.concat(validateBody(data.body, validate.errors || []));
+  }
+  if(data.authors) {
+    finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
   }
   return finalErrors.concat(validate.errors || []);
 }

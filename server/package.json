@@ -53,7 +53,6 @@
   "dependencies": {
     "@types/busboy": "^0.2.3",
     "@types/multer": "^1.3.10",
-    "@types/sane-email-validation": "^1.1.0",
     "@types/split2": "^2.1.6",
     "ajv": "^6.10.2",
     "amphtml-validator": "^1.0.29",
@@ -72,10 +71,10 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
     "robots-parser": "^2.1.1",
-    "sane-email-validation": "^3.0.1",
     "sha.js": "^2.4.11",
     "split2": "^3.1.1",
-    "ts-json-schema-generator": "^0.58.1"
+    "ts-json-schema-generator": "^0.58.1",
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@bitjson/npm-scripts-info": "^1.0.0",

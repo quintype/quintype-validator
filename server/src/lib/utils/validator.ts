@@ -6,7 +6,7 @@ import split2 from 'split2'
 import path, { join } from 'path';
 import { parse, HTMLElement } from 'node-html-parser'
 import { URL } from 'url';
-import { isNotEmail } from 'sane-email-validation';
+import { validate } from 'validate.js';
 
 const schemas: { [key: string]: object } = {};
 
@@ -97,7 +97,12 @@ function validateSlug(slug: string, uniqueSlugs: Set<string>, errors: Array<ajv.
 
 function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
   authors.map((author: any) => {
-    if((author && !author.email) || isNotEmail(author.email)) {
+    const constraints = {
+      from: {
+        email: true
+      }
+    }
+    if((author && !author.email) || validate({from: author.email}, constraints)) {
       errors.push({
         keyword: 'invalidEmail',
         dataPath: '/email',

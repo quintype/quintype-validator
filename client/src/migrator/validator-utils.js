@@ -77,7 +77,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL } = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,7 +92,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties })
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -147,11 +147,20 @@ function parseResult (result) {
     })
   })
 
+  invalidTimestamp && invalidTimestamp.forEach(error => {
+    let [key, subPath] = error.key.split(':')
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
+    finalResult.errors.push({
+      message: `${dataType} has invalid timestamp for '${key}'${subPath}.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
   required && required.forEach(error => {
     let [key, subPath] = error.key.split(':')
     subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.errors.push({
-      message: `${dataType} should have required property '${key}' ${subPath}.`,
+      message: `${dataType} should have required property '${key}'${subPath}.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
@@ -160,7 +169,16 @@ function parseResult (result) {
     let [key, subPath] = warning.key.split(':')
     subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.warnings.push({
-      message: `${dataType} has additional property '${key}' ${subPath}.`,
+      message: `${dataType} has additional property '${key}'${subPath}.`,
+      metadata: formErrorMetadata(dataType, warning.ids)
+    })
+  })
+
+  oldTimestamp && oldTimestamp.forEach(warning => {
+    let [key, subPath] = warning.key.split(':')
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
+    finalResult.warnings.push({
+      message: `${dataType} seems to have a very old timestamp for '${key}'${subPath}. Please check if the desired timestamp is provided in milliseconds.`,
       metadata: formErrorMetadata(dataType, warning.ids)
     })
   })

@@ -90,6 +90,12 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + error.params.value)
     case 'invalidURL':
       return (keyPath + ':' + error.params.value)
+    case 'invalidSlug':
+      return (keyPath + ':' + error.params.value)
+    case 'invalidTimestamp':
+      return (keyPath + ':' + schema)
+    case 'oldTimestamp':
+      return (keyPath + ':' + schema)
 // handle other keyword errors if required
   }
   return false

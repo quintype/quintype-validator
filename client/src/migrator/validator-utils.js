@@ -199,6 +199,14 @@ function parseResult (result) {
     })
   })
 
+  invalidSlug && invalidSlug.forEach(error => {
+    const [key, value] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${key} '${value}' is invalid.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
   return finalResult
 }
 

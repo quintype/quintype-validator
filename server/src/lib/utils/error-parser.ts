@@ -96,6 +96,7 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + schema)
     case 'oldTimestamp':
       return (keyPath + ':' + schema)
+
 // handle other keyword errors if required
   }
   return false

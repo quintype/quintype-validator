@@ -151,7 +151,7 @@ function parseResult (result) {
     let [key, subPath] = error.key.split(':')
     subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.errors.push({
-      message: `${dataType} has invalid timestamp for '${key}'${subPath}. Expecting a positive integer representing timestamp in epoch MILLISECONDS not exceeding current timestamp.`,
+      message: `${dataType} has invalid timestamp for '${key}'${subPath}. Expecting a positive integer representing timestamp in epoch milliseconds not exceeding current timestamp.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
@@ -178,7 +178,7 @@ function parseResult (result) {
     let [key, subPath] = warning.key.split(':')
     subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.warnings.push({
-      message: `${dataType} seems to have a very old timestamp for '${key}'${subPath}. Please check if the desired timestamp is provided in MILLISECONDS.`,
+      message: `${dataType} seems to have a very old timestamp for '${key}'${subPath}. Please check if the desired timestamp is provided in milliseconds.`,
       metadata: formErrorMetadata(dataType, warning.ids)
     })
   })

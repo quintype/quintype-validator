@@ -24,7 +24,8 @@
     "react-textarea-autosize": "^7.1.2",
     "superagent": "^5.1.0",
     "superagent-bluebird-promise": "^4.2.0",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "cypress": "4.10.0"
   },
   "scripts": {
     "start": "react-scripts start",

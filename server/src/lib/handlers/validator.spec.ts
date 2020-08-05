@@ -277,10 +277,10 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'first-published-at:Story', ids: ['story-001'] },
+        {required: [{ key: 'any one of body, story-elements or cards:Story', ids: ['story-001']},
+                    { key: 'first-published-at:Story', ids: ['story-001'] },
                     { key: 'last-published-at:Story', ids: ['story-001'] },
-                    { key: 'published-at:Story', ids: ['story-001'] },
-                    { key: 'any one of body, story-elements or cards:Story', ids: ['story-001'] },]})
+                    { key: 'published-at:Story', ids: ['story-001'] }]})
     );
   });
 

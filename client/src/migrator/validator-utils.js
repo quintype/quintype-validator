@@ -200,7 +200,7 @@ function parseResult (result) {
   authorNamesMismatch && authorNamesMismatch.forEach(error => {
     const [key, value] = error.key.split(':')
     const data = error.data;
-    finalResult.warnings.push({
+    finalResult.errors.push({
       message: `${key} username: '${data.username}' & name: '${data.name}' are not same.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })

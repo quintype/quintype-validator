@@ -277,7 +277,7 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'any one of body, story-elements or cards:Story', ids: ['story-001']},
+        {required: [{ key: 'any one of body, story-elements or cards:Story', ids: ['story-001'] },
                     { key: 'first-published-at:Story', ids: ['story-001'] },
                     { key: 'last-published-at:Story', ids: ['story-001'] },
                     { key: 'published-at:Story', ids: ['story-001'] }]})
@@ -454,9 +454,9 @@ describe('storyValidationTest', () => {
       'body': '<p>Some Body</p>',
       'story-template': 'text',
       status: 'published',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
+      'first-published-at': 1597040005795,
+      'last-published-at': 1597040005795,
+      'published-at': 1597040005795,
       authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
       sections: [{ name:'Foo1', slug: 'section-slug', 'external-id': 'section-001',
                   'parent': { name:'Foo2', slug: 'parent-slug', 'external-id': 'parent-001' }}],

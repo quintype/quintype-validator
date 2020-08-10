@@ -22,7 +22,7 @@ function fixErrors(errorList: Obj, identifier: string): Obj {
       if(errorKey) {
         errorKey.ids.push(identifier)
       } else {
-        errorList.required.push({
+        errorList.required.unshift({
           key: keyName,
           ids: [identifier]
         })

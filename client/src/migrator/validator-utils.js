@@ -59,7 +59,7 @@ function formErrorFile(errorAggregations) {
   let fileString = 'data:application/octet-stream,error-type%2Cpath%2Clog-level%2Cexternal-id%0A'
 
   for (const errorType in errorAggregations) {
-    const logLevel = errorType === 'additionalProperties' ? 'warning' : 'error'
+    const logLevel = errorType === 'additionalProperties' || 'oldTimestamp' ? 'warning' : 'error'
     // eslint-disable-next-line no-loop-func
     errorAggregations[errorType] && errorAggregations[errorType].forEach(error => {
       const errorMessage = createFileErrorMessage(errorType)

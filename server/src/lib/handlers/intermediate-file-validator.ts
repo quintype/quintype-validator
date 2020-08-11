@@ -34,7 +34,16 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
     }
     type = value;
   })
-  busboy.on('file', async(fieldname, file, _1, _2, mimetype): Promise<Response> => {
+  busboy.on('file', async(fieldname, file, fileName, _2, mimetype): Promise<Response> => {
+    const fileNameSplit: string = fileName.split('.')[0];
+    if(!fileNameSplit.match(/^(authors-|sections-|story-|users-)(.+)(-\d{5})$/)) {
+      return res.json({
+        exceptions: [{
+          key: `IncorrectFileName: ${fileName}. Example: ${type.toLowerCase()}-<PUBLISHER-NAME>-<5 DIGITS>.txt.gz`
+        }],
+        dataType: type
+      })
+    }
     if (fieldname !== 'file') {
       return res.json({
         exceptions: [{key: `IncorrectFieldName: ${fieldname}`}],

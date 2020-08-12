@@ -95,6 +95,36 @@ function validateSlug(slug: string, uniqueSlugs: Set<string>, errors: Array<ajv.
   return errors
 }
 
+function validateTimestamp(data: {[key: string]: any}, dateKeys: Array<string>, errors:Array<ajv.ErrorObject>) {
+  const currentTimestamp = Date.now()
+  dateKeys.forEach(key => {
+    if(Number.isInteger(data[key])) {
+      if(data[key] > currentTimestamp || data[key] < 0) {
+        errors.push({
+          keyword: 'invalidTimestamp',
+          dataPath: `/${key}`,
+          schemaPath: '',
+          params: {
+            value: data[key]
+          }
+        })
+      }
+
+      else if(data[key] < 631132200000) {
+        errors.push({
+          keyword: 'oldTimestamp',
+          dataPath: `/${key}`,
+          schemaPath: '',
+          params: {
+            value: data[key]
+          }
+        })
+      }
+    }
+  })
+  return errors
+}
+
 function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
   authors.map((author: any) => {
     const constraints = {
@@ -140,11 +170,18 @@ export function validateJson(
     finalErrors = validateSlug(data.slug,uniqueSlugs,validate.errors || [])
   }
   if(data.body) {
-    finalErrors = finalErrors.concat(validateBody(data.body, validate.errors || []));
+    finalErrors = finalErrors.concat(validateBody(data.body, validate.errors || []))
   }
+
+  const dateKeys = Object.keys(data).filter(key => key.includes('published-at'))
+  if(dateKeys.length) {
+    finalErrors = finalErrors.concat(validateTimestamp(data, dateKeys, validate.errors || []))
+  }
+
   if(data.authors) {
     finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
   }
+
   return finalErrors.concat(validate.errors || []);
 }
 

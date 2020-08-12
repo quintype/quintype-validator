@@ -59,7 +59,7 @@ function formErrorFile(errorAggregations) {
   let fileString = 'data:application/octet-stream,error-type%2Cpath%2Clog-level%2Cexternal-id%0A'
 
   for (const errorType in errorAggregations) {
-    const logLevel = errorType === 'additionalProperties' ? 'warning' : 'error'
+    const logLevel = errorType === 'additionalProperties' || 'oldTimestamp' ? 'warning' : 'error'
     // eslint-disable-next-line no-loop-func
     errorAggregations[errorType] && errorAggregations[errorType].forEach(error => {
       const errorMessage = createFileErrorMessage(errorType)
@@ -77,7 +77,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidEmail, authorNamesMismatch } = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,8 +92,8 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidEmail, authorNamesMismatch })
-  finalResult.errorFile = errorFileLink;
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch })
+  finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
 
@@ -142,25 +142,43 @@ function parseResult (result) {
   invalidURL && invalidURL.forEach(error => {
     const [key, value] = error.key.split(':')
     finalResult.errors.push({
-      message: `${key} has invalid url '${value}'`,
+      message: `${key} has invalid url '${value}'.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  invalidTimestamp && invalidTimestamp.forEach(error => {
+    let [key, subPath] = error.key.split(':')
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
+    finalResult.errors.push({
+      message: `${dataType} has invalid timestamp for '${key}'${subPath}. Expecting a positive integer representing timestamp in epoch milliseconds not exceeding current timestamp.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 
   required && required.forEach(error => {
     let [key, subPath] = error.key.split(':')
-    subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.errors.push({
-      message: `${dataType} should have required property '${key}' ${subPath}.`,
+      message: `${dataType} should have required property '${key}'${subPath}.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 
   additionalProperties && additionalProperties.forEach(warning => {
     let [key, subPath] = warning.key.split(':')
-    subPath = (subPath === dataType) ? '' : ` in '${subPath}'.`
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
     finalResult.warnings.push({
-      message: `${dataType} has additional property '${key}' ${subPath}.`,
+      message: `${dataType} has additional property '${key}'${subPath}.`,
+      metadata: formErrorMetadata(dataType, warning.ids)
+    })
+  })
+
+  oldTimestamp && oldTimestamp.forEach(warning => {
+    let [key, subPath] = warning.key.split(':')
+    subPath = (subPath === dataType) ? '' : ` in '${subPath}'`
+    finalResult.warnings.push({
+      message: `${dataType} seems to have a very old timestamp for '${key}'${subPath}. Please check if the desired timestamp is provided in milliseconds.`,
       metadata: formErrorMetadata(dataType, warning.ids)
     })
   })

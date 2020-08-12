@@ -87,14 +87,14 @@ describe('validateJsonTest', () => {
 
 /* Tag validation tests */
 describe('tagValidationTest', () => {
-  it('should throw "minLength" error if name has less that 3 characters', () => {
+  it('should throw "minLength" error if name has less that 2 characters', () => {
     const Tag1 = {
       name: ''
     };
     const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {minLength: [{ key: 'name:3', ids: [undefined] }]})
+        {minLength: [{ key: 'name:2', ids: [undefined] }]})
     );
   });
 
@@ -263,7 +263,7 @@ describe('sectionValidationTest', () => {
 
 /* Story validation tests */
 describe('storyValidationTest', () => {
-  it('should throw "requiredProperty" error if body or publish dates are not provided', () => {
+  it('should throw "requiredProperty" error if body/story-elements/cards or publish dates are not provided', () => {
     const Story = {
       'external-id': 'story-001',
       headline: 'A story headline',
@@ -277,7 +277,7 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'body:Story', ids: ['story-001'] },
+        {required: [{ key: 'any one of body, story-elements or cards:Story', ids: ['story-001'] },
                     { key: 'first-published-at:Story', ids: ['story-001'] },
                     { key: 'last-published-at:Story', ids: ['story-001'] },
                     { key: 'published-at:Story', ids: ['story-001'] }]})
@@ -454,9 +454,9 @@ describe('storyValidationTest', () => {
       'body': '<p>Some Body</p>',
       'story-template': 'text',
       status: 'published',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
+      'first-published-at': 1597040005795,
+      'last-published-at': 1597040005795,
+      'published-at': 1597040005795,
       authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
       sections: [{ name:'Foo1', slug: 'section-slug', 'external-id': 'section-001',
                   'parent': { name:'Foo2', slug: 'parent-slug', 'external-id': 'parent-001' }}],

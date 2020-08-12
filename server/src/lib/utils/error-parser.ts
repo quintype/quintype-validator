@@ -2,7 +2,7 @@ interface Obj{
   [key: string]: any
 }
 
-function fixErrors(errorList: Obj): Obj {
+function fixErrors(errorList: Obj, identifier: string): Obj {
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(
       (prop: { [key: string]: string }) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
@@ -15,21 +15,20 @@ function fixErrors(errorList: Obj): Obj {
   if(errorList.required) {
     const requiredProp = errorList.required.filter(
       (prop: { [key: string]: string }) => (prop.key === 'body:Story' || prop.key === 'story-elements:Story' || prop.key === 'cards:Story'))  
-    const keyName = 'any one of body, story-elements and cards'
-    const identifier = requiredProp[0].ids[0]
+    const keyName = 'any one of body, story-elements or cards:Story'
 
-    if(requiredProp.length !== 2 ) {
+    if(requiredProp.length !== 2) {
       const errorKey = errorList.required.find((prop: Obj) => prop.key === keyName)
-
       if(errorKey) {
         errorKey.ids.push(identifier)
       } else {
-        errorList.required.push({
+        errorList.required.unshift({
           key: keyName,
           ids: [identifier]
         })
       }
     }
+
     errorList.required = errorList.required.filter(
       (prop: Obj) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
 
@@ -66,7 +65,7 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     }
   });
 
-  return schema === 'StoryInternal' ? fixErrors(errorList) : errorList
+  return schema === 'Story' ? fixErrors(errorList, identifier) : errorList
 }
 
 function getErrorParam(error: Obj, schema: string): string | boolean {
@@ -92,6 +91,11 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
     case 'invalidEmail':
     case 'authorNamesMismatch':
       return (keyPath + ':' + error.params.value)
+    case 'invalidTimestamp':
+      return (keyPath + ':' + schema)
+    case 'oldTimestamp':
+      return (keyPath + ':' + schema)
+
 // handle other keyword errors if required
   }
   return false

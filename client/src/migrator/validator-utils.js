@@ -77,7 +77,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp} = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,7 +92,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp })
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -203,6 +203,23 @@ function parseResult (result) {
     const [key, value] = error.key.split(':')
     finalResult.errors.push({
       message: `${key} '${value}' is invalid.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  invalidEmail && invalidEmail.forEach(error => {
+    const [key, value] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${value ? `${key} id: '${value}' is not valid.` : `${key} id cannot be empty.`}`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  authorNamesMismatch && authorNamesMismatch.forEach(error => {
+    const [key, value] = error.key.split(':')
+    const data = error.data;
+    finalResult.errors.push({
+      message: `${key} username: '${data.username}' & name: '${data.name}' are not same.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

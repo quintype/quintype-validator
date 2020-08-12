@@ -43,7 +43,7 @@ function fixErrors(errorList: Obj, identifier: string): Obj {
 export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, schema: string, errorList: Obj)
   : Obj {
   errors.forEach(error => {
-    const {keyword} = error
+    const {keyword, data} = error
     const errorParam = getErrorParam(error, schema)
     if(!errorParam) return
 
@@ -59,7 +59,8 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     } else {
       errorList[keyword].push({
         key: errorParam,
-        ids: [identifier]
+        ids: [identifier],
+        data: data
       })
     }
   });
@@ -81,16 +82,14 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
     case 'enum':
       return (keyPath + ':' + error.params.allowedValues)
     case 'maxLength':
-      return (keyPath + ':' + error.params.limit)
     case 'minLength':
-      return (keyPath + ':' + error.params.limit)
     case 'minItems':
       return (keyPath + ':' + error.params.limit)
     case 'uniqueKey':
-      return (keyPath + ':' + error.params.value)
     case 'invalidURL':
-      return (keyPath + ':' + error.params.value)
     case 'invalidSlug':
+    case 'invalidEmail':
+    case 'authorNamesMismatch':
       return (keyPath + ':' + error.params.value)
     case 'invalidTimestamp':
       return (keyPath + ':' + schema)

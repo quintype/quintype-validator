@@ -6,6 +6,7 @@ import split2 from 'split2'
 import path, { join } from 'path';
 import { parse, HTMLElement } from 'node-html-parser'
 import { URL } from 'url';
+import { validate } from 'validate.js';
 
 const schemas: { [key: string]: object } = {};
 
@@ -124,6 +125,38 @@ function validateTimestamp(data: {[key: string]: any}, dateKeys: Array<string>, 
   return errors
 }
 
+function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
+  authors.map((author: any) => {
+    const constraints = {
+      from: {
+        email: true
+      }
+    }
+    if((author && !author.email) || validate({from: author.email}, constraints)) {
+      errors.push({
+        keyword: 'invalidEmail',
+        dataPath: '/email',
+        schemaPath: '',
+        params: {
+          value: author.email
+        }
+      })
+    }
+    if(author.username !== author.name) {
+      errors.push({
+        keyword: 'authorNamesMismatch',
+        dataPath: '/author',
+        schemaPath: '',
+        data: author,
+        params: {
+          value: author.username
+        }
+      })
+    }
+  })
+  return errors
+}
+
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
@@ -143,6 +176,10 @@ export function validateJson(
   const dateKeys = Object.keys(data).filter(key => key.includes('published-at'))
   if(dateKeys.length) {
     finalErrors = finalErrors.concat(validateTimestamp(data, dateKeys, validate.errors || []))
+  }
+
+  if(data.authors) {
+    finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
   }
 
   return finalErrors.concat(validate.errors || []);

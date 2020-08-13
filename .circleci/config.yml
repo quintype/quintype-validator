@@ -10,6 +10,13 @@ jobs:
             ./node_modules/.bin/cypress run --spec 'cypress/integration/*' --browser chrome
 workflows:
   version: 2
-  test-pipeline:
+  functional_test:
+    triggers:
+       - schedule:
+          cron: "45 13 * * 1-5"
+          filters:
+            branches:
+              only:
+                - cypress-tests
     jobs:
       - functional_test

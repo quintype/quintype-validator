@@ -59,7 +59,7 @@ function formErrorFile(errorAggregations) {
   let fileString = 'data:application/octet-stream,error-type%2Cpath%2Clog-level%2Cexternal-id%0A'
 
   for (const errorType in errorAggregations) {
-    const logLevel = (errorType === 'additionalProperties') || (errorType ==='oldTimestamp') ? 'warning' : 'error'
+    const logLevel = errorType === 'additionalProperties' || 'oldTimestamp' ? 'warning' : 'error'
     // eslint-disable-next-line no-loop-func
     errorAggregations[errorType] && errorAggregations[errorType].forEach(error => {
       const errorMessage = createFileErrorMessage(errorType)
@@ -77,7 +77,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern} = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,7 +92,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern })
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -180,14 +180,6 @@ function parseResult (result) {
     finalResult.warnings.push({
       message: `${dataType} seems to have a very old timestamp for '${key}'${subPath}. Please check if the desired timestamp is provided in milliseconds.`,
       metadata: formErrorMetadata(dataType, warning.ids)
-    })
-  })
-
-  pattern && pattern.forEach(error => {
-    const [key, stringPattern] = error.key.split(':')
-    finalResult.errors.push({
-      message: `Story should have an HTML string for ${key}.`,
-      metadata: formErrorMetadata(dataType, error.ids)
     })
   })
 

@@ -157,6 +157,25 @@ function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
   return errors
 }
 
+function validateHeroImage(heroImage: string, errors: Array<ajv.ErrorObject>) {
+  const constraints = {
+    website: {
+      url: true
+    }
+  };
+  if (validate({ website: heroImage }, constraints)) {
+    errors.push({
+      keyword: 'invalidHeroImage',
+      dataPath: '/TemporaryheroImageUrl',
+      schemaPath: '',
+      params: {
+        value: heroImage
+      }
+    });
+  }
+  return errors;
+}
+
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
@@ -180,6 +199,10 @@ export function validateJson(
 
   if(data.authors) {
     finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
+  }
+
+  if(data['temporary-hero-image-url']) {
+    finalErrors = finalErrors.concat(validateHeroImage(data['temporary-hero-image-url'], validate.errors || []));
   }
 
   return finalErrors.concat(validate.errors || []);

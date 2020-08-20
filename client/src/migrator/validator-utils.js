@@ -77,7 +77,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch} = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, invalidHeroImage} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -92,7 +92,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch })
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, invalidHeroImage })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -216,10 +216,18 @@ function parseResult (result) {
   })
 
   authorNamesMismatch && authorNamesMismatch.forEach(error => {
-    const [key, value] = error.key.split(':')
+    const [key] = error.key.split(':')
     const data = error.data;
     finalResult.errors.push({
       message: `${key} username: '${data.username}' & name: '${data.name}' are not same.`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  invalidHeroImage && invalidHeroImage.forEach(error => {
+    const [key, value, value1] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${key} '${value}:${value1}' is invalid. Example: domain/path/to/image.jpg`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

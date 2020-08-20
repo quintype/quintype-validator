@@ -51,6 +51,7 @@ function createFileErrorMessage (errorType) {
     case 'required': return 'requiredField'
     case 'wrongEnumValue': return 'wrongValue'
     case 'uniqueKey': return 'duplicateKey'
+    case 'pattern': return 'wrongPattern'
     default: return errorType
   }
 }
@@ -186,7 +187,7 @@ function parseResult (result) {
   pattern && pattern.forEach(error => {
     const [key, stringPattern] = error.key.split(':')
     finalResult.errors.push({
-      message: `Story has incorrect pattern for ${key}. Expected HTML string`,
+      message: `Story has incorrect HTML string for property '${key}'.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

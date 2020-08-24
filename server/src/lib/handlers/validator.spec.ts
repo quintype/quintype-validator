@@ -31,7 +31,9 @@ describe('validateJsonTest', () => {
       name: 'Author2 name'
     };
     const Author3 = {
-      name: 'Foobar'
+      name: 'Foobar',
+      username: 'Foobar',
+      email: 'foo@abc.com'
     };
     expect(validateJson(Author1, authorSchema, new Set())).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be shorter than 1 characters"})]));
@@ -52,7 +54,7 @@ describe('validateJsonTest', () => {
     const Story3 = {
       name: 'Foobar',
       sections: [{ name: 'sec1'}],
-      authors: [{ name: 'foobar'}]
+      authors: [{ name: 'foobar', username: 'foobar', email: 'foo@abc.com'}]
     };
     expect(validateJson(Story1, storySchema, new Set())).toEqual(
       expect.arrayContaining(
@@ -69,13 +71,13 @@ describe('validateJsonTest', () => {
       name: 'Foobar',
       slug: 'foobar',
       sections: [{ name: 'sec1'}],
-      authors: [{ name: 'foobar'}]
+      authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
     };
     const Story2 = {
       name: 'Foobar',
       slug: 'foobar',
       sections: [{ name: 'sec1'}],
-      authors: [{ name: 'foobar'}]
+      authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
     };
 
     expect(validateJson(Story1, storySchema, uniqueSlugs)).toEqual([]);
@@ -94,7 +96,7 @@ describe('tagValidationTest', () => {
     const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {minLength: [{ key: 'name:2', ids: [undefined] }]})
+        {minLength: [expect.objectContaining({ key: 'name:2', ids: [undefined] })]})
     );
   });
 
@@ -105,7 +107,7 @@ describe('tagValidationTest', () => {
     const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {maxLength: [{ key: 'name:100', ids: [undefined] }]})
+        {maxLength: [expect.objectContaining({ key: 'name:100', ids: [undefined] })]})
     );
   });
 
@@ -129,7 +131,8 @@ describe('authorValidationTest', () => {
     const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'external-id:Author', ids: [undefined] }, { key: 'username:Author', ids: [undefined] }]})
+        {required: [expect.objectContaining({ key: 'external-id:Author', ids: [undefined] }), 
+                    expect.objectContaining({ key: 'username:Author', ids: [undefined] })]})
     );
   });
 
@@ -141,13 +144,14 @@ describe('authorValidationTest', () => {
     const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'name:Author', ids: ['author-001'] }, { key: 'email:Author', ids: ['author-001'] }]})
+        {required: [expect.objectContaining({ key: 'name:Author', ids: ['author-001'] }), 
+                    expect.objectContaining({ key: 'email:Author', ids: ['author-001'] })]})
     );
   });
 
   it('should throw "type" error if any of the keys has wrong type', () => {
     const Author = {
-      name: 'Foo Bar',
+      name: 'Foo',
       username: 'Foo',
       email: 'author@abc.com',
       'external-id': 123,
@@ -156,13 +160,14 @@ describe('authorValidationTest', () => {
     const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {type: [{ key: 'external-id:string', ids: [123] }, { key: 'role:string', ids: [123] }]})
+        {type: [expect.objectContaining({ key: 'external-id:string', ids: [123] }), 
+                expect.objectContaining({ key: 'role:string', ids: [123] })]})
     );
   });
 
   it('should throw "additionalProperties" error if any extra key is provided which is not defined in schema', () => {
     const Author = {
-      name: 'Foo Bar',
+      name: 'Foo',
       username: 'Foo',
       email: 'author@abc.com',
       'external-id': 'author-001',
@@ -174,13 +179,13 @@ describe('authorValidationTest', () => {
     };
     const output = validator('Author', Author, {}, new Set());
     expect(output).toEqual( expect.objectContaining(
-      {additionalProperties: [{ key: 'foo:Author', ids: ['author-001'] }]})
+      {additionalProperties: [expect.objectContaining({ key: 'foo:Author', ids: ['author-001'] })]})
     );
   });
 
   it('should validate successfully when all required keys with correct datatypes are provided', () => {
     const Author = {
-      name: 'Foo Bar',
+      name: 'Foo',
       username: 'Foo',
       email: 'author@abc.com',
       'external-id': 'author-001',
@@ -201,7 +206,8 @@ describe('sectionValidationTest', () => {
     const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'external-id:Section', ids: [undefined] }, { key: 'slug:Section', ids: [undefined] }]})
+        {required: [expect.objectContaining({ key: 'external-id:Section', ids: [undefined] }), 
+                    expect.objectContaining({ key: 'slug:Section', ids: [undefined] })]})
     );
   });
 
@@ -213,7 +219,7 @@ describe('sectionValidationTest', () => {
     const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'name:Section', ids: ['section-001'] }]})
+        {required: [expect.objectContaining({ key: 'name:Section', ids: ['section-001'] })]})
     );
   });
 
@@ -227,7 +233,7 @@ describe('sectionValidationTest', () => {
     const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {type: [{ key: 'slug:string', ids: ['section-001'] }]})
+        {type: [expect.objectContaining({ key: 'slug:string', ids: ['section-001'] })]})
     );
   });
 
@@ -245,7 +251,7 @@ describe('sectionValidationTest', () => {
     const output = validator('Section', Section, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {additionalProperties: [{ key: 'foo:Section', ids: ['section-001'] }]})
+        {additionalProperties: [expect.objectContaining({ key: 'foo:Section', ids: ['section-001'] })]})
     );
   });
 
@@ -270,17 +276,17 @@ describe('storyValidationTest', () => {
       slug: 'story-slug',
       'story-template': 'text',
       status: 'published',
-      authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
+      authors: [{ name:'Foo', email: 'author@abc.com', 'external-id': 'author-001'}],
       sections: [{ name:'Foo', slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'any one of body, story-elements or cards:Story', ids: ['story-001'] },
-                    { key: 'first-published-at:Story', ids: ['story-001'] },
-                    { key: 'last-published-at:Story', ids: ['story-001'] },
-                    { key: 'published-at:Story', ids: ['story-001'] }]})
+        {required: [expect.objectContaining({ key: 'any one of body, story-elements or cards:Story', ids: ['story-001'] }),
+                    expect.objectContaining({ key: 'first-published-at:Story', ids: ['story-001'] }),
+                    expect.objectContaining({ key: 'last-published-at:Story', ids: ['story-001'] }),
+                    expect.objectContaining({ key: 'published-at:Story', ids: ['story-001'] })]})
     );
   });
 
@@ -290,19 +296,19 @@ describe('storyValidationTest', () => {
       'body': '<p>Some Body</p>',
       'story-template': 'text',
       status: 'published',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
-      authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
+      'first-published-at': 1597994307759,
+      'last-published-at': 1597994307759,
+      'published-at': 1597994307759,
+      authors: [{ name:'Foo', email: 'author@abc.com', 'external-id': 'author-001'}],
       sections: [{ name:'Foo', slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'external-id:Story', ids: [undefined] },
-                    { key: 'headline:Story', ids: [undefined] },
-                    { key: 'slug:Story', ids: [undefined] }]})
+        {required: [expect.objectContaining({ key: 'external-id:Story', ids: [undefined] }),
+                    expect.objectContaining({ key: 'headline:Story', ids: [undefined] }),
+                    expect.objectContaining({ key: 'slug:Story', ids: [undefined] })]})
     );
   });
 
@@ -312,18 +318,18 @@ describe('storyValidationTest', () => {
       headline: 'A story headline',
       slug: 'story-slug',
       'summary': 'Story Summary.',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
+      'first-published-at': 1597994307759,
+      'last-published-at': 1597994307759,
+      'published-at': 1597994307759,
       'body': '<p>Some Body</p>',
       status: 'published'
     };
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {required: [{ key: 'sections:Story', ids: ['story-001'] },
-                    { key: 'authors:Story', ids: ['story-001'] },
-                    { key: 'story-template:Story', ids: ['story-001'] }]})
+        {required: [expect.objectContaining({ key: 'sections:Story', ids: ['story-001'] }),
+                    expect.objectContaining({ key: 'authors:Story', ids: ['story-001'] }),
+                    expect.objectContaining({ key: 'story-template:Story', ids: ['story-001'] })]})
     );
   });
 
@@ -336,9 +342,9 @@ describe('storyValidationTest', () => {
       'story-template': 'text',
       'body': '<p>Some Body</p>',
       status: 'published',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
+      'first-published-at': 1597994307759,
+      'last-published-at': 1597994307759,
+      'published-at': 1597994307759,
       authors: 'Foobar',
       sections: [{ slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
@@ -346,8 +352,8 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {type: [{ key: 'summary:string', ids: ['story-001'] },
-                { key: 'authors:array', ids: ['story-001'] }]})
+        {type: [expect.objectContaining({ key: 'summary:string', ids: ['story-001'] }),
+                expect.objectContaining({ key: 'authors:array', ids: ['story-001'] })]})
     );
   });
 
@@ -359,18 +365,18 @@ describe('storyValidationTest', () => {
       'story-template': 'graphic',
       body: '<p>test</p>',
       status: 'draft',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
-      authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
+      'first-published-at': 1597994307759,
+      'last-published-at': 1597994307759,
+      'published-at': 1597994307759,
+      authors: [{ name:'Foo', username:'Foo', email: 'author@abc.com', 'external-id': 'author-001'}],
       sections: [{ name:'Foo', slug: 'section-slug', 'external-id': 'section-001'}],
       tags: [{ name: 'tag' }]
     };
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {enum: [{ key: 'status:open,published', ids: ['story-001'] },
-                { key: 'story-template:text,photo,video,poll,live-blog', ids: ['story-001'] }]})
+        {enum: [expect.objectContaining({ key: 'status:open,published', ids: ['story-001'] }),
+                expect.objectContaining({ key: 'story-template:text,photo,video,poll,live-blog', ids: ['story-001'] })]})
     );
   });
 
@@ -383,10 +389,10 @@ describe('storyValidationTest', () => {
       'body': '<p>Some Body</p>',
       'story-template': 'text',
       status: 'published',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
-      authors: [{ email: 'author@foobar', 'external-id': 1}],
+      'first-published-at': 1597994307759,
+      'last-published-at': 1597994307759,
+      'published-at': 1597994307759,
+      authors: [{ email: 'author@abc.com', 'external-id': 1}],
       sections: [{ slug: 'section-slug', 'external-id': 'section-001',
                   'parent': { slug: 'parent-slug' }}],
       tags: [{ name: 'tag' }],
@@ -395,7 +401,7 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {additionalProperties: [{ key: 'foo:Story', ids: ['story-001'] }] })
+        {additionalProperties: [expect.objectContaining({ key: 'foo:Story', ids: ['story-001'] })] })
     );
   });
 
@@ -408,9 +414,9 @@ describe('storyValidationTest', () => {
       'body': '<p>Some Body</p>',
       'story-template': 'text',
       status: 'published',
-      'first-published-at': 1020,
-      'last-published-at': 1020,
-      'published-at': 1020,
+      'first-published-at': 1597994307759,
+      'last-published-at': 1597994307759,
+      'published-at': 1597994307759,
       authors: [],
       sections: [],
       tags: [{ name: 'tag' }]
@@ -418,8 +424,8 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual(
       expect.objectContaining(
-        {minItems: [{ key: 'sections:1', ids: ['story-001'] },
-                    { key: 'authors:1', ids: ['story-001']}]})
+        {minItems: [expect.objectContaining({ key: 'sections:1', ids: ['story-001'] }),
+                    expect.objectContaining({ key: 'authors:1', ids: ['story-001']})]})
     );
   });
 
@@ -435,7 +441,7 @@ describe('storyValidationTest', () => {
       'first-published-at': 1020,
       'last-published-at': 1020,
       'published-at': 1020,
-      authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
+      authors: [{ name:'Foo', email: 'author@abc.com', 'external-id': 'author-001'}],
       sections: [{ name:'Foo1', slug: 'section-slug', 'external-id': 'section-001',
                   'parent': { name:'Foo2', slug: 'parent-slug', 'external-id': 'parent-001' }}],
       tags: [{ name: 'tag' }]
@@ -457,7 +463,7 @@ describe('storyValidationTest', () => {
       'first-published-at': 1597040005795,
       'last-published-at': 1597040005795,
       'published-at': 1597040005795,
-      authors: [{ name:'Foo', email: 'author@foobar', 'external-id': 'author-001'}],
+      authors: [{ name:'Foo', username:'Foo', email: 'author@abc.com', 'external-id': 'author-001'}],
       sections: [{ name:'Foo1', slug: 'section-slug', 'external-id': 'section-001',
                   'parent': { name:'Foo2', slug: 'parent-slug', 'external-id': 'parent-001' }}],
       tags: [{ name: 'tag' }]

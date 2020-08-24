@@ -90,6 +90,7 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
     case 'invalidSlug':
     case 'invalidEmail':
     case 'authorNamesMismatch':
+    case 'invalidHeroImage':
       return (keyPath + ':' + error.params.value)
     case 'invalidTimestamp':
       return (keyPath + ':' + schema)

@@ -11,6 +11,8 @@ export interface AuthorTest {
    * @maxLength 10
   */
   readonly name: string;
+  readonly username: string;
+  readonly email: string;
 }
 
 export interface StoryTest {

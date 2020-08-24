@@ -197,7 +197,7 @@ export function validateJson(
     finalErrors = finalErrors.concat(validateTimestamp(data, dateKeys, validate.errors || []))
   }
 
-  if(data.authors) {
+  if(data.authors && Array.isArray(data.authors)) {
     finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
   }
 

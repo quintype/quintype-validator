@@ -2,7 +2,7 @@ interface Obj{
   [key: string]: any
 }
 
-function fixErrors(errorList: Obj): Obj {
+function fixErrors(errorList: Obj, identifier: string): Obj {
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(
       (prop: { [key: string]: string }) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
@@ -15,21 +15,20 @@ function fixErrors(errorList: Obj): Obj {
   if(errorList.required) {
     const requiredProp = errorList.required.filter(
       (prop: { [key: string]: string }) => (prop.key === 'body:Story' || prop.key === 'story-elements:Story' || prop.key === 'cards:Story'))  
-    const keyName = 'any one of body, story-elements and cards'
-    const identifier = requiredProp[0].ids[0]
+    const keyName = 'any one of body, story-elements or cards:Story'
 
-    if(requiredProp.length !== 2 ) {
+    if(requiredProp.length !== 2) {
       const errorKey = errorList.required.find((prop: Obj) => prop.key === keyName)
-
       if(errorKey) {
         errorKey.ids.push(identifier)
       } else {
-        errorList.required.push({
+        errorList.required.unshift({
           key: keyName,
           ids: [identifier]
         })
       }
     }
+
     errorList.required = errorList.required.filter(
       (prop: Obj) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
 
@@ -44,7 +43,7 @@ function fixErrors(errorList: Obj): Obj {
 export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, schema: string, errorList: Obj)
   : Obj {
   errors.forEach(error => {
-    const {keyword} = error
+    const {keyword, data} = error
     const errorParam = getErrorParam(error, schema)
     if(!errorParam) return
 
@@ -60,12 +59,13 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     } else {
       errorList[keyword].push({
         key: errorParam,
-        ids: [identifier]
+        ids: [identifier],
+        data: data
       })
     }
   });
 
-  return schema === 'StoryInternal' ? fixErrors(errorList) : errorList
+  return schema === 'Story' ? fixErrors(errorList, identifier) : errorList
 }
 
 function getErrorParam(error: Obj, schema: string): string | boolean {
@@ -82,15 +82,23 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
     case 'enum':
       return (keyPath + ':' + error.params.allowedValues)
     case 'maxLength':
-      return (keyPath + ':' + error.params.limit)
     case 'minLength':
-      return (keyPath + ':' + error.params.limit)
     case 'minItems':
       return (keyPath + ':' + error.params.limit)
     case 'uniqueKey':
-      return (keyPath + ':' + error.params.value)
     case 'invalidURL':
+    case 'invalidSlug':
+    case 'invalidEmail':
+    case 'authorNamesMismatch':
+    case 'invalidHeroImage':
       return (keyPath + ':' + error.params.value)
+    case 'invalidTimestamp':
+      return (keyPath + ':' + schema)
+    case 'oldTimestamp':
+      return (keyPath + ':' + schema)
+    case 'pattern':
+      return (keyPath + ':Incorrect-HTML-string')
+
 // handle other keyword errors if required
   }
   return false

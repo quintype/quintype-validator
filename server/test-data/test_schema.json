@@ -8,14 +8,20 @@
         "AuthorTest": {
           "type": "object",
           "properties": {
+            "email": {
+              "type": "string"
+            },
             "name": {
               "description": "Name of Author",
-              "type": "string",
               "minLength": 1,
-              "maxLength": 10
+              "maxLength": 10,
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
             }
           },
-          "required": ["name"],
+          "required": ["name", "username", "email"],
           "additionalProperties": false,
           "description": "Author Definition"
         }
@@ -101,15 +107,21 @@
         "AuthorTest": {
           "type": "object",
           "properties": {
+            "email": {
+              "type": "string"
+            },
             "name": {
               "description": "Name of Author",
               "minLength": 1,
               "maxLength": 10,
               "type": "string"
+            },
+            "username": {
+              "type":"string"
             }
           },
           "required": [
-            "name"
+            "name", "username", "email"
           ],
           "additionalProperties": false,
           "description": "Author Definition"

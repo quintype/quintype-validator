@@ -1,4 +1,4 @@
-FROM node:10-alpine AS build
+FROM node:12-alpine AS build
 
 RUN apk update && \
     apk add git
@@ -18,7 +18,7 @@ RUN npm run build:main && \
     npm install --no-optional --production && \
     mv node_modules public views package.json package-lock.json config build/main
 
-FROM node:10-alpine
+FROM node:12-alpine
 MAINTAINER Quintype Developers <dev-core@quintype.com>
 
 RUN apk update && \

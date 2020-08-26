@@ -13,7 +13,7 @@ describe('Validate Author Files', function() {
         validateAuthor.verifyValidAuthorCount("1");
     });
 
-    it.only('validate Author files using S3 path',function(){
+    it('validate Author files using S3 path',function(){
       cy.visit(URL);
       const s3path = 's3://stg-qt-images/validator/slug-verify';
       validateAuthor.selectAuthorType();
@@ -22,6 +22,6 @@ describe('Validate Author Files', function() {
       validateAuthor.fillS3Path(s3path);
       validateAuthor.clickValidateButton();
       validateAuthor.verifyTotalAuthorCount("2");
-      validateAuthor.verifyValidAuthorCount("2");
+      validateAuthor.verifyValidAuthorCount("2  ");
   });
 });

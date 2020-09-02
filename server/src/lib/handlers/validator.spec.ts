@@ -35,11 +35,12 @@ describe('validateJsonTest', () => {
       username: 'Foobar',
       email: 'foo@abc.com'
     };
-    expect(validateJson(Author1, authorSchema, new Set())).toEqual(
+    const type = 'Author';
+    expect(validateJson(Author1, authorSchema, new Set(), type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be shorter than 1 characters"})]));
-    expect(validateJson(Author2, authorSchema, new Set())).toEqual(
+    expect(validateJson(Author2, authorSchema, new Set(), type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be longer than 10 characters"})]));
-    expect(validateJson(Author3, authorSchema, new Set())).toEqual([]);
+    expect(validateJson(Author3, authorSchema, new Set(), type)).toEqual([]);
   });
 
   it('should validate json', () => {
@@ -56,13 +57,14 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar', username: 'foobar', email: 'foo@abc.com'}]
     };
-    expect(validateJson(Story1, storySchema, new Set())).toEqual(
+    const type = 'Story';
+    expect(validateJson(Story1, storySchema, new Set(), type)).toEqual(
       expect.arrayContaining(
         [expect.objectContaining({"message": "should have required property 'sections'"}),
          expect.objectContaining({"message": "should have required property 'authors'"})]));
-    expect(validateJson(Story2, storySchema, new Set())).toEqual(
+    expect(validateJson(Story2, storySchema, new Set(), type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT have fewer than 1 items"})]));
-    expect(validateJson(Story3, storySchema, new Set())).toEqual([]);
+    expect(validateJson(Story3, storySchema, new Set(), type)).toEqual([]);
   });
 
   it('should throw "uniqueKey" error if story has duplicate slug', () => {
@@ -79,9 +81,9 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
     };
-
-    expect(validateJson(Story1, storySchema, uniqueSlugs)).toEqual([]);
-    expect(validateJson(Story2, storySchema, uniqueSlugs)).toEqual(
+    const type = 'Story';
+    expect(validateJson(Story1, storySchema, uniqueSlugs, type)).toEqual([]);
+    expect(validateJson(Story2, storySchema, uniqueSlugs, type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"keyword": "uniqueKey", "params": {"value": "foobar"}})])
     );
   });

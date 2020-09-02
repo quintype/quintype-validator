@@ -125,8 +125,7 @@ function validateTimestamp(data: {[key: string]: any}, dateKeys: Array<string>, 
   return errors
 }
 
-function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
-  authors.map((author: any) => {
+function validateAuthor(author: any, errors: Array<ajv.ErrorObject>) {
     const constraints = {
       from: {
         email: true
@@ -153,7 +152,6 @@ function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
         }
       })
     }
-  })
   return errors
 }
 
@@ -179,7 +177,8 @@ function validateHeroImage(heroImage: string, errors: Array<ajv.ErrorObject>) {
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
-  uniqueSlugs: Set<string>
+  uniqueSlugs: Set<string>,
+  type: string
 ): ReadonlyArray<ajv.ErrorObject> {
   const ajvt = new ajv({ verbose: true, jsonPointers: true, allErrors: true });
   const validate = ajvt.compile(schema);
@@ -196,10 +195,17 @@ export function validateJson(
   if(dateKeys.length) {
     finalErrors = finalErrors.concat(validateTimestamp(data, dateKeys, validate.errors || []))
   }
-
-  if(data.authors && Array.isArray(data.authors)) {
-    finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
-  }
+  
+  data.authors && (type === 'Author' || Array.isArray(data.authors))
+    ? data.authors.map(
+        (author: object) =>
+          (finalErrors = finalErrors.concat(
+            validateAuthor(author, validate.errors || [])
+          ))
+      )
+    : (finalErrors = finalErrors.concat(
+        validateAuthor(data, validate.errors || [])
+      ));
 
   if(data['temporary-hero-image-url']) {
     finalErrors = finalErrors.concat(validateHeroImage(data['temporary-hero-image-url'], validate.errors || []));
@@ -219,7 +225,7 @@ export function validator(type: string, data: {[key: string]: any}, result: {[ke
     result.failed = 0
   }
   const directSchema = generateJsonSchema(typesPath, type);
-  const error = validateJson(data, directSchema, uniqueSlugs);
+  const error = validateJson(data, directSchema, uniqueSlugs, type);
 
   if (error.length) {
     result.failed = result.failed + 1

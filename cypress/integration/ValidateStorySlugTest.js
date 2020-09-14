@@ -26,22 +26,7 @@ describe('validate Story Files', function() {
         validateStory.clickAccordian();
         cy.contains("slug '#design/when-animation-narrates-history' is invalid.");
     });
-
-    /*it('validate story file with invalid story slug and file upload by- input',function(){
-        const invalistoryslugfile = 'story-WithInvalidSlug-00001.txt.gz';
-        cy.visit(URL);
-        validateStory.selectStoryType();
-        validateStory.clickValidateByField();
-        validateStory.selectFileUpload();
-        validateStory.fileUpload(invalistoryslugfile);
-        validateStory.clickValidateButton();
-        validateStory.verifyTotalStoryCount("1");
-        validateStory.verifyValidStoryCount("0");
-        validateStory.verifyInvalidStoryCount("1");
-        validateStory.clickAccordian();
-        cy.contains("slug '#design/when-animation-narrates-history' is invalid.");
-    });*/
-
+    
     it('validate story invalid story slug and s3 path as input',function(){
         const s3path = 's3://stg-qt-images/validator/slug-verify';
         cy.visit(URL);

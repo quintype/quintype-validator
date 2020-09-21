@@ -51,7 +51,7 @@
     "node": ">=8.9"
   },
   "dependencies": {
-    "@quintype/migration-helpers": "^1.14.6",
+    "@quintype/migration-helpers": "^1.14.7",
     "@types/busboy": "^0.2.3",
     "@types/multer": "^1.3.10",
     "@types/split2": "^2.1.6",

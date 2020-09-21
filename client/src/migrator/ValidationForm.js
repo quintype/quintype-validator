@@ -34,7 +34,7 @@ export default class ValidationForm extends Component {
   mergeError = (accumulatedErrors, currentErrors) => {
     for (const currentError of currentErrors) {
       let accumulatedError = accumulatedErrors.find(err => err.key === currentError.key)
-      if (accumulatedError) {
+      if ((typeof currentError === 'object') && accumulatedError) {
         accumulatedError.ids.concat(currentError.ids)
       } else {
         accumulatedErrors.push(currentError)

@@ -131,7 +131,7 @@ function validateAuthor(author: any, errors: Array<ajv.ErrorObject>) {
       email: true
     }
   }
-  if((author && author.email) || validate({from: author.email}, constraints)) {
+  if(author && author.email && validate({from: author.email}, constraints)) {
     errors.push({
       keyword: 'invalidEmail',
       dataPath: '/email',

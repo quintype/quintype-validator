@@ -126,32 +126,32 @@ function validateTimestamp(data: {[key: string]: any}, dateKeys: Array<string>, 
 }
 
 function validateAuthor(author: any, errors: Array<ajv.ErrorObject>) {
-    const constraints = {
-      from: {
-        email: true
+  const constraints = {
+    from: {
+      email: true
+    }
+  }
+  if(author && author.email && validate({from: author.email}, constraints)) {
+    errors.push({
+      keyword: 'invalidEmail',
+      dataPath: '/email',
+      schemaPath: '',
+      params: {
+        value: author.email
       }
-    }
-    if((author && !author.email) || validate({from: author.email}, constraints)) {
-      errors.push({
-        keyword: 'invalidEmail',
-        dataPath: '/email',
-        schemaPath: '',
-        params: {
-          value: author.email
-        }
-      })
-    }
-    if(author.username !== author.name) {
-      errors.push({
-        keyword: 'authorNamesMismatch',
-        dataPath: '/author',
-        schemaPath: '',
-        data: author,
-        params: {
-          value: author.username
-        }
-      })
-    }
+    })
+  }
+  if(author.username && (author.username !== author.name)) {
+    errors.push({
+      keyword: 'authorNamesMismatch',
+      dataPath: '/author',
+      schemaPath: '',
+      data: author,
+      params: {
+        value: author.username
+      }
+    })
+  }
   return errors
 }
 
@@ -195,17 +195,21 @@ export function validateJson(
   if(dateKeys.length) {
     finalErrors = finalErrors.concat(validateTimestamp(data, dateKeys, validate.errors || []))
   }
-  
-  data.authors && (type === 'Author' || Array.isArray(data.authors))
-    ? data.authors.map(
-        (author: object) =>
-          (finalErrors = finalErrors.concat(
-            validateAuthor(author, validate.errors || [])
-          ))
-      )
-    : (finalErrors = finalErrors.concat(
-        validateAuthor(data, validate.errors || [])
-      ));
+
+  if (data.authors && Array.isArray(data.authors)) {
+    data.authors.map(
+      (author: object) =>
+        (finalErrors = finalErrors.concat(
+          validateAuthor(author, validate.errors || [])
+        ))
+    )
+  }
+
+  if ( type === 'Author' ) {
+    (finalErrors = finalErrors.concat(
+      validateAuthor(data, validate.errors || [])
+    ));
+  }
 
   if(data['temporary-hero-image-url']) {
     finalErrors = finalErrors.concat(validateHeroImage(data['temporary-hero-image-url'], validate.errors || []));

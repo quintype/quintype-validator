@@ -2,7 +2,7 @@ interface Obj{
   [key: string]: any
 }
 
-function fixErrors(errorList: Obj, identifier: string): Obj {
+function fixErrors(errorList: Obj, identifier: string, failures: number): Obj {
   if(errorList.additionalProperties) {
     errorList.additionalProperties = errorList.additionalProperties.filter(
       (prop: { [key: string]: string }) => (prop.key !== 'body:Story' && prop.key !== 'story-elements:Story' && prop.key !== 'cards:Story'))
@@ -16,8 +16,10 @@ function fixErrors(errorList: Obj, identifier: string): Obj {
     const requiredProp = errorList.required.filter(
       (prop: { [key: string]: string }) => (prop.key === 'body:Story' || prop.key === 'story-elements:Story' || prop.key === 'cards:Story'))  
     const keyName = 'any one of body, story-elements or cards:Story'
-
+    failures -= requiredProp.length
+    
     if(requiredProp.length !== 2) {
+      failures += 1
       const errorKey = errorList.required.find((prop: Obj) => prop.key === keyName)
       if(errorKey) {
         errorKey.ids.push(identifier)
@@ -37,11 +39,19 @@ function fixErrors(errorList: Obj, identifier: string): Obj {
     }
   }
 
+  if (failures) {
+    errorList.failed = errorList.failed + 1
+  } else {
+    errorList.successful = errorList.successful + 1
+    errorList.valid.push(identifier)
+  }
   return errorList
 }
 
 export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, schema: string, errorList: Obj)
   : Obj {
+  let failures = 0
+
   errors.forEach(error => {
     const {keyword, data} = error
     const errorParam = getErrorParam(error, schema)
@@ -57,6 +67,9 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
         errorKey.ids.push(identifier)
       }
     } else {
+      if(error.keyword !== 'additionalProperties' && error.keyword !== 'oldTimestamp') {
+        failures += 1
+      }
       errorList[keyword].push({
         key: errorParam,
         ids: [identifier],
@@ -65,7 +78,17 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     }
   });
 
-  return schema === 'Story' ? fixErrors(errorList, identifier) : errorList
+  if (schema === 'Story') {
+    return fixErrors(errorList, identifier, failures)
+  } else {
+    if (failures) {
+      errorList.failed = errorList.failed + 1
+    } else {
+      errorList.successful = errorList.successful + 1
+      errorList.valid.push(identifier)
+    }
+    return errorList
+  }
 }
 
 function getErrorParam(error: Obj, schema: string): string | boolean {

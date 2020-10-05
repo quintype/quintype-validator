@@ -238,7 +238,7 @@ export function validator(type: string, data: {[key: string]: any}, result: {[ke
     return errorParser(error, data['external-id'], type, result);
   }
 
-  result.successful = result.successful + 1
+  result.successful += 1
   result.valid.push(data['external-id'])
   return result
 }

@@ -40,9 +40,9 @@ function fixErrors(errorList: Obj, identifier: string, failures: number): Obj {
   }
 
   if (failures) {
-    errorList.failed = errorList.failed + 1
+    errorList.failed += 1
   } else {
-    errorList.successful = errorList.successful + 1
+    errorList.successful += 1
     errorList.valid.push(identifier)
   }
   return errorList
@@ -82,9 +82,9 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
     return fixErrors(errorList, identifier, failures)
   } else {
     if (failures) {
-      errorList.failed = errorList.failed + 1
+      errorList.failed += 1
     } else {
-      errorList.successful = errorList.successful + 1
+      errorList.successful += 1
       errorList.valid.push(identifier)
     }
     return errorList

@@ -228,17 +228,17 @@ export function validator(type: string, data: {[key: string]: any}, result: {[ke
     result.successful = 0
     result.failed = 0
   }
+  if(!result.valid) {
+    result.valid = []
+  }
   const directSchema = generateJsonSchema(typesPath, type);
   const error = validateJson(data, directSchema, uniqueSlugs, type);
 
   if (error.length) {
-    result.failed = result.failed + 1
     return errorParser(error, data['external-id'], type, result);
   }
-  if(!result.valid) {
-    result.valid = []
-  }
-  result.successful = result.successful + 1
+
+  result.successful += 1
   result.valid.push(data['external-id'])
   return result
 }

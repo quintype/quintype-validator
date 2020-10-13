@@ -33,4 +33,5 @@ export interface StoryTest {
 
   /** List of story authors */
   readonly authors: ReadonlyArray<AuthorTest>;
+  readonly 'temporary-hero-image-url'?: string;
 }

@@ -81,6 +81,9 @@
                 "$ref": "#/definitions/AuthorTest"
               },
               "description": "List of story authors"
+            },
+            "temporary-hero-image-url": {
+              "type": "string"
             }
           },
           "required": [

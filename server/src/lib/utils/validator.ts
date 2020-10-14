@@ -158,7 +158,9 @@ function validateAuthor(author: any, errors: Array<ajv.ErrorObject>) {
 function validateHeroImage(heroImage: string, errors: Array<ajv.ErrorObject>) {
   const constraints = {
     website: {
-      url: true
+      url: {
+        allowLocal: true
+      }
     }
   };
   if (validate({ website: heroImage }, constraints)) {

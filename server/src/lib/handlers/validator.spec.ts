@@ -473,4 +473,54 @@ describe('storyValidationTest', () => {
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual({ 'dataType': 'Story', 'total': 1, 'failed': 0, 'successful': 1, 'valid': ['story-001']});
   });
+
+  it('should throw "invalidHeroImage" error if temporary-hero-image-url\'s domain is not valid', () => {
+    const type = 'Story';
+    const Story1 = {
+      'temporary-hero-image-url': 'test.com/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+        name: 'Foobar',
+        slug: 'foobar',
+        sections: [{ name: 'sec1'}],
+        authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+    };
+    const Story2 = {
+      'temporary-hero-image-url': 'http://test.com/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+        name: 'Foobar',
+        slug: 'foobar',
+        sections: [{ name: 'sec1'}],
+        authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+    };
+    const Story3 = {
+     'temporary-hero-image-url': 'localhost:9110/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+      name: 'Foobar',
+      slug: 'foobar',
+      sections: [{ name: 'sec1'}],
+      authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+    };
+    const Story4 = {
+      'temporary-hero-image-url': 'http://localhost:9110/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+       name: 'Foobar',
+       slug: 'foobar',
+       sections: [{ name: 'sec1'}],
+       authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+     };
+    expect(validateJson(Story1, storySchema, new Set(), type)).toEqual(expect.arrayContaining([expect.objectContaining({
+      keyword: 'invalidHeroImage',
+      dataPath: '/TemporaryheroImageUrl',
+      schemaPath: '',
+      params: {
+        value: 'test.com/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg'
+      }
+    })]));
+    expect(validateJson(Story2, storySchema, new Set(), type)).toEqual([]);
+    expect(validateJson(Story3, storySchema, new Set(), type)).toEqual(expect.arrayContaining([expect.objectContaining({
+      keyword: 'invalidHeroImage',
+      dataPath: '/TemporaryheroImageUrl',
+      schemaPath: '',
+      params: {
+        value: 'localhost:9110/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg'
+      }
+    })]));
+    expect(validateJson(Story4, storySchema, new Set(), type)).toEqual([]);
+  });
 })

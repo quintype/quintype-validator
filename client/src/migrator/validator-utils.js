@@ -78,7 +78,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage} = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -93,7 +93,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidSlug, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage })
+  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -187,7 +187,7 @@ function parseResult (result) {
   pattern && pattern.forEach(error => {
     const [key, stringPattern] = error.key.split(':')
     finalResult.errors.push({
-      message: `Story has incorrect HTML string for property '${key}'.`,
+      message: `${dataType} has invalid string pattern for property '${key}'.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })
@@ -204,14 +204,6 @@ function parseResult (result) {
     const [key, expectedValue] = error.key.split(':')
     finalResult.errors.push({
       message: `${dataType} has incorrect value for property '${key}'. Allowed values are '${expectedValue.split(',').join(', ')}'.`,
-      metadata: formErrorMetadata(dataType, error.ids)
-    })
-  })
-
-  invalidSlug && invalidSlug.forEach(error => {
-    const [key, value] = error.key.split(':')
-    finalResult.errors.push({
-      message: `${key} '${value}' is invalid.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

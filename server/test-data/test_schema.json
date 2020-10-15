@@ -99,6 +99,12 @@
             "name": {
               "description": "Name of section",
               "type": "string"
+            },
+            "slug": {
+              "description": "Slug of section",
+              "minLength": 1,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "type": "string"
             }
           },
           "required": [

@@ -35,11 +35,12 @@ describe('validateJsonTest', () => {
       username: 'Foobar',
       email: 'foo@abc.com'
     };
-    expect(validateJson(Author1, authorSchema, new Set())).toEqual(
+    const type = 'Author';
+    expect(validateJson(Author1, authorSchema, new Set(), type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be shorter than 1 characters"})]));
-    expect(validateJson(Author2, authorSchema, new Set())).toEqual(
+    expect(validateJson(Author2, authorSchema, new Set(), type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT be longer than 10 characters"})]));
-    expect(validateJson(Author3, authorSchema, new Set())).toEqual([]);
+    expect(validateJson(Author3, authorSchema, new Set(), type)).toEqual([]);
   });
 
   it('should validate json', () => {
@@ -56,13 +57,14 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar', username: 'foobar', email: 'foo@abc.com'}]
     };
-    expect(validateJson(Story1, storySchema, new Set())).toEqual(
+    const type = 'Story';
+    expect(validateJson(Story1, storySchema, new Set(), type)).toEqual(
       expect.arrayContaining(
         [expect.objectContaining({"message": "should have required property 'sections'"}),
          expect.objectContaining({"message": "should have required property 'authors'"})]));
-    expect(validateJson(Story2, storySchema, new Set())).toEqual(
+    expect(validateJson(Story2, storySchema, new Set(), type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"message": "should NOT have fewer than 1 items"})]));
-    expect(validateJson(Story3, storySchema, new Set())).toEqual([]);
+    expect(validateJson(Story3, storySchema, new Set(), type)).toEqual([]);
   });
 
   it('should throw "uniqueKey" error if story has duplicate slug', () => {
@@ -79,9 +81,9 @@ describe('validateJsonTest', () => {
       sections: [{ name: 'sec1'}],
       authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
     };
-
-    expect(validateJson(Story1, storySchema, uniqueSlugs)).toEqual([]);
-    expect(validateJson(Story2, storySchema, uniqueSlugs)).toEqual(
+    const type = 'Story';
+    expect(validateJson(Story1, storySchema, uniqueSlugs, type)).toEqual([]);
+    expect(validateJson(Story2, storySchema, uniqueSlugs, type)).toEqual(
       expect.arrayContaining([expect.objectContaining({"keyword": "uniqueKey", "params": {"value": "foobar"}})])
     );
   });
@@ -470,5 +472,55 @@ describe('storyValidationTest', () => {
     };
     const output = validator('Story', Story, {}, new Set());
     expect(output).toEqual({ 'dataType': 'Story', 'total': 1, 'failed': 0, 'successful': 1, 'valid': ['story-001']});
+  });
+
+  it('should throw "invalidHeroImage" error if temporary-hero-image-url\'s domain is not valid', () => {
+    const type = 'Story';
+    const Story1 = {
+      'temporary-hero-image-url': 'test.com/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+        name: 'Foobar',
+        slug: 'foobar',
+        sections: [{ name: 'sec1'}],
+        authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+    };
+    const Story2 = {
+      'temporary-hero-image-url': 'http://test.com/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+        name: 'Foobar',
+        slug: 'foobar',
+        sections: [{ name: 'sec1'}],
+        authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+    };
+    const Story3 = {
+     'temporary-hero-image-url': 'localhost:9110/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+      name: 'Foobar',
+      slug: 'foobar',
+      sections: [{ name: 'sec1'}],
+      authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+    };
+    const Story4 = {
+      'temporary-hero-image-url': 'http://localhost:9110/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg',
+       name: 'Foobar',
+       slug: 'foobar',
+       sections: [{ name: 'sec1'}],
+       authors: [{ name: 'foobar', username: 'foobar', email: 'foobar@abc.com' }]
+     };
+    expect(validateJson(Story1, storySchema, new Set(), type)).toEqual(expect.arrayContaining([expect.objectContaining({
+      keyword: 'invalidHeroImage',
+      dataPath: '/TemporaryheroImageUrl',
+      schemaPath: '',
+      params: {
+        value: 'test.com/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg'
+      }
+    })]));
+    expect(validateJson(Story2, storySchema, new Set(), type)).toEqual([]);
+    expect(validateJson(Story3, storySchema, new Set(), type)).toEqual(expect.arrayContaining([expect.objectContaining({
+      keyword: 'invalidHeroImage',
+      dataPath: '/TemporaryheroImageUrl',
+      schemaPath: '',
+      params: {
+        value: 'localhost:9110/wp-content/uploads/2016/11/Last-week-in-parliament-1.jpg'
+      }
+    })]));
+    expect(validateJson(Story4, storySchema, new Set(), type)).toEqual([]);
   });
 })

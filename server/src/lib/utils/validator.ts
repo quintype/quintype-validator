@@ -125,42 +125,42 @@ function validateTimestamp(data: {[key: string]: any}, dateKeys: Array<string>, 
   return errors
 }
 
-function validateAuthor(authors: object[], errors: Array<ajv.ErrorObject>) {
-  authors.map((author: any) => {
-    const constraints = {
-      from: {
-        email: true
+function validateAuthor(author: any, errors: Array<ajv.ErrorObject>) {
+  const constraints = {
+    from: {
+      email: true
+    }
+  }
+  if(author && author.email && validate({from: author.email}, constraints)) {
+    errors.push({
+      keyword: 'invalidEmail',
+      dataPath: '/email',
+      schemaPath: '',
+      params: {
+        value: author.email
       }
-    }
-    if((author && !author.email) || validate({from: author.email}, constraints)) {
-      errors.push({
-        keyword: 'invalidEmail',
-        dataPath: '/email',
-        schemaPath: '',
-        params: {
-          value: author.email
-        }
-      })
-    }
-    if(author.username !== author.name) {
-      errors.push({
-        keyword: 'authorNamesMismatch',
-        dataPath: '/author',
-        schemaPath: '',
-        data: author,
-        params: {
-          value: author.username
-        }
-      })
-    }
-  })
+    })
+  }
+  if(author.username && (author.username !== author.name)) {
+    errors.push({
+      keyword: 'authorNamesMismatch',
+      dataPath: '/author',
+      schemaPath: '',
+      data: author,
+      params: {
+        value: author.username
+      }
+    })
+  }
   return errors
 }
 
 function validateHeroImage(heroImage: string, errors: Array<ajv.ErrorObject>) {
   const constraints = {
     website: {
-      url: true
+      url: {
+        allowLocal: true
+      }
     }
   };
   if (validate({ website: heroImage }, constraints)) {
@@ -179,7 +179,8 @@ function validateHeroImage(heroImage: string, errors: Array<ajv.ErrorObject>) {
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
-  uniqueSlugs: Set<string>
+  uniqueSlugs: Set<string>,
+  type: string
 ): ReadonlyArray<ajv.ErrorObject> {
   const ajvt = new ajv({ verbose: true, jsonPointers: true, allErrors: true });
   const validate = ajvt.compile(schema);
@@ -197,8 +198,19 @@ export function validateJson(
     finalErrors = finalErrors.concat(validateTimestamp(data, dateKeys, validate.errors || []))
   }
 
-  if(data.authors && Array.isArray(data.authors)) {
-    finalErrors = finalErrors.concat(validateAuthor(data.authors, validate.errors || []));
+  if (data.authors && Array.isArray(data.authors)) {
+    data.authors.map(
+      (author: object) =>
+        (finalErrors = finalErrors.concat(
+          validateAuthor(author, validate.errors || [])
+        ))
+    )
+  }
+
+  if ( type === 'Author' ) {
+    (finalErrors = finalErrors.concat(
+      validateAuthor(data, validate.errors || [])
+    ));
   }
 
   if(data['temporary-hero-image-url']) {
@@ -218,17 +230,17 @@ export function validator(type: string, data: {[key: string]: any}, result: {[ke
     result.successful = 0
     result.failed = 0
   }
-  const directSchema = generateJsonSchema(typesPath, type);
-  const error = validateJson(data, directSchema, uniqueSlugs);
-
-  if (error.length) {
-    result.failed = result.failed + 1
-    return errorParser(error, data['external-id'], type, result);
-  }
   if(!result.valid) {
     result.valid = []
   }
-  result.successful = result.successful + 1
+  const directSchema = generateJsonSchema(typesPath, type);
+  const error = validateJson(data, directSchema, uniqueSlugs, type);
+
+  if (error.length) {
+    return errorParser(error, data['external-id'], type, result);
+  }
+
+  result.successful += 1
   result.valid.push(data['external-id'])
   return result
 }

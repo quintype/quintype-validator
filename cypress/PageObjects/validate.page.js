@@ -5,10 +5,12 @@ export class Validator{
   selectDirectTextInput='#react-select-3-option-0';
   markUpTextArea='[data-test-id="text-area-wrapper"] textarea';
   validateButton ='[data-test-id="emButton"]'
+  
   selectAuthorType() {
     cy.get(this.selectTypeField).click();
     cy.contains("Author").click();
   }
+  
   selectValidateByDirectInput() {
     cy.get(this.validateByField).click();
     cy.get(this.selectDirectTextInput).click({force:true});
@@ -17,6 +19,7 @@ export class Validator{
   enterAuthorJsonData(){
     utils.copyJson('author.json',this.markUpTextArea);
   }
+  
   clickValidateButton(){
     cy.get(this.validateButton).click();
   }

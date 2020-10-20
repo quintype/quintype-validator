@@ -110,7 +110,6 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + error.params.limit)
     case 'uniqueKey':
     case 'invalidURL':
-    case 'invalidSlug':
     case 'invalidEmail':
     case 'authorNamesMismatch':
     case 'invalidHeroImage':
@@ -120,7 +119,7 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
     case 'oldTimestamp':
       return (keyPath + ':' + schema)
     case 'pattern':
-      return (keyPath + ':Incorrect-HTML-string')
+      return (keyPath + ':Invalid-string')
 
 // handle other keyword errors if required
   }

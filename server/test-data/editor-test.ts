@@ -2,6 +2,13 @@
 export interface SectionTest {
   /** Name of section */
   readonly name: string;
+
+  /**
+   * Slug of section
+   * @minLength 1
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
+  readonly slug?: string;
 }
 
 /** Author Definition */

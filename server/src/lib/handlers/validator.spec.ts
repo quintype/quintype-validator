@@ -213,7 +213,7 @@ describe('sectionValidationTest', () => {
     );
   });
 
-  it('should throw "requiredProperty" error if name is not provided', () => {
+  it('should throw "required" error if name is not provided', () => {
     const Section = {
       slug: 'sports',
       'external-id': 'section-001'
@@ -254,6 +254,19 @@ describe('sectionValidationTest', () => {
     expect(output).toEqual(
       expect.objectContaining(
         {additionalProperties: [expect.objectContaining({ key: 'foo:Section', ids: ['section-001'] })]})
+    );
+  });
+
+  it('should throw "pattern" error if slug is not valid', () => {
+    const Section = {
+      name: 'Sports',
+      slug: 'sports&w',
+      'external-id': 'section-001'
+    };
+    const output = validator('Section', Section, {}, new Set());
+    expect(output).toEqual(
+      expect.objectContaining(
+        {pattern: [expect.objectContaining({ key: 'slug:Invalid-string', ids: ['section-001'] })]})
     );
   });
 

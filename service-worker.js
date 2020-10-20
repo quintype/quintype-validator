@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/quintype-validator/precache-manifest.d1e72d4ffe202fa3181effa50abeefb3.js"
+  "/quintype-validator/precache-manifest.a42210eebfb8e121162b0dd51ebf8af7.js"
 );
 
 self.addEventListener('message', (event) => {

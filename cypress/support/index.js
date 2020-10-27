@@ -15,10 +15,10 @@
 
 // Import commands.js using ES2015 syntax:
 beforeEach(() => {
-    cy.visit("https://developers.quintype.com/quintype-validator", {
-      timeout: 80000
-    });
+  cy.visit("https://developers.quintype.com/quintype-validator", {
+    timeout: 80000,
   });
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

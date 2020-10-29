@@ -93,7 +93,7 @@ export function errorParser(errors: ReadonlyArray<Obj>, identifier: string, sche
 
 function getErrorParam(error: Obj, schema: string): string | boolean {
   let keyPath = error.dataPath.slice(1) || schema
-  keyPath = keyPath.replace(/\/[0-9]+/g, '')
+  keyPath = keyPath.replace(/\/[0-9]+/g, '-ArrayItem')
 
   switch(error.keyword) {
     case 'required':

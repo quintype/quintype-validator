@@ -7,6 +7,7 @@ import path, { join } from 'path';
 import { parse, HTMLElement } from 'node-html-parser'
 import { URL } from 'url';
 import { validate } from 'validate.js';
+const chardet = require('chardet');
 
 const schemas: { [key: string]: object } = {};
 
@@ -218,6 +219,20 @@ export function validator(type: string, data: {[key: string]: any}, result: {[ke
   if(!result.valid) {
     result.valid = []
   }
+
+  const encoding = chardet.detect(Buffer.from(JSON.stringify(data)))
+  if ( encoding !== 'ISO-8859-1' && encoding !== 'UTF-8') {
+    const error = [{
+      keyword: 'invalidEncoding',
+      dataPath: '/',
+      schemaPath: '',
+      params: {
+        value: encoding
+      }
+    }]
+    return errorParser(error, data['external-id'], type, result);
+  }
+
   const directSchema = generateJsonSchema(typesPath, type);
   const error = validateJson(data, directSchema, uniqueSlugs, type);
 

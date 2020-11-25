@@ -120,6 +120,8 @@ function getErrorParam(error: Obj, schema: string): string | boolean {
       return (keyPath + ':' + schema)
     case 'pattern':
       return (keyPath + ':Invalid-string')
+    case 'invalidEncoding':
+      return (keyPath + ':' + error.params.value)
 
 // handle other keyword errors if required
   }

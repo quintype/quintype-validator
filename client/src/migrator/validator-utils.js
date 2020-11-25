@@ -78,7 +78,7 @@ function formErrorFile(errorAggregations) {
 }
 
 function parseResult (result) {
-  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage} = result
+  const { dataType, total, successful, failed, additionalProperties, type, required, enum: wrongEnumValue, minLength, maxLength, exceptions, minItems, uniqueKey, invalidURL, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage, invalidEncoding} = result
   const finalResult = {}
   finalResult.errors = []
   finalResult.warnings = []
@@ -93,7 +93,7 @@ function parseResult (result) {
     return finalResult
   }
 
-  const errorFileLink = formErrorFile({ exceptions, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage })
+  const errorFileLink = formErrorFile({ exceptions, invalidEncoding, type, required, wrongEnumValue, minLength, maxLength, minItems, uniqueKey, invalidURL, additionalProperties, invalidTimestamp, oldTimestamp, invalidEmail, authorNamesMismatch, pattern, invalidHeroImage })
   finalResult.errorFile = errorFileLink
   const pluralKey = dataType === 'Story' ? `${dataType.toLowerCase().slice(0, 4)}ies` : `${dataType.toLowerCase()}s`
   finalResult.dataType = pluralKey
@@ -229,6 +229,14 @@ function parseResult (result) {
     const [key, value, value1] = error.key.split(':')
     finalResult.errors.push({
       message: `${key} '${value}:${value1}' is invalid. Example: domain/path/to/image.jpg`,
+      metadata: formErrorMetadata(dataType, error.ids)
+    })
+  })
+
+  invalidEncoding && invalidEncoding.forEach(error => {
+    const [key, value] = error.key.split(':')
+    finalResult.errors.push({
+      message: `${dataType} contains '${value}' encoded characters. Please provide only valid UTF-8 characters.`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

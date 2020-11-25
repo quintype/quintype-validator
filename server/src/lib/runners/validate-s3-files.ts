@@ -6,8 +6,6 @@ import { WorkerThreadPool } from "../utils/worker-thread-pool"
 import { parentPort } from "worker_threads"
 const config = require("js-yaml").load(fs.readFileSync('config/migrator.yml'))
 
-
-
 async function validateByKey(data: any, type: string, uniqueSlugs: Set<string>) {
   const { Name, files } = data
   let result: { [key: string]: any } | any = { exceptions: [] }

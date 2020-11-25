@@ -37,9 +37,10 @@ export function fileValidator(req: Request, res: Response, uniqueSlugs: Set<stri
   busboy.on('file', async(fieldname, file, fileName, _2, mimetype): Promise<Response> => {
     const fileNameSplit: string = fileName.split('.')[0];
     if(!fileNameSplit.match(/^(authors-|sections-|story-|users-)(.+)(-\d{5})$/)) {
+      const key = `${type.toLowerCase()}${type === 'Story' ? '' : 's'}`
       return res.json({
         exceptions: [{
-          key: `IncorrectFileName: ${fileName}. Example: ${type.toLowerCase()}-<PUBLISHER-NAME>-<5 DIGITS>.txt.gz`
+          key: `IncorrectFileName: ${fileName}. Example: ${key}-<PUBLISHER-NAME>-<5 DIGITS>.txt.gz`
         }],
         dataType: type
       })

@@ -61,7 +61,7 @@ export default class ValidationForm extends Component {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/get-s3-files`, requestOptions)
       const fileList = await response.json()
-      if (fileList.error) {
+      if (fileList.error || fileList.exceptions) {
         this.props.sendData({ result: fileList })
         return
       }

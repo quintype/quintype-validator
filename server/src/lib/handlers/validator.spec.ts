@@ -93,7 +93,7 @@ describe('validateJsonTest', () => {
 describe('tagValidationTest', () => {
   it('should throw "minLength" error if name has less that 2 characters', () => {
     const Tag1 = {
-      name: ''
+      name: 'a'
     };
     const output = validator('Tag', Tag1, {}, new Set());
     expect(output).toEqual(

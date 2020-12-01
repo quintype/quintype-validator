@@ -162,6 +162,21 @@ function validateHeroImage(heroImage: string, errors: Array<ajv.ErrorObject>) {
   return errors;
 }
 
+function validateEncoding(data: string, errors: Array<ajv.ErrorObject>) {
+  const encoding = chardet.detect(Buffer.from(JSON.stringify(data)))
+  if ( encoding !== 'ISO-8859-1' && encoding !== 'UTF-8') {
+    errors.push({
+      keyword: 'invalidEncoding',
+      dataPath: '/',
+      schemaPath: '',
+      params: {
+        value: encoding
+      }
+    })
+  }
+  return errors;  
+}
+
 export function validateJson(
   data: {[key: string]: any},
   schema: object,
@@ -194,15 +209,16 @@ export function validateJson(
   }
 
   if ( type === 'Author' ) {
-    (finalErrors = finalErrors.concat(
+    finalErrors = finalErrors.concat(
       validateAuthor(data, validate.errors || [])
-    ));
+    );
   }
 
   if(data['temporary-hero-image-url']) {
     finalErrors = finalErrors.concat(validateHeroImage(data['temporary-hero-image-url'], validate.errors || []));
   }
 
+  finalErrors = finalErrors.concat(validateEncoding(JSON.stringify(data), validate.errors || []))
   return finalErrors.concat(validate.errors || []);
 }
 
@@ -218,19 +234,6 @@ export function validator(type: string, data: {[key: string]: any}, result: {[ke
   }
   if(!result.valid) {
     result.valid = []
-  }
-
-  const encoding = chardet.detect(Buffer.from(JSON.stringify(data)))
-  if ( encoding !== 'ISO-8859-1' && encoding !== 'UTF-8') {
-    const error = [{
-      keyword: 'invalidEncoding',
-      dataPath: '/',
-      schemaPath: '',
-      params: {
-        value: encoding
-      }
-    }]
-    return errorParser(error, data['external-id'], type, result);
   }
 
   const directSchema = generateJsonSchema(typesPath, type);

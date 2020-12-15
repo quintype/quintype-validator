@@ -17,9 +17,9 @@ export const app = express();
 //creating thread poll with s3 validator file
 const workerPool = new WorkerThreadPool(path.join(__dirname,'runners/validate-s3-files.js'), config['workerThreads'] || 2 );
 workerPool.setMaxListeners(500);
+app.use(cors());
 app.use(compression());
 app.use(bodyParser.json({ limit: '1mb' }));
-
 app.set('view engine', 'ejs');
 app.use(express.static('public', { maxAge: 86400000 }));
 

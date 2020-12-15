@@ -122,14 +122,19 @@ export default class ValidationForm extends Component {
     this.props.sendData({
       formEnabled: false
     })
-
+    // Access-Control-Allow-Origin:  http://127.0.0.1:3000
+    // Access-Control-Allow-Methods: POST
+    // Access-Control-Allow-Headers: Content-Type, Authorization
     const options = createRequest(this.state.validateType, this.state.selectType, this.state.userData)
+    // console.log('options :', JSON.stringify(options));
     if (this.state.validateType.value === 'S3 path') {
       this.validateFromS3(options)
     } else {
       try {
+        console.log("REACT_APP_API_HOST->", process.env.REACT_APP_API_HOST);
         const response = await fetch(`${process.env.REACT_APP_API_HOST || ''}/api/validate?source=${this.state.validateType.value.split(' ')[0]}`, options)
         const result = await response.json()
+        console.log('result :', result);
         this.props.sendData({ result })
       } catch (err) {
         console.log(err);

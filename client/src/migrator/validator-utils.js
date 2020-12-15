@@ -17,8 +17,8 @@ function createRequest ({ value: validateType }, { value: selectType }, userData
     method: 'POST',
     headers: {
       Accept: 'application/json',
-      'Access-Control-Allow-Origin':  'https://developers.quintype.com',
-      // "Access-Control-Allow-Origin": "*",
+      // 'Access-Control-Allow-Origin':  'https://developers.quintype.com',
+      "Access-Control-Allow-Origin": "*",
       keepalive:true
     }
   }

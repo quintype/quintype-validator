@@ -15,10 +15,13 @@ const validateOptions = [
 function createRequest ({ value: validateType }, { value: selectType }, userData) {
   const options = {
     method: 'POST',
+    mode: "cors",
     headers: {
       Accept: 'application/json',
-      // 'Access-Control-Allow-Origin':  'https://developers.quintype.com',
-      "Access-Control-Allow-Origin": "*",
+      'Access-Control-Allow-Origin':  'https://developers.quintype.com',
+      // "Access-Control-Allow-Origin": "*",
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       keepalive:true
     }
   }
@@ -230,7 +233,7 @@ function parseResult (result) {
   invalidHeroImage && invalidHeroImage.forEach(error => {
     const [key, value, value1] = error.key.split(':')
     finalResult.errors.push({
-      message: `${key} '${value}:${value1}' is invalid. Example: domain/path/to/image.jpg`,
+      message: `${key} '${value}:${value1}' is invalid. Example: domain/path/to/some_image_name.jpg`,
       metadata: formErrorMetadata(dataType, error.ids)
     })
   })

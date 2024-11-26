@@ -1,10 +1,10 @@
 import "./app.scss";
 
+import _ from "lodash";
 import React from "react";
-import request from "superagent-bluebird-promise";
 import Dropzone from "react-dropzone";
 import { NavLink } from "react-router-dom";
-import _ from "lodash";
+import request from "superagent-bluebird-promise";
 
 import FileSaver from "file-saver";
 import QuintypeLogo from "./quintype-logo";
@@ -18,7 +18,7 @@ class GetUrlComponent extends React.Component {
     if (accepted.length !== 1) return;
 
     const reader = new FileReader();
-    reader.onload = x => this.props.onImport(JSON.parse(x.target.result));
+    reader.onload = (x) => this.props.onImport(JSON.parse(x.target.result));
     reader.readAsText(accepted[0]);
   }
 
@@ -27,18 +27,18 @@ class GetUrlComponent extends React.Component {
       <React.Fragment>
         <Dropzone
           accept="application/json"
-          onDrop={accepted => this.importResult(accepted)}
+          onDrop={(accepted) => this.importResult(accepted)}
           className="url-dropzone"
           acceptClassName="url-dropzone-accept"
           rejectClassName="url-dropzone-reject"
           disableClick={true}
         >
-          <form className="url-container" onSubmit={e => this.submit(e)}>
+          <form className="url-container" onSubmit={(e) => this.submit(e)}>
             <input
               className="url-input"
               value={this.props.url}
               placeholder="Enter Url"
-              onChange={e => this.props.onChange(e.target.value)}
+              onChange={(e) => this.props.onChange(e.target.value)}
             />
             <input type="submit" className="url-go" value="Go!" />
           </form>
@@ -57,18 +57,22 @@ export class Sidebar extends React.Component {
         </div>
         <div className="menu">
           <div className="menu__container">
-          <NavLink to="/website" className="navbar" activeClassName="is-active">
-            <div className="menu__website logo"></div>
-          </NavLink>
+            <NavLink
+              to="/website"
+              className="navbar"
+              activeClassName="is-active"
+            >
+              <div className="menu__website logo"></div>
+            </NavLink>
           </div>
           <div className="menu__container">
-          <NavLink
-            to="/migrator"
-            className="navbar"
-            activeClassName="is-active"
-          >
-            <div className="menu__migrator logo"></div>
-          </NavLink>
+            <NavLink
+              to="/migrator"
+              className="navbar"
+              activeClassName="is-active"
+            >
+              <div className="menu__migrator logo"></div>
+            </NavLink>
           </div>
         </div>
       </div>
@@ -77,18 +81,14 @@ export class Sidebar extends React.Component {
 }
 
 export function Migrator() {
-  return (
-    <div>
-      
-    </div>
-  );
+  return <div></div>;
 }
 
 class ResultSection extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      active: false
+      active: false,
     };
   }
 
@@ -160,7 +160,7 @@ class DebugSection extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      active: false
+      active: false,
     };
   }
 
@@ -234,9 +234,7 @@ class Results extends React.Component {
     const showResult = (category, title) =>
       this.props.results[category] ? (
         <ResultSection title={title} result={this.props.results[category]} />
-      ) : (
-        undefined
-      );
+      ) : undefined;
 
     return (
       <div className="results">
@@ -252,9 +250,7 @@ class Results extends React.Component {
             </div>
             <div>Content Id: {this.props.results.structured.contentId}</div>
           </ResultSection>
-        ) : (
-          undefined
-        )}
+        ) : undefined}
         {showResult("og", "Facebook OG Tags")}
         {showResult("seo", "SEO Rules")}
         {showResult("robots", "Robots")}
@@ -262,6 +258,7 @@ class Results extends React.Component {
         {showResult("lighthouseSeo", "Lighthouse SEO")}
         {showResult("lighthousePwa", "PWA")}
         {showResult("routeData", "Route Data Size")}
+        {showResult("assets", "Assets")}
 
         <DebugSection
           results={this.props.results}
@@ -287,23 +284,23 @@ export class HomeComponent extends React.Component {
       url: "",
       response: null,
       loading: false,
-      error: null
+      error: null,
     };
   }
 
   loadRules(url) {
     request
       .post(`${process.env.REACT_APP_API_HOST || ""}/api/validate.json`, {
-        url: url
+        url: url,
       })
-      .then(response =>
+      .then((response) =>
         this.setState({
           response: response.body,
           loading: false,
-          url: response.body.url
+          url: response.body.url,
         })
       )
-      .catch(e => this.setState({ loading: false, error: e.message }));
+      .catch((e) => this.setState({ loading: false, error: e.message }));
   }
 
   processUrl(url) {
@@ -313,7 +310,7 @@ export class HomeComponent extends React.Component {
       {
         url: url,
         loading: true,
-        error: null
+        error: null,
       },
       () => this.loadRules(url)
     );
@@ -321,7 +318,7 @@ export class HomeComponent extends React.Component {
 
   downloadResponse() {
     const blob = new Blob([JSON.stringify(this.state.response)], {
-      type: "application/json;charset=utf-8"
+      type: "application/json;charset=utf-8",
     });
     FileSaver.saveAs(blob, "validator.json");
   }
@@ -331,7 +328,7 @@ export class HomeComponent extends React.Component {
       response: response,
       error: null,
       loading: false,
-      url: response.url
+      url: response.url,
     });
   }
 
@@ -340,10 +337,10 @@ export class HomeComponent extends React.Component {
       <div>
         <h1 className="website-heading">Quintype Validator</h1>
         <GetUrlComponent
-          onSubmit={url => this.processUrl(url)}
+          onSubmit={(url) => this.processUrl(url)}
           url={this.state.url}
-          onChange={url => this.setState({ url: url })}
-          onImport={result => this.import(result)}
+          onChange={(url) => this.setState({ url: url })}
+          onImport={(result) => this.import(result)}
         />
         {this.state.error && (
           <div className="error-message">{this.state.error}</div>
@@ -353,7 +350,7 @@ export class HomeComponent extends React.Component {
           <Results
             results={this.state.response.results}
             links={this.state.response.links}
-            onValidate={url => this.processUrl(url)}
+            onValidate={(url) => this.processUrl(url)}
             url={this.state.response.url}
             onDownload={() => this.downloadResponse()}
           />

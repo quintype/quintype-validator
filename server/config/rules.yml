@@ -175,6 +175,23 @@ og:
         presence: true
         count: 1
 
+assets:
+  rules:
+    - type: dom
+      selector: script[src]
+      contentAttr: src
+      errors:
+        presence: true
+        regex: !!js/regexp /^https?:\/\/fea.assettype.com/
+        message: 'Javascript should be served from fea.assettype.com'
+    - type: dom
+      selector: img
+      contentAttr: data-src
+      errors:
+        presence: true
+        regex: !!js/regexp /^https?:\/\/.*.assettype.com/
+        message: 'Images should be served from cloudflare'
+
 amp:
   ignored: true
 

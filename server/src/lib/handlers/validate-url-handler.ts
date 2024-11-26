@@ -4,6 +4,7 @@ import URL from 'url';
 import { fetchUrl } from '../fetch-url';
 import { runAmpValidator } from '../runners/amp';
 import {
+  runAssetsValidator,
   runHeaderValidator,
   runOgTagValidator,
   runSeoValidator
@@ -28,6 +29,7 @@ const RUNNERS: ReadonlyArray<any> = [
   runOgTagValidator,
   runHeaderValidator,
   runRobotsValidator,
+  runAssetsValidator,
   runRouteDataValidator
 ];
 
@@ -46,16 +48,16 @@ export async function validateUrlHandler(
       og,
       headers,
       robots,
+      assets,
       routeData
     ] = await Promise.all(
       [fetchLinks, ...RUNNERS].map(runner => runner(dom, url, response))
     );
-
     res.status(201);
     res.setHeader('Content-Type', 'application/json');
     res.json({
       url,
-      results: { seo, amp, og, headers, robots, routeData, structured },
+      results: { seo, amp, og, headers, robots, routeData, structured, assets },
       links
     });
   } catch (error) {

@@ -4,7 +4,7 @@ This tool can be used to validate any Quintype page. This is currently deployed 
 
 ## Validatations
 
-The tool runs multiple validators, and reports the output of each stage. Warnings conditions are mentioned in (parenthesis).
+The tool runs multiple validators, and reports the output of each stage. Warnings conditions are mentioned in (parenthesis)
 
 ### AMP
 

@@ -1,7 +1,7 @@
-FROM node:12-alpine AS build
+FROM node:16-alpine AS build
 
 RUN apk update && \
-    apk add git
+  apk add git
 
 RUN mkdir /app
 WORKDIR /app
@@ -14,17 +14,17 @@ ENV NODE_ENV production
 
 COPY . /app/
 RUN npm run build:main && \
-    rm -rf node-modules && \
-    npm install --no-optional --production && \
-    mv node_modules public views package.json package-lock.json config build/main
+  rm -rf node-modules && \
+  npm install --no-optional --production && \
+  mv node_modules public views package.json package-lock.json config build/main
 
-FROM node:12-alpine
+FROM node:16-alpine
 MAINTAINER Quintype Developers <dev-core@quintype.com>
 
 RUN apk update && \
-    apk add curl tini && \
-    addgroup -S app && \
-    adduser -S -g app app
+  apk add curl tini && \
+  addgroup -S app && \
+  adduser -S -g app app
 
 ENV NODE_ENV production
 ENV PORT 3000
